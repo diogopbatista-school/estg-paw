@@ -1,45 +1,69 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var mongoose = require('mongoose');
+var createError = require("http-errors");
+var express = require("express");
+var path = require("path");
+var cookieParser = require("cookie-parser");
+var logger = require("morgan");
+var mongoose = require("mongoose");
 
-mongoose.connect('', { useNewUrlParser: true, useUnifiedTopology: true });
+var app = express(); // Certifique-se de que esta declaração aparece apenas uma vez
 
-nrpCQRjdmMyCC2cIc
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+mongoose.Promise = global.Promise;
 
-var app = express();
+mongoose
+  .connect("mongodb+srv://PAW_TP_2025:pVHvZ26RXVXUDiwk@paw-tp.bf87xik.mongodb.net/?retryWrites=true&w=majority&appName=PAW-TP")
+  .then(() => {
+    console.log("Connected to the database!");
+  })
+  .catch((err) => {
+    console.log("Cannot connect to the database!", err);
+    process.exit();
+  });
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
 
-app.use(logger('dev'));
+// Configuração do middleware de sessão
+app.use(
+  session({
+    store: MongoStore.create({ mongoUrl: "mongodb+srv://PAW_TP_2025:pVHvZ26RXVXUDiwk@paw-tp.bf87xik.mongodb.net/?retryWrites=true&w=majority&appName=PAW-TP" }),
+    resave: false,
+    saveUninitialized: false,
+    secret: "estg-paw", // Substitua por uma chave secreta segura
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 dia (opcional: define o tempo de vida do cookie)
+    },
+  })
+);
+
+var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+
+// Configuração do mecanismo de visualização
+app.set("views", path.join(__dirname, "views"));
+app.set("view engine", "ejs");
+
+app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, "public")));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// Definição das rotas
+app.use("/", indexRouter);
+app.use("/users", usersRouter);
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
+// Captura de erros 404 e encaminhamento para o manipulador de erros
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
+// Manipulador de erros
+app.use(function (err, req, res, next) {
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.error = req.app.get("env") === "development" ? err : {};
 
-  // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.render("error");
 });
 
 module.exports = app;

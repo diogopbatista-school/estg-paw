@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registo de Utilizador</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+    />
+  </head>
+
+  <body>
+    <div class="container mt-5">
+      <h2>Registo de Utilizador</h2>
+
+      <!-- Exibe mensagem de erro, se houver -->
+      <% if (typeof error !== "undefined" && error) { %>
+        <div class="alert alert-danger" role="alert">
+          <%= error %>
+        </div>
+      <% } %>
+
+      <form action="/users/submitUser" method="POST">
+        <div class="mb-3">
+          <label for="name" class="form-label">Nome</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            name="name"
+            value="<%= formData && formData.name ? formData.name : '' %>"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            value="<%= formData && formData.email ? formData.email : '' %>"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="nif" class="form-label">NIF</label>
+          <input
+            type="number"
+            class="form-control"
+            id="nif"
+            name="nif"
+            value="<%= formData && formData.nif ? formData.nif : '' %>"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Senha</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            name="password"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <label for="role" class="form-label">Tipo de Utilizador</label>
+          <select
+            class="form-select"
+            id="role"
+            name="role"
+            required
+          >
+            <option value="client" <%= formData && formData.role === 'client' ? 'selected' : '' %>>Cliente</option>
+            <option value="manager" <%= formData && formData.role === 'manager' ? 'selected' : '' %>>Gerente</option>
+            <option value="admin" <%= formData && formData.role === 'admin' ? 'selected' : '' %>>Administrador</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="phone" class="form-label">Telefone</label>
+          <input
+            type="number"
+            class="form-control"
+            id="phone"
+            name="phone"
+            value="<%= formData && formData.phone ? formData.phone : '' %>"
+          />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Registar</button>
+      </form>
+    </div>
+  </body>
+</html>
