@@ -108,6 +108,9 @@ router.post("/dashboard/edit", isAuthenticated, async function (req, res) {
     // Extrair os campos diretamente de req.body
     const { name, email, password, newPassword, confirmNewPassword, phone } = req.body;
 
+    console.log(password);
+    console.log(newPassword);
+
     // Chamar o método do controller para atualizar o usuário
     const updatedUser = await userController.updateUser(userId, {
       name,

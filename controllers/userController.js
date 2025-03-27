@@ -1,4 +1,3 @@
-const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
@@ -29,15 +28,15 @@ userController.registerUser = async (userData) => {
     throw new Error("A senha não atende aos critérios de segurança.");
   }
 
-  // Gerar o salt e o hash da senha
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, "sha512").toString("hex");
-
   // Verificar se o NIF ou email já está registrado
   const existingUser = await User.findOne({ $or: [{ nif }, { email }] });
   if (existingUser) {
     throw new Error("Já existe um utilizador com este NIF ou email.");
   }
+
+  // Gerar o hash da senha
+  const saltRounds = 10; // Número de rounds para o salt
+  const hash = await bcrypt.hash(password, saltRounds);
 
   // Criar o usuário
   const newUser = new User({
@@ -45,7 +44,6 @@ userController.registerUser = async (userData) => {
     email,
     nif,
     password: hash,
-    salt,
     role: role || "client",
     phone,
   });
@@ -54,20 +52,23 @@ userController.registerUser = async (userData) => {
   return newUser;
 };
 
+// Verificar credenciais do usuário
 userController.verifyCredentials = async (email, password) => {
   const user = await User.findOne({ email }).exec();
   if (!user) {
     throw new Error("Usuário não encontrado.");
   }
 
-  const hash = crypto.pbkdf2Sync(password, user.salt, 1000, 64, "sha512").toString("hex");
-  if (hash !== user.password) {
+  // Comparar a senha fornecida com o hash armazenado
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
     throw new Error("Senha incorreta.");
   }
 
   return user;
 };
 
+// Atualizar informações do usuário
 userController.updateUser = async (userId, userData) => {
   const { name, email, password, newPassword, confirmNewPassword, phone } = userData;
 
@@ -95,8 +96,9 @@ userController.updateUser = async (userId, userData) => {
       throw new Error("A nova senha não atende aos critérios de segurança.");
     }
 
-    // Atualizar a senha no banco de dados
-    userData.password = await bcrypt.hash(newPassword, 10);
+    // Gerar o hash da nova senha
+    const saltRounds = 10;
+    userData.password = await bcrypt.hash(newPassword, saltRounds);
   }
 
   // Atualizar os dados do usuário no banco de dados

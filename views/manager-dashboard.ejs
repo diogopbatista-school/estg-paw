@@ -15,6 +15,13 @@
       <h2>Painel do Manager</h2>
       <p>Bem-vindo, <%= user.name %>! Aqui estão os seus restaurantes:</p>
 
+      <!-- Botão para Criar Restaurante -->
+      <a
+        href="/restaurants/create"
+        class="btn btn-success mb-3">
+        Criar Restaurante
+      </a>
+
       <% if (restaurants.length > 0) { %>
       <table class="table table-striped">
         <thead>
