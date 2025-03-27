@@ -9,23 +9,90 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+    <style>
+      .dashboard-container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .btn-custom {
+        margin-top: 10px;
+        font-size: 1rem;
+      }
+    </style>
   </head>
 
   <body>
-    <div class="container mt-5">
+    <div class="container mt-5 dashboard-container">
       <h2>Bem-vindo ao Dashboard!</h2>
 
       <!-- Exibe informações do usuário -->
       <p><strong>Nome:</strong> <%= user.name %></p>
+      <p><strong>NIF:</strong> <%= user.nif %></p>
       <p><strong>Email:</strong> <%= user.email %></p>
+      <p><strong>Telefone:</strong> <%= user.phone || "Não informado" %></p>
       <p><strong>Função:</strong> <%= user.role %></p>
 
-      <!-- Botão de logout -->
-      <a
-        href="/users/logout"
-        class="btn btn-danger"
-        >Sair</a
-      >
+      <!-- Botões para editar informações e sair -->
+      <div class="mt-3">
+        <a
+          href="/users/dashboard/edit"
+          class="btn btn-warning btn-lg btn-custom"
+          >Editar Informações</a
+        >
+        <a
+          href="/users/logout"
+          class="btn btn-danger btn-lg btn-custom"
+          >Sair</a
+        >
+      </div>
+
+      <!-- Exibe botões específicos para clientes -->
+      <% if (user.role === 'client') { %>
+      <div class="mt-4">
+        <h4>Ações do Cliente</h4>
+        <a
+          href="/users/orders/history"
+          class="btn btn-info btn-lg btn-custom"
+          >Histórico de Pedidos</a
+        >
+        <a
+          href="/users/orders/new"
+          class="btn btn-success btn-lg btn-custom"
+          >Efetuar Pedido</a
+        >
+        <a
+          href="/restaurants/search"
+          class="btn btn-primary btn-lg btn-custom"
+          >Pesquisar Restaurantes</a
+        >
+      </div>
+      <% } %>
+
+      <!-- Exibe botão específico para managers -->
+      <% if (user.role === 'manager') { %>
+      <div class="mt-4">
+        <h4>Ações do Manager</h4>
+        <a
+          href="/restaurants/manage"
+          class="btn btn-dark btn-lg btn-custom"
+          >Gerenciar Restaurantes</a
+        >
+      </div>
+      <% } %>
+
+      <!-- Exibe botão específico para admins -->
+      <% if (user.role === 'admin') { %>
+      <div class="mt-4">
+        <h4>Ações do Administrador</h4>
+        <a
+          href="/admin/crud"
+          class="btn btn-danger btn-lg btn-custom"
+          >CRUD</a
+        >
+      </div>
+      <% } %>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>

@@ -36,7 +36,9 @@ app.use(
 );
 
 var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
+const usersRouter = require("./routes/users");
+const dashboardRouter = require("./routes/dashboard");
+const restaurantsRouter = require("./routes/restaurant");
 
 // Configuração do mecanismo de visualização
 app.set("views", path.join(__dirname, "views"));
@@ -51,6 +53,8 @@ app.use(express.static(path.join(__dirname, "public")));
 // Definição das rotas
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
+app.use("/users/dashboard", dashboardRouter);
+app.use("/users/dashboard/restaurants", restaurantsRouter);
 
 // Captura de erros 404 e encaminhamento para o manipulador de erros
 app.use(function (req, res, next) {

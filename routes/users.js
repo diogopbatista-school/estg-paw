@@ -27,40 +27,20 @@ router.get("/register", function (req, res) {
 // Processar registro de usuário
 router.post("/submitUser", async function (req, res) {
   try {
-    // Validações dos campos usando o ValidationsController
-    const userData = {
-      name: validationsController.validateString(req.body.name),
-      email: validationsController.validateEmail(req.body.email),
-      nif: validationsController.validateNIF(req.body.nif),
-      password: req.body.password, // Validação será feita abaixo
-      role: req.body.role || "client", // Define o papel padrão como "client"
-      phone: req.body.phone ? validationsController.validateNumber(req.body.phone) : undefined,
-    };
+    const userData = req.body;
 
-    // Validação da senha
-    const isPasswordValid = validationsController.validatePassword(userData.password);
-    if (!isPasswordValid) {
-      throw new Error("A senha não atende aos critérios de segurança.");
-    }
-
-    // Verificar se o NIF ou email já está registrado
-    const existingUser = await userController.getUser({ $or: [{ nif: userData.nif }, { email: userData.email }] });
-    if (existingUser) {
-      throw new Error("Já existe um utilizador com este NIF ou email.");
-    }
-
-    // Criar o usuário usando o userController
-    await userController.createUser(userData);
+    // Chamar o método do controller para registrar o usuário
+    await userController.registerUser(userData);
 
     console.log("Usuário registrado com sucesso!");
-    res.status(201).redirect("/users/login"); // Redireciona para a página de login após o registro
+    res.status(201).redirect("/users/login");
   } catch (error) {
     console.error("Erro ao registrar o usuário:", error);
 
-    // Renderiza a página de registro novamente com a mensagem de erro e os dados preenchidos
+    // Renderiza a página de registro novamente com a mensagem de erro
     res.status(400).render("user-register", {
       error: error.message,
-      formData: req.body, // Retorna os dados preenchidos para o formulário
+      formData: req.body,
     });
   }
 });
@@ -82,7 +62,9 @@ router.post("/login", async function (req, res) {
     req.session.user = {
       id: user._id,
       name: user.name,
+      nif: user.nif, // Certifique-se de incluir o NIF aqui
       email: user.email,
+      phone: user.phone,
       role: user.role,
     };
 
@@ -111,6 +93,75 @@ router.get("/logout", function (req, res) {
 // Dashboard protegido
 router.get("/dashboard", isAuthenticated, function (req, res) {
   res.render("user-dashboard", { user: req.session.user }); // Renderiza o dashboard com os dados do usuário
+});
+
+router.get("/dashboard/edit", isAuthenticated, function (req, res) {
+  res.render("user-edit", { user: req.session.user, error: null });
+});
+
+// Processar edição de informações do usuário
+router.post("/dashboard/edit", isAuthenticated, async function (req, res) {
+  try {
+    const { name, email, password, newPassword, confirmNewPassword, phone } = req.body;
+
+    // Verificar se a senha atual foi fornecida
+    if (newPassword || confirmNewPassword) {
+      if (!password) {
+        throw new Error("A senha atual é obrigatória para alterar a senha.");
+      }
+
+      // Verificar se a senha atual está correta
+      const user = await User.findById(req.session.user.id);
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        throw new Error("A senha atual está incorreta.");
+      }
+
+      // Verificar se a nova senha e a confirmação coincidem
+      if (newPassword !== confirmNewPassword) {
+        throw new Error("A nova senha e a confirmação não coincidem.");
+      }
+
+      // Validar os critérios de segurança da nova senha
+      const isPasswordValidForSecurity = validationsController.validatePassword(newPassword);
+      if (!isPasswordValidForSecurity) {
+        throw new Error("A nova senha não atende aos critérios de segurança.");
+      }
+    }
+
+    // Atualizar os dados do usuário no banco de dados
+    const updatedUser = await User.findByIdAndUpdate(
+      req.session.user.id,
+      {
+        name,
+        email,
+        ...(newPassword && { password: await bcrypt.hash(newPassword, 10) }), // Atualiza a senha apenas se for fornecida
+        phone,
+      },
+      { new: true } // Retorna o documento atualizado
+    );
+
+    // Atualizar os dados na sessão
+    req.session.user = {
+      id: updatedUser._id,
+      name: updatedUser.name,
+      nif: updatedUser.nif,
+      phone: updatedUser.phone,
+      email: updatedUser.email,
+      role: updatedUser.role,
+    };
+
+    console.log("Informações do usuário atualizadas:", updatedUser);
+    res.redirect("/users/dashboard"); // Redireciona para o dashboard
+  } catch (error) {
+    console.error("Erro ao atualizar informações do usuário:", error);
+
+    // Renderiza a página de edição novamente com a mensagem de erro
+    res.status(400).render("user-edit", {
+      user: req.session.user,
+      error: error.message,
+    });
+  }
 });
 
 module.exports = router;
