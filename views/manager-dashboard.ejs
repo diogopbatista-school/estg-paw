@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Painel Manager</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2>Painel do Manager</h2>
+      <p>Bem-vindo, <%= user.name %>! Aqui estão os seus restaurantes:</p>
+
+      <% if (restaurants.length > 0) { %>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Localização</th>
+            <th>Telefone</th>
+            <th>Verificado</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% restaurants.forEach(function (restaurant) { %>
+          <tr>
+            <td><%= restaurant.name %></td>
+            <td><%= restaurant.description || "Sem descrição" %></td>
+            <td>
+              Latitude: <%= restaurant.location.latitude %><br />
+              Longitude: <%= restaurant.location.longitude %>
+            </td>
+            <td><%= restaurant.phone %></td>
+            <td>
+              <% if (restaurant.verified) { %>
+              <span class="badge bg-success">Sim</span>
+              <% } else { %>
+              <span class="badge bg-danger">Não</span>
+              <% } %>
+            </td>
+            <td>
+              <a
+                href="/restaurants/<%= restaurant._id %>"
+                class="btn btn-primary btn-sm">
+                Abrir Restaurante
+              </a>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+      <% } else { %>
+      <p class="text-muted">Nenhum restaurante associado.</p>
+      <% } %>
+    </div>
+  </body>
+</html>

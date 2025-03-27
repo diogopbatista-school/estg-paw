@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
 let validationsController = require("./validationsController");
@@ -65,6 +66,56 @@ userController.verifyCredentials = async (email, password) => {
   }
 
   return user;
+};
+
+userController.updateUser = async (userId, userData) => {
+  const { name, email, password, newPassword, confirmNewPassword, phone } = userData;
+
+  // Verificar se a senha atual foi fornecida para alterar a senha
+  if (newPassword || confirmNewPassword) {
+    if (!password) {
+      throw new Error("A senha atual é obrigatória para alterar a senha.");
+    }
+
+    // Verificar se a senha atual está correta
+    const user = await User.findById(userId);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new Error("A senha atual está incorreta.");
+    }
+
+    // Verificar se a nova senha e a confirmação coincidem
+    if (newPassword !== confirmNewPassword) {
+      throw new Error("A nova senha e a confirmação não coincidem.");
+    }
+
+    // Validar os critérios de segurança da nova senha
+    const isPasswordValidForSecurity = validationsController.validatePassword(newPassword);
+    if (!isPasswordValidForSecurity) {
+      throw new Error("A nova senha não atende aos critérios de segurança.");
+    }
+
+    // Atualizar a senha no banco de dados
+    userData.password = await bcrypt.hash(newPassword, 10);
+  }
+
+  // Atualizar os dados do usuário no banco de dados
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    {
+      name,
+      email,
+      phone,
+      ...(userData.password && { password: userData.password }), // Atualiza a senha apenas se for fornecida
+    },
+    { new: true } // Retorna o documento atualizado
+  );
+
+  if (!updatedUser) {
+    throw new Error("Usuário não encontrado.");
+  }
+
+  return updatedUser;
 };
 
 module.exports = userController;

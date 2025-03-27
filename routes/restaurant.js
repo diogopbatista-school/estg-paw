@@ -11,13 +11,20 @@ function isAuthenticated(req, res, next) {
 }
 
 // Listar restaurantes do manager
-router.get("/", isAuthenticated, async function (req, res) {
-  if (req.session.user.role !== "manager") {
-    return res.status(403).send("Acesso negado.");
-  }
+router.get("/manage", isAuthenticated, async (req, res) => {
+  try {
+    // Verificar se o usuário é um manager
+    if (req.session.user.role !== "manager") {
+      return res.status(403).send("Acesso negado. Apenas managers podem acessar esta página.");
+    }
 
-  const manager = await User.findById(req.session.user.id).populate("restaurants");
-  res.render("user-restaurants", { restaurants: manager.restaurants });
+    // Buscar os restaurantes associados ao manager
+    const manager = await User.findById(req.session.user.id).populate("restaurants");
+    res.render("manager-dashboard", { restaurants: manager.restaurants });
+  } catch (error) {
+    console.error("Erro ao carregar o painel do manager:", error);
+    res.status(500).send("Erro ao carregar o painel do manager.");
+  }
 });
 
 module.exports = router;

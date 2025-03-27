@@ -142,6 +142,19 @@
               value="<%= formData && formData.phone ? formData.phone : '' %>" />
           </div>
 
+          <!-- Seleção de Função (Client ou Manager) -->
+          <div class="mb-3">
+            <label for="role" class="form-label">Função</label>
+            <select
+              class="form-control"
+              id="role"
+              name="role"
+              required>
+              <option value="client" <%= formData && formData.role === 'client' ? 'selected' : '' %>>Cliente</option>
+              <option value="manager" <%= formData && formData.role === 'manager' ? 'selected' : '' %>>Gerente</option>
+            </select>
+          </div>
+
           <!-- Botão de Envio -->
           <button
             type="submit"

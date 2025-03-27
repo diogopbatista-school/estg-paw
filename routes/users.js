@@ -100,46 +100,23 @@ router.get("/dashboard/edit", isAuthenticated, function (req, res) {
 });
 
 // Processar edição de informações do usuário
+// Processar edição de informações do usuário
 router.post("/dashboard/edit", isAuthenticated, async function (req, res) {
   try {
+    const userId = req.session.user.id; // Obtém o ID do usuário da sessão
+
+    // Extrair os campos diretamente de req.body
     const { name, email, password, newPassword, confirmNewPassword, phone } = req.body;
 
-    // Verificar se a senha atual foi fornecida
-    if (newPassword || confirmNewPassword) {
-      if (!password) {
-        throw new Error("A senha atual é obrigatória para alterar a senha.");
-      }
-
-      // Verificar se a senha atual está correta
-      const user = await User.findById(req.session.user.id);
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        throw new Error("A senha atual está incorreta.");
-      }
-
-      // Verificar se a nova senha e a confirmação coincidem
-      if (newPassword !== confirmNewPassword) {
-        throw new Error("A nova senha e a confirmação não coincidem.");
-      }
-
-      // Validar os critérios de segurança da nova senha
-      const isPasswordValidForSecurity = validationsController.validatePassword(newPassword);
-      if (!isPasswordValidForSecurity) {
-        throw new Error("A nova senha não atende aos critérios de segurança.");
-      }
-    }
-
-    // Atualizar os dados do usuário no banco de dados
-    const updatedUser = await User.findByIdAndUpdate(
-      req.session.user.id,
-      {
-        name,
-        email,
-        ...(newPassword && { password: await bcrypt.hash(newPassword, 10) }), // Atualiza a senha apenas se for fornecida
-        phone,
-      },
-      { new: true } // Retorna o documento atualizado
-    );
+    // Chamar o método do controller para atualizar o usuário
+    const updatedUser = await userController.updateUser(userId, {
+      name,
+      email,
+      password,
+      newPassword,
+      confirmNewPassword,
+      phone,
+    });
 
     // Atualizar os dados na sessão
     req.session.user = {
