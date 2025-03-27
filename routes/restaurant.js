@@ -20,20 +20,40 @@ router.get("/manage", isAuthenticated, async (req, res) => {
       return res.status(403).send("Acesso negado. Apenas managers podem acessar esta página.");
     }
 
-    // Buscar os restaurantes associados ao manager
-    const manager = await User.findById(req.session.user.id).populate("restaurants");
+    // Extrair filtros de pesquisa da query string
+    const searchFilters = {
+      name: req.query.name || "",
+      description: req.query.description || "",
+      location: req.query.location || "",
+      phone: req.query.phone || "",
+    };
 
-    // Renderizar a página com os restaurantes e o usuário
+    // Buscar os restaurantes associados ao manager
+    const manager = await User.findById(req.session.user.id).populate({
+      path: "restaurants",
+      match: {
+        ...(searchFilters.name && { name: { $regex: searchFilters.name, $options: "i" } }),
+        ...(searchFilters.description && { description: { $regex: searchFilters.description, $options: "i" } }),
+        ...(searchFilters.location && {
+          "location.latitude": { $regex: searchFilters.location, $options: "i" },
+        }),
+        ...(searchFilters.phone && { phone: { $regex: searchFilters.phone, $options: "i" } }),
+      },
+    });
+
+    // Renderizar a página com os restaurantes filtrados
     res.render("manager-dashboard", {
-      user: req.session.user, // Passa o objeto user para o template
+      user: req.session.user,
       restaurants: manager.restaurants || [],
-      error: null, // Define error como null
+      searchFilters,
+      error: null,
     });
   } catch (error) {
     console.error("Erro ao carregar o painel do manager:", error);
     res.render("manager-dashboard", {
       user: req.session.user,
       restaurants: [],
+      searchFilters: {}, // Passa um objeto vazio para evitar erros no template
       error: "Erro ao carregar o painel do manager.",
     });
   }

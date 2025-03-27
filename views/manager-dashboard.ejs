@@ -5,40 +5,124 @@
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0" />
-    <title>Painel Manager</title>
+    <title>Painel do Manager</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+    <style>
+      body {
+        background: linear-gradient(to right, #4b6cb7, #182848);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Poppins", sans-serif;
+        color: #fff;
+      }
+      .container {
+        max-width: 1000px;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.3);
+        color: #333;
+      }
+      h2 {
+        color: #007bff;
+        text-align: center;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+      .table {
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .badge {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+      }
+      .btn {
+        font-weight: bold;
+        border-radius: 8px;
+        transition: background 0.3s;
+      }
+      .btn-primary {
+        background: #007bff;
+        border: none;
+      }
+      .btn-primary:hover {
+        background: #0056b3;
+      }
+      .filter-container {
+        margin-bottom: 20px;
+      }
+    </style>
   </head>
   <body>
-    <% if (error) { %>
-    <div
-      class="alert alert-danger"
-      role="alert">
-      <%= error %>
-    </div>
-    <% } %>
-
     <div class="container mt-5">
+      <% if (error) { %>
+      <div
+        class="alert alert-danger"
+        role="alert">
+        <%= error %>
+      </div>
+      <% } %>
+
       <h2>Painel do Manager</h2>
       <p>Bem-vindo, <%= user.name %>! Aqui estão os seus restaurantes:</p>
 
-      <!-- Botão para Criar Restaurante -->
+      <!-- Filtros de Pesquisa (Sem botão, pesquisa ao vivo) -->
+      <div class="filter-container">
+        <form
+          id="filter-form"
+          class="row">
+          <div class="col-md-3">
+            <input
+              type="text"
+              id="filter-name"
+              class="form-control"
+              placeholder="Pesquisar por Nome" />
+          </div>
+          <div class="col-md-3">
+            <input
+              type="text"
+              id="filter-description"
+              class="form-control"
+              placeholder="Pesquisar por Descrição" />
+          </div>
+          <div class="col-md-3">
+            <input
+              type="text"
+              id="filter-location"
+              class="form-control"
+              placeholder="Pesquisar por Localização" />
+          </div>
+          <div class="col-md-3">
+            <input
+              type="text"
+              id="filter-phone"
+              class="form-control"
+              placeholder="Pesquisar por Telefone" />
+          </div>
+        </form>
+      </div>
+
       <a
         href="/restaurants/create"
-        class="btn btn-success mb-3">
-        Criar Restaurante
-      </a>
-
-      <!-- Botão para Voltar -->
+        class="btn btn-success mb-3"
+        >Criar Restaurante</a
+      >
       <a
         href="/users/dashboard"
-        class="btn btn-secondary mb-3">
-        Voltar
-      </a>
+        class="btn btn-secondary mb-3"
+        >Voltar</a
+      >
 
       <% if (restaurants.length > 0) { %>
-      <table class="table table-striped">
+      <table
+        id="restaurants-table"
+        class="table table-striped table-hover">
         <thead>
           <tr>
             <th>Nome</th>
@@ -51,7 +135,7 @@
         </thead>
         <tbody>
           <% restaurants.forEach(function (restaurant) { %>
-          <tr>
+          <tr class="restaurant-row">
             <td><%= restaurant.name %></td>
             <td><%= restaurant.description || "Sem descrição" %></td>
             <td>
@@ -69,17 +153,49 @@
             <td>
               <a
                 href="/restaurants/manage/<%= restaurant._id %>"
-                class="btn btn-primary btn-sm">
-                Abrir Restaurante
-              </a>
+                class="btn btn-primary btn-sm"
+                >Abrir Restaurante</a
+              >
             </td>
           </tr>
           <% }); %>
         </tbody>
       </table>
       <% } else { %>
-      <p class="text-muted">Nenhum restaurante associado.</p>
+      <p class="text-muted text-center">Nenhum restaurante associado.</p>
       <% } %>
     </div>
+
+    <script>
+      // Função para filtrar a tabela
+      function filterTable() {
+        const nameFilter = document.getElementById("filter-name").value.toLowerCase();
+        const descriptionFilter = document.getElementById("filter-description").value.toLowerCase();
+        const locationFilter = document.getElementById("filter-location").value.toLowerCase();
+        const phoneFilter = document.getElementById("filter-phone").value.toLowerCase();
+
+        const rows = document.querySelectorAll(".restaurant-row");
+
+        rows.forEach((row) => {
+          const name = row.cells[0].textContent.toLowerCase();
+          const description = row.cells[1].textContent.toLowerCase();
+          const location = row.cells[2].textContent.toLowerCase();
+          const phone = row.cells[3].textContent.toLowerCase();
+
+          // Exibe a linha se corresponder a todos os filtros
+          if (name.includes(nameFilter) && description.includes(descriptionFilter) && location.includes(locationFilter) && phone.includes(phoneFilter)) {
+            row.style.display = "";
+          } else {
+            row.style.display = "none";
+          }
+        });
+      }
+
+      // Adicionando os eventos de input nos filtros
+      document.getElementById("filter-name").addEventListener("input", filterTable);
+      document.getElementById("filter-description").addEventListener("input", filterTable);
+      document.getElementById("filter-location").addEventListener("input", filterTable);
+      document.getElementById("filter-phone").addEventListener("input", filterTable);
+    </script>
   </body>
 </html>

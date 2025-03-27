@@ -1,11 +1,8 @@
 var express = require("express");
 var { urlencoded } = require("body-parser");
 var router = express.Router();
-const crypto = require("crypto");
-const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
-const validationsController = require("../controllers/validationsController");
 const userController = require("../controllers/userController"); // Certifique-se de que este controlador existe
 
 // Aplicar o middleware urlencoded globalmente para todas as rotas
@@ -91,8 +88,20 @@ router.get("/logout", function (req, res) {
 });
 
 // Dashboard protegido
-router.get("/dashboard", isAuthenticated, function (req, res) {
-  res.render("user-dashboard", { user: req.session.user }); // Renderiza o dashboard com os dados do usuário
+router.get("/dashboard", isAuthenticated, async (req, res) => {
+  try {
+    // Buscar o usuário e os restaurantes associados
+    const user = await User.findById(req.session.user.id).populate("restaurants");
+
+    // Renderizar o template com os dados necessários
+    res.render("user-dashboard", {
+      user: req.session.user, // Passa os dados do usuário
+      restaurants: user.restaurants || [], // Passa os restaurantes associados ao usuário
+    });
+  } catch (error) {
+    console.error("Erro ao carregar o dashboard do usuário:", error);
+    res.status(500).render("error", { message: "Erro ao carregar o dashboard do usuário." });
+  }
 });
 
 router.get("/dashboard/edit", isAuthenticated, function (req, res) {
