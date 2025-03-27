@@ -9,40 +9,9 @@
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
-    <style>
-      body {
-        background: linear-gradient(to right, #ff7e5f, #feb47b);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: Arial, sans-serif;
-      }
-      .container {
-        max-width: 800px;
-        background: rgba(255, 255, 255, 0.9);
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-      }
-      h2 {
-        color: #007bff;
-        text-align: center;
-        font-weight: bold;
-      }
-      .list-group-item {
-        background: #fff3e0;
-        border-radius: 8px;
-        margin-bottom: 10px;
-      }
-      .btn {
-        width: 100%;
-        font-weight: bold;
-      }
-    </style>
   </head>
   <body>
-    <div class="container">
+    <div class="container mt-5">
       <h2>Detalhes do Restaurante</h2>
       <p><strong>Nome:</strong> <%= restaurant.name %></p>
 
@@ -63,9 +32,9 @@
       <!-- Botão para Gerenciar o Menu -->
       <a
         href="/restaurants/manage/<%= restaurant._id %>/menu"
-        class="btn btn-primary mt-3"
-        >Gerenciar Menu</a
-      >
+        class="btn btn-primary mt-3">
+        Gerenciar Menu
+      </a>
 
       <!-- Botão para Voltar -->
       <a

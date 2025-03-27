@@ -11,6 +11,14 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
   </head>
   <body>
+    <% if (error) { %>
+    <div
+      class="alert alert-danger"
+      role="alert">
+      <%= error %>
+    </div>
+    <% } %>
+
     <div class="container mt-5">
       <h2>Painel do Manager</h2>
       <p>Bem-vindo, <%= user.name %>! Aqui estão os seus restaurantes:</p>
@@ -20,6 +28,13 @@
         href="/restaurants/create"
         class="btn btn-success mb-3">
         Criar Restaurante
+      </a>
+
+      <!-- Botão para Voltar -->
+      <a
+        href="/users/dashboard"
+        class="btn btn-secondary mb-3">
+        Voltar
       </a>
 
       <% if (restaurants.length > 0) { %>
@@ -53,7 +68,7 @@
             </td>
             <td>
               <a
-                href="/restaurants/<%= restaurant._id %>"
+                href="/restaurants/manage/<%= restaurant._id %>"
                 class="btn btn-primary btn-sm">
                 Abrir Restaurante
               </a>
