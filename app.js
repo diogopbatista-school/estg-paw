@@ -54,7 +54,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/users/dashboard", dashboardRouter);
-app.use("/users/dashboard/restaurants", restaurantsRouter);
+app.use("/restaurants", restaurantsRouter);
 
 // Captura de erros 404 e encaminhamento para o manipulador de erros
 app.use(function (req, res, next) {

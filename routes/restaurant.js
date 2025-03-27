@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 const User = require("../models/User");
+const Restaurant = require("../models/Restaurant"); // Certifique-se de importar o modelo
 
 // Middleware para verificar autenticação
 function isAuthenticated(req, res, next) {
@@ -20,7 +21,12 @@ router.get("/manage", isAuthenticated, async (req, res) => {
 
     // Buscar os restaurantes associados ao manager
     const manager = await User.findById(req.session.user.id).populate("restaurants");
-    res.render("manager-dashboard", { restaurants: manager.restaurants });
+
+    // Renderizar a página com os restaurantes e o usuário
+    res.render("manager-dashboard", {
+      user: req.session.user, // Passa o objeto user para o template
+      restaurants: manager.restaurants || [],
+    });
   } catch (error) {
     console.error("Erro ao carregar o painel do manager:", error);
     res.status(500).send("Erro ao carregar o painel do manager.");
