@@ -18,7 +18,7 @@ function isAuthenticated(req, res, next) {
 
 // Página de registro
 router.get("/register", function (req, res) {
-  res.render("user-register", { formData: {}, error: null });
+  res.render("user/user-register", { formData: {}, error: null });
 });
 
 // Processar registro de usuário
@@ -35,7 +35,7 @@ router.post("/submitUser", async function (req, res) {
     console.error("Erro ao registrar o usuário:", error);
 
     // Renderiza a página de registro novamente com a mensagem de erro
-    res.status(400).render("user-register", {
+    res.status(400).render("user/user-register", {
       error: error.message,
       formData: req.body,
     });
@@ -44,7 +44,7 @@ router.post("/submitUser", async function (req, res) {
 
 // Página de login
 router.get("/login", function (req, res) {
-  res.render("user-login", { error: null });
+  res.render("user/user-login", { error: null });
 });
 
 // Processar login
@@ -71,7 +71,7 @@ router.post("/login", async function (req, res) {
     console.error("Erro no login:", error);
 
     // Renderiza a página de login novamente com a mensagem de erro
-    res.status(400).render("user-login", {
+    res.status(400).render("user/user-login", {
       error: error.message,
     });
   }
@@ -83,7 +83,7 @@ router.get("/logout", function (req, res) {
     if (err) {
       console.error("Erro ao encerrar a sessão:", err);
     }
-    res.redirect("/users/login"); // Redireciona para a página de login
+    res.redirect("user/users/login"); // Redireciona para a página de login
   });
 });
 
@@ -94,7 +94,7 @@ router.get("/dashboard", isAuthenticated, async (req, res) => {
     const user = await User.findById(req.session.user.id).populate("restaurants");
 
     // Renderizar o template com os dados necessários
-    res.render("user-dashboard", {
+    res.render("user/user-dashboard", {
       user: req.session.user, // Passa os dados do usuário
       restaurants: user.restaurants || [], // Passa os restaurantes associados ao usuário
     });
@@ -104,8 +104,8 @@ router.get("/dashboard", isAuthenticated, async (req, res) => {
   }
 });
 
-router.get("/dashboard/edit", isAuthenticated, function (req, res) {
-  res.render("user-edit", { user: req.session.user, error: null });
+router.get("user/dashboard/edit", isAuthenticated, function (req, res) {
+  res.render("user/user-edit", { user: req.session.user, error: null });
 });
 
 // Processar edição de informações do usuário
@@ -146,7 +146,7 @@ router.post("/dashboard/edit", isAuthenticated, async function (req, res) {
     console.error("Erro ao atualizar informações do usuário:", error);
 
     // Renderiza a página de edição novamente com a mensagem de erro
-    res.status(400).render("user-edit", {
+    res.status(400).render("user/user-edit", {
       user: req.session.user,
       error: error.message,
     });

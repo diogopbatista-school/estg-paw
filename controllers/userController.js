@@ -14,19 +14,14 @@ userController.getUser = (criteria = {}) => {
 userController.registerUser = async (userData) => {
   const { name, email, nif, password, confirmPassword, phone, role } = userData;
 
-  console.log(password);
-  console.log(confirmPassword);
+  validationsController.validateString(name); // Valida o nome
+  validationsController.validateEmail(email); // Valida o email
+  validationsController.validateNIF(nif); // Valida o NIF
+  validationsController.validateNumber(phone); // Valida o telefone
 
-  // Verificar se as senhas coincidem
-  if (password !== confirmPassword) {
-    throw new Error("A senha e a confirmação não coincidem.");
-  }
+  validationsController.validatePasswordsMatch(password, confirmPassword);
 
-  // Validar os critérios de segurança da senha
-  const isPasswordValid = validationsController.validatePassword(password);
-  if (!isPasswordValid) {
-    throw new Error("A senha não atende aos critérios de segurança.");
-  }
+  validationsController.validatePassword(password);
 
   // Verificar se o NIF ou email já está registrado
   const existingUser = await User.findOne({ $or: [{ nif }, { email }] });
@@ -36,7 +31,7 @@ userController.registerUser = async (userData) => {
 
   // Gerar o hash da senha
   const saltRounds = 10; // Número de rounds para o salt
-  const hash = await bcrypt.hash(password, saltRounds);
+  const hash = await bcrypt.hash(password, saltRounds); // Com o bcrypt nao é preciso guardar o salt na DB
 
   // Criar o usuário
   const newUser = new User({

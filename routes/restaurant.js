@@ -3,6 +3,8 @@ var router = express.Router();
 const User = require("../models/User");
 const restaurantController = require("../controllers/restaurantController");
 const Restaurant = require("../models/Restaurant");
+const Menu = require("../models/Menu");
+const Dish = require("../models/Dish");
 
 // Middleware para verificar autenticação
 function isAuthenticated(req, res, next) {
@@ -42,7 +44,7 @@ router.get("/manage", isAuthenticated, async (req, res) => {
     });
 
     // Renderizar a página com os restaurantes filtrados
-    res.render("manager-dashboard", {
+    res.render("user/manager-dashboard", {
       user: req.session.user,
       restaurants: manager.restaurants || [],
       searchFilters,
@@ -50,7 +52,7 @@ router.get("/manage", isAuthenticated, async (req, res) => {
     });
   } catch (error) {
     console.error("Erro ao carregar o painel do manager:", error);
-    res.render("manager-dashboard", {
+    res.render("user/manager-dashboard", {
       user: req.session.user,
       restaurants: [],
       searchFilters: {}, // Passa um objeto vazio para evitar erros no template
@@ -66,9 +68,6 @@ router.get("/manage/:id", isAuthenticated, async (req, res) => {
     // Buscar o restaurante pelo ID
     const restaurant = await Restaurant.findById(restaurantId).populate("manager");
 
-    console.log("Restaurante encontrado:", restaurant);
-
-    // Verificar se o restaurante existe
     if (!restaurant) {
       return res.status(404).render("error", { message: "Restaurante não encontrado." });
     }
@@ -78,8 +77,12 @@ router.get("/manage/:id", isAuthenticated, async (req, res) => {
       return res.status(403).render("error", { message: "Acesso negado." });
     }
 
-    // Renderizar a página do restaurante
-    res.render("restaurant-dashboard", { restaurant });
+    // Buscar os menus associados ao restaurante e popular os pratos
+    const menus = await Menu.find({ restaurant: restaurantId });
+    console.log("Menus:", menus); // Adicione este log para depuração
+
+    // Renderizar a página do restaurante com os menus e pratos
+    res.render("restaurant/restaurant-dashboard", { restaurant, menus });
   } catch (error) {
     console.error("Erro ao abrir o restaurante:", error);
     res.status(500).render("error", { message: "Erro ao abrir o restaurante." });
@@ -87,9 +90,13 @@ router.get("/manage/:id", isAuthenticated, async (req, res) => {
 });
 
 router.get("/create", isAuthenticated, (req, res) => {
-  res.render("restaurant-create", { error: null });
+  res.render("restaurant/restaurant-create", { error: null });
 });
 
 router.post("/submitRestaurant", isAuthenticated, restaurantController.createRestaurant);
+
+router.get("/manage/:id/edit", isAuthenticated, restaurantController.showEditRestaurantForm);
+
+router.post("/manage/:id/edit", isAuthenticated, restaurantController.updateRestaurant);
 
 module.exports = router;

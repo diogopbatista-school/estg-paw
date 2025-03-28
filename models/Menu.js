@@ -4,6 +4,7 @@ const MenuSchema = new mongoose.Schema({
   restaurant: {
     type: mongoose.Schema.Types.ObjectId,
     required: true,
+    ref: "Restaurant",
   },
   category: {
     type: String,
@@ -11,21 +12,15 @@ const MenuSchema = new mongoose.Schema({
   },
   dishes: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "dish",
-      prices: {
-        small: {
-          type: Number,
-          required: false,
-        },
-        medium: {
-          type: Number,
-          required: true,
-        },
-        large: {
-          type: Number,
-          required: false,
-        },
+      dish: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Dish", // Referência ao modelo de pratos
+        required: true,
+      },
+      price: {
+        small: { type: Number, required: false }, // Preço para tamanho pequeno
+        medium: { type: Number, required: true }, // Preço para tamanho médio
+        large: { type: Number, required: false }, // Preço para tamanho grande
       },
     },
   ],
@@ -35,9 +30,4 @@ const MenuSchema = new mongoose.Schema({
   },
 });
 
-MenuSchema.pre("save", (next) => {
-  if (this.dishes.length > 10) {
-    next(new Error("Menu can only have 10 dishes"));
-  }
-  next();
-});
+module.exports = mongoose.model("Menu", MenuSchema);

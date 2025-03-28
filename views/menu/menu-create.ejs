@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Criar Menu</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h3>Criar Menu para o Restaurante: <%= restaurant.name %></h3>
+
+      <!-- Exibe mensagem de erro, se houver -->
+      <% if (typeof error !== "undefined" && error) { %>
+      <div
+        class="alert alert-danger"
+        role="alert">
+        <%= error %>
+      </div>
+      <% } %>
+
+      <form
+        action="/restaurants/manage/<%= restaurant._id %>/submitMenu"
+        method="POST">
+        <!-- Campo Categoria -->
+        <div class="mb-3">
+          <label
+            for="category"
+            class="form-label"
+            >Categoria</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="category"
+            name="category"
+            placeholder="Digite a categoria do menu"
+            required />
+        </div>
+
+        <!-- Botões -->
+        <button
+          type="submit"
+          class="btn btn-success">
+          Criar Menu
+        </button>
+        <a
+          href="/restaurants/manage/<%= restaurant._id %>/menus"
+          class="btn btn-secondary"
+          >Cancelar</a
+        >
+      </form>
+    </div>
+  </body>
+</html>

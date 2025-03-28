@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Detalhes do Restaurante</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+    <style>
+      body {
+        background: linear-gradient(to right, #ff7e5f, #feb47b);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      .container {
+        max-width: 900px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .panel {
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      }
+      h2,
+      h3 {
+        text-align: center;
+        font-weight: bold;
+      }
+      .btn {
+        width: 100%;
+        font-weight: bold;
+        border-radius: 8px;
+      }
+      .list-group-item {
+        background: #fff3e0;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        padding: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="panel">
+        <h2>Detalhes do Restaurante</h2>
+        <p><strong>Nome:</strong> <%= restaurant.name %></p>
+        <p><strong>Descrição:</strong> <%= restaurant.description || "Sem descrição disponível" %></p>
+        <p><strong>Localização:</strong> Latitude: <%= restaurant.location.latitude %>, Longitude: <%= restaurant.location.longitude %></p>
+        <p><strong>Telefone:</strong> <%= restaurant.phone %></p>
+        <p><strong>Verificado:</strong> <%= restaurant.verified ? "Sim" : "Não" %></p>
+      </div>
+
+      <div class="panel">
+        <h3>Menu</h3>
+        <% if (menus && menus.length > 0) { %>
+        <ul class="list-group">
+          <% menus.forEach(function (menu) { %>
+          <li class="list-group-item">
+            <h4><strong>Categoria:</strong> <%= menu.category || "Sem categoria" %></h4>
+            <p><strong>Data de Criação:</strong> <%= menu.created_at.toLocaleDateString() %></p>
+          </li>
+          <% }); %>
+        </ul>
+        <% } else { %>
+        <p class="text-muted text-center">Este restaurante ainda não possui um menu.</p>
+        <% } %>
+      </div>
+
+      <div class="panel text-center">
+        <a
+          href="/restaurants/manage/<%= restaurant._id %>/menus"
+          class="btn btn-primary mb-2"
+          >Editar Menu</a
+        >
+        <a
+          href="/restaurants/manage/<%= restaurant._id %>/edit"
+          class="btn btn-warning mb-2"
+          >Editar Restaurante</a
+        >
+        <a
+          href="/restaurants/manage"
+          class="btn btn-secondary"
+          >Voltar</a
+        >
+      </div>
+    </div>
+  </body>
+</html>

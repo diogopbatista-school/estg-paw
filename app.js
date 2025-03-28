@@ -39,6 +39,7 @@ var indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const dashboardRouter = require("./routes/dashboard");
 const restaurantsRouter = require("./routes/restaurant");
+const menuRoutes = require("./routes/menu");
 
 // Configuração do mecanismo de visualização
 app.set("views", path.join(__dirname, "views"));
@@ -55,6 +56,7 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/users/dashboard", dashboardRouter);
 app.use("/restaurants", restaurantsRouter);
+app.use("/", menuRoutes);
 
 // Captura de erros 404 e encaminhamento para o manipulador de erros
 app.use(function (req, res, next) {

@@ -14,16 +14,16 @@ function isAuthenticated(req, res, next) {
 
 // Dashboard protegido
 router.get("/", isAuthenticated, function (req, res) {
-  res.render("user-dashboard", { user: req.session.user });
+  res.render("user/user-dashboard", { user: req.session.user });
 });
 
 // Página de edição de informações do usuário
 router.get("/edit", isAuthenticated, function (req, res) {
-  res.render("user-edit", { user: req.session.user, error: null });
+  res.render("user/user-edit", { user: req.session.user, error: null });
 });
 
 // Processar edição de informações do usuário
-router.post("/edit", isAuthenticated, async function (req, res) {
+router.post("user/edit", isAuthenticated, async function (req, res) {
   try {
     const { name, email, password, newPassword, confirmNewPassword, phone } = req.body;
 
@@ -70,7 +70,7 @@ router.post("/edit", isAuthenticated, async function (req, res) {
 
     res.redirect("/users/dashboard");
   } catch (error) {
-    res.status(400).render("user-edit", { user: req.session.user, error: error.message });
+    res.status(400).render("user/user-edit", { user: req.session.user, error: error.message });
   }
 });
 

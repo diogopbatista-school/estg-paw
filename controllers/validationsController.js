@@ -1,5 +1,11 @@
 let validationsController = {};
 
+validationsController.validatePasswordsMatch = (password, confirmPassword) => {
+  if (password !== confirmPassword) {
+    throw new Error("A senha e a confirmação não coincidem.");
+  }
+};
+
 validationsController.validateString = (string) => {
   if (typeof string === "undefined" || string === null) {
     throw new Error("Campo de Texto em Falta");
