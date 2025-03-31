@@ -17,6 +17,9 @@ menuController.listMenus = async (req, res) => {
   try {
     const restaurantId = req.params.id;
 
+    console.log("restaurantId:", restaurantId);
+    console.log("userIdWW");
+
     // Verificar se o restaurante existe
     const restaurant = await Restaurant.findById(restaurantId);
 
@@ -49,18 +52,25 @@ menuController.getMenuDetails = async (req, res) => {
   try {
     const { restaurantId, menuId } = req.params;
 
-    // Buscar o menu pelo ID e popular os pratos
-    const menu = await Menu.findById(menuId).populate("dishes.dish");
+    console.log("restaurantId:", restaurantId);
+    console.log("menuId:", menuId);
+
+    // Buscar o menu pelo ID
+    const menu = await Menu.findById(menuId);
 
     if (!menu) {
       return res.status(404).render("error", { message: "Menu não encontrado." });
     }
 
-    // Renderizar a página do menu com os pratos
-    res.render("menu/menu-details", { menu, restaurantId });
+    // Buscar os pratos associados ao menu
+    const dishes = await Dish.find({ menuId });
+
+    console.log("Dishes:", dishes); // Adicione este log para depuração
+
+    res.render("menu/menu-details", { restaurantId, menu, dishes });
   } catch (error) {
-    console.error("Erro ao abrir o menu:", error);
-    res.status(500).render("error", { message: "Erro ao abrir o menu." });
+    console.error("Erro ao carregar os detalhes do menu:", error);
+    res.status(500).render("error", { message: "Erro ao carregar os detalhes do menu." });
   }
 };
 
@@ -68,6 +78,8 @@ menuController.getMenuDetails = async (req, res) => {
 menuController.renderCreateMenuForm = async (req, res) => {
   try {
     const restaurantId = req.params.restaurantId;
+
+    console.log("lo");
 
     // Buscar o restaurante pelo ID
     const restaurant = await Restaurant.findById(restaurantId);

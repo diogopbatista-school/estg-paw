@@ -2,6 +2,8 @@ var express = require("express");
 var router = express.Router();
 const userController = require("../controllers/userController");
 
+console.log("User Controller:", userController);
+
 // Middleware para verificar autenticação
 function isAuthenticated(req, res, next) {
   if (req.session && req.session.user) {
@@ -32,10 +34,10 @@ router.get("/logout", userController.logoutUser);
 // Dashboard protegido
 router.get("/dashboard", isAuthenticated, userController.getDashboard);
 
-// Página de edição de informações do usuário
-router.get("/dashboard/edit", isAuthenticated, userController.getEditPage);
+// Rota para exibir o formulário de edição de perfil
+router.get("/dashboard/edit", isAuthenticated, userController.showEditUserForm);
 
-// Processar edição de informações do usuário
+// Rota para processar a edição de informações do usuário
 router.post("/dashboard/edit", isAuthenticated, userController.updateUser);
 
 module.exports = router;

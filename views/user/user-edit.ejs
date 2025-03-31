@@ -2,9 +2,7 @@
 <html lang="pt">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Editar Perfil</title>
     <link
       rel="stylesheet"
@@ -42,23 +40,15 @@
 
       <!-- Exibe mensagem de erro, se houver -->
       <% if (typeof error !== "undefined" && error) { %>
-      <div
-        class="alert alert-danger"
-        role="alert">
+      <div class="alert alert-danger" role="alert">
         <%= error %>
       </div>
       <% } %>
 
-      <form
-        action="/users/dashboard/edit"
-        method="POST">
+      <form action="/admin/edit-user/<%= user._id %>" method="POST">
         <!-- Campo Nome -->
         <div class="mb-3">
-          <label
-            for="name"
-            class="form-label"
-            >Nome</label
-          >
+          <label for="name" class="form-label">Nome</label>
           <input
             type="text"
             class="form-control"
@@ -70,11 +60,7 @@
 
         <!-- Campo Email -->
         <div class="mb-3">
-          <label
-            for="email"
-            class="form-label"
-            >Email</label
-          >
+          <label for="email" class="form-label">Email</label>
           <input
             type="email"
             class="form-control"
@@ -86,11 +72,7 @@
 
         <!-- Campo Senha Atual -->
         <div class="mb-3">
-          <label
-            for="password"
-            class="form-label"
-            >Senha Atual</label
-          >
+          <label for="password" class="form-label">Senha Atual</label>
           <input
             type="password"
             class="form-control"
@@ -101,11 +83,7 @@
 
         <!-- Campo Nova Senha -->
         <div class="mb-3">
-          <label
-            for="newPassword"
-            class="form-label"
-            >Nova Senha</label
-          >
+          <label for="newPassword" class="form-label">Nova Senha</label>
           <input
             type="password"
             class="form-control"
@@ -116,11 +94,7 @@
 
         <!-- Campo Confirmação de Nova Senha -->
         <div class="mb-3">
-          <label
-            for="confirmNewPassword"
-            class="form-label"
-            >Confirmação da Nova Senha</label
-          >
+          <label for="confirmNewPassword" class="form-label">Confirmação da Nova Senha</label>
           <input
             type="password"
             class="form-control"
@@ -131,11 +105,7 @@
 
         <!-- Campo Telefone -->
         <div class="mb-3">
-          <label
-            for="phone"
-            class="form-label"
-            >Telefone</label
-          >
+          <label for="phone" class="form-label">Telefone</label>
           <input
             type="text"
             class="form-control"
@@ -145,18 +115,22 @@
             placeholder="Digite o número de telefone" />
         </div>
 
+        <!-- Campo Papel (Role) - Apenas para Administradores -->
+        <% if (sessionUser.role === "admin") { %>
+        <div class="mb-3">
+          <label for="role" class="form-label">Função</label>
+          <select class="form-control" id="role" name="role" required>
+            <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Administrador</option>
+            <option value="manager" <%= user.role === 'manager' ? 'selected' : '' %>>Gerente</option>
+            <option value="client" <%= user.role === 'client' ? 'selected' : '' %>>Cliente</option>
+          </select>
+        </div>
+        <% } %>
+
         <!-- Botões de Ação -->
         <div class="d-flex justify-content-between">
-          <button
-            type="submit"
-            class="btn btn-success btn-lg w-48">
-            Salvar Alterações
-          </button>
-          <a
-            href="/users/dashboard"
-            class="btn btn-danger btn-lg w-48">
-            Cancelar
-          </a>
+          <button type="submit" class="btn btn-success btn-lg w-48">Salvar Alterações</button>
+          <a href="/admin/dashboard" class="btn btn-danger btn-lg w-48">Cancelar</a>
         </div>
       </form>
     </div>

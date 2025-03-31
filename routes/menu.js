@@ -13,13 +13,12 @@ function isAuthenticated(req, res, next) {
 // Listar menus de um restaurante
 router.get("/restaurants/manage/:id/menus", isAuthenticated, menuController.listMenus);
 
+router.get("/restaurants/manage/:restaurantId/menu/create", isAuthenticated, menuController.renderCreateMenuForm);
+
 // Abrir um menu específico
 router.get("/restaurants/manage/:restaurantId/menus/:menuId", isAuthenticated, menuController.getMenuDetails);
 
-// Renderizar o formulário de criação de menu
-router.get("/restaurants/manage/:restaurantId/menus/create", isAuthenticated, menuController.renderCreateMenuForm);
-
 // Criar um novo menu
-router.post("/restaurants/manage/:restaurantId/submitMenu", isAuthenticated, menuController.createMenu);
+router.post("/restaurants/manage/:restaurantId/menus/submitMenu", isAuthenticated, menuController.createMenu);
 
 module.exports = router;

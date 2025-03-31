@@ -28,6 +28,12 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  order_records: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order", // Referência ao modelo OrderRecord
+    },
+  ],
   restaurants: [
     {
       type: mongoose.Schema.Types.ObjectId,

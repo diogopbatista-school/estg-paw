@@ -69,6 +69,8 @@ validationsController.validatePassword = (password) => {
   if (!result) {
     throw new Error("Palavra-passe Inválida");
   }
+  password = bcrypt.hash(userData.password, 10);
+
   return password;
 };
 
@@ -120,17 +122,6 @@ validationsController.validateLongitude = (longitude) => {
     throw new Error("Longitude Inválida");
   }
   return longitude;
-};
-
-validationsController.validateAge = (age) => {
-  if (typeof age === "undefined") {
-    throw new Error("Campo Idade em Falta");
-  }
-  let result = age === "young" || age === "junior" || age === "adult" || age === "senior";
-  if (!result) {
-    throw new Error("Idade Inválida");
-  }
-  return age;
 };
 
 validationsController.validateBoolean = (boolean) => {

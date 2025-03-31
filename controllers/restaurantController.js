@@ -88,10 +88,16 @@ restaurantController.renderCreateRestaurantForm = (req, res) => {
 // Função para criar um novo restaurante
 restaurantController.createRestaurant = async (req, res) => {
   try {
+    console.log(req.body);
+
     const newRestaurant = new Restaurant({
       name: req.body.name,
       description: req.body.description,
-      location: req.body.location,
+      latitude: req.body.latitude,
+      location: {
+        latitude: req.body.latitude,
+        longitude: req.body.longitude,
+      },
       phone: req.body.phone,
       manager: req.session.user.id,
     });
@@ -146,6 +152,20 @@ restaurantController.updateRestaurant = async (req, res) => {
   } catch (error) {
     console.error("Erro ao atualizar o restaurante:", error);
     res.status(500).render("error", { message: "Erro ao atualizar o restaurante." });
+  }
+};
+
+restaurantController.deleteRestaurant = async (req, res) => {
+  try {
+    const restaurantId = req.params.id;
+
+    // Apagar o restaurante pelo ID
+    await Restaurant.findByIdAndDelete(restaurantId);
+
+    res.redirect("/users/manager-dashboard"); // Redirecionar para o painel do gerente
+  } catch (error) {
+    console.error("Erro ao apagar o restaurante:", error);
+    res.status(500).render("error", { message: "Erro ao apagar o restaurante." });
   }
 };
 

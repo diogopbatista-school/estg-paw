@@ -6,6 +6,7 @@ var logger = require("morgan");
 var mongoose = require("mongoose");
 
 var app = express(); // Certifique-se de que esta declaração aparece apenas uma vez
+app.use(express.urlencoded({ extended: true }));
 
 mongoose.Promise = global.Promise;
 
@@ -39,6 +40,8 @@ var indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 const restaurantsRouter = require("./routes/restaurant");
 const menuRoutes = require("./routes/menu");
+const adminRoutes = require("./routes/admin");
+const dishRoutes = require("./routes/dish");
 
 // Configuração do mecanismo de visualização
 app.set("views", path.join(__dirname, "views"));
@@ -55,6 +58,8 @@ app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use("/restaurants", restaurantsRouter);
 app.use("/", menuRoutes);
+app.use("/admin", adminRoutes);
+app.use("/", dishRoutes);
 
 // Captura de erros 404 e encaminhamento para o manipulador de erros
 app.use(function (req, res, next) {

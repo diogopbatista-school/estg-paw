@@ -27,6 +27,12 @@ const RestaurantSchema = new mongoose.Schema({
       ref: "menu",
     },
   ],
+  order_records: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Order", // Referência ao modelo OrderRecord
+    },
+  ],
   verified: {
     type: Boolean,
     default: false,

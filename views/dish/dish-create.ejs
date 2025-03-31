@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Criar Prato</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+    <script>
+      // Função para adicionar mais campos de preço
+      function addPriceField() {
+        const container = document.getElementById("price-container");
+        const newField = document.createElement("div");
+        newField.classList.add("mb-3");
+        newField.innerHTML = `
+          <div class="row">
+            <div class="col-md-6">
+              <label for="dose" class="form-label">Dose</label>
+              <input
+                type="text"
+                class="form-control"
+                name="doses[]"
+                placeholder="Ex.: Pequena, Média, Grande"
+                required />
+            </div>
+            <div class="col-md-6">
+              <label for="price" class="form-label">Preço</label>
+              <input
+                type="number"
+                step="0.01"
+                class="form-control"
+                name="prices[]"
+                placeholder="Digite o preço"
+                required />
+            </div>
+          </div>
+        `;
+        container.appendChild(newField);
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h2 class="mb-4">Criar Novo Prato</h2>
+
+      <% if (error) { %>
+      <div
+        class="alert alert-danger"
+        role="alert">
+        <%= error %>
+      </div>
+      <% } %>
+
+      <form
+        action="/restaurants/manage/<%= restaurantId %>/menus/<%= menuId %>/dishes/submitDish"
+        method="POST">
+        <div class="mb-3">
+          <label
+            for="name"
+            class="form-label"
+            >Nome do Prato</label
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            name="name"
+            placeholder="Digite o nome do prato"
+            value="<%= name || '' %>"
+            required />
+        </div>
+        <div class="mb-3">
+          <label
+            for="description"
+            class="form-label"
+            >Descrição</label
+          >
+          <textarea
+            class="form-control"
+            id="description"
+            name="description"
+            rows="3"
+            placeholder="Digite a descrição do prato"
+            required>
+<%= description || '' %></textarea
+          >
+        </div>
+        <div id="price-container">
+          <% if (doses && prices && doses.length > 0 && prices.length > 0) { %> <% doses.forEach((dose, index) => { %>
+          <div class="mb-3">
+            <div class="row">
+              <div class="col-md-6">
+                <label
+                  for="dose"
+                  class="form-label"
+                  >Dose</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  name="doses[]"
+                  value="<%= dose %>"
+                  required />
+              </div>
+              <div class="col-md-6">
+                <label
+                  for="price"
+                  class="form-label"
+                  >Preço</label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  name="prices[]"
+                  value="<%= prices[index] %>"
+                  required />
+              </div>
+            </div>
+          </div>
+          <% }); %> <% } else { %>
+          <div class="mb-3">
+            <div class="row">
+              <div class="col-md-6">
+                <label
+                  for="dose"
+                  class="form-label"
+                  >Dose</label
+                >
+                <input
+                  type="text"
+                  class="form-control"
+                  name="doses[]"
+                  placeholder="Ex.: Pequena, Média, Grande"
+                  required />
+              </div>
+              <div class="col-md-6">
+                <label
+                  for="price"
+                  class="form-label"
+                  >Preço</label
+                >
+                <input
+                  type="number"
+                  step="0.01"
+                  class="form-control"
+                  name="prices[]"
+                  placeholder="Digite o preço"
+                  required />
+              </div>
+            </div>
+          </div>
+          <% } %>
+        </div>
+        <button
+          type="button"
+          class="btn btn-secondary mb-3"
+          onclick="addPriceField()">
+          Adicionar Preço
+        </button>
+        <button
+          type="submit"
+          class="btn btn-success">
+          Criar Prato
+        </button>
+        <a
+          href="/restaurants/manage/<%= restaurantId %>/menus/<%= menuId %>"
+          class="btn btn-secondary"
+          >Cancelar</a
+        >
+      </form>
+    </div>
+  </body>
+</html>

@@ -156,6 +156,12 @@
                 class="btn btn-primary btn-sm"
                 >Abrir Restaurante</a
               >
+              <a
+                href="/restaurants/delete/<%= restaurant._id %>"
+                class="btn btn-danger btn-sm"
+                onclick="return confirm('Tem certeza que deseja apagar este restaurante?')"
+                >Apagar</a
+              >
             </td>
           </tr>
           <% }); %>

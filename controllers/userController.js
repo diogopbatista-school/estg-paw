@@ -10,16 +10,49 @@ userController.getDashboard = (req, res) => {
 };
 
 // Função para carregar a página de edição de informações do usuário
-userController.getEditPage = (req, res) => {
-  res.render("user/user-edit", { user: req.session.user, error: null });
+// Função para exibir o formulário de edição de perfil
+userController.showEditUserForm = async (req, res) => {
+  try {
+    const userId = req.session.user.id; // Obtém o ID do usuário logado
+    const user = await User.findById(userId); // Busca o usuário no banco de dados
+
+    if (!user) {
+      return res.status(404).render("error", { message: "Usuário não encontrado." });
+    }
+
+    // Renderiza o formulário de edição com os dados do usuário e do usuário logado
+    res.render("user/user-edit", { user, sessionUser: req.session.user });
+  } catch (error) {
+    console.error("Erro ao carregar o formulário de edição:", error);
+    res.status(500).render("error", { message: "Erro ao carregar o formulário de edição." });
+  }
 };
 
 // Função para processar a edição de informações do usuário
 userController.updateUser = async (req, res) => {
   try {
-    const { name, email, password, newPassword, confirmNewPassword, phone } = req.body;
+    const { name, email, password, newPassword, confirmNewPassword, phone, nif, role } = req.body;
+
+    // Verificar se o e-mail já está em uso por outro usuário
+    const existingUser = await User.findOne({ email, _id: { $ne: req.session.user.id } });
+    if (existingUser) {
+      throw new Error("E-mail já está em uso por outro usuário.");
+    }
+
+    // Verificar se o NIF já está em uso por outro usuário
+    const existingNif = await User.findOne({ nif, _id: { $ne: req.session.user.id } });
+    if (existingNif) {
+      throw new Error("NIF já está em uso por outro usuário.");
+    }
+
+    // Validar os campos fornecidos
+    const validatedName = validationsController.validateString(name);
+    const validatedEmail = validationsController.validateEmail(email);
+    const validatedPhone = validationsController.validateNumber(phone);
+    const validatedNif = validationsController.validateNIF(nif);
 
     // Verificar se a senha atual é necessária para alterar a senha
+    let updatedPassword = null;
     if (newPassword || confirmNewPassword) {
       if (!password) {
         throw new Error("A senha atual é obrigatória para alterar a senha.");
@@ -35,20 +68,19 @@ userController.updateUser = async (req, res) => {
         throw new Error("A nova senha e a confirmação não coincidem.");
       }
 
-      const isPasswordValidForSecurity = validationsController.validatePassword(newPassword);
-      if (!isPasswordValidForSecurity) {
-        throw new Error("A nova senha não atende aos critérios de segurança.");
-      }
+      updatedPassword = validationsController.validatePassword(newPassword);
     }
 
     // Atualizar os dados do usuário
     const updatedUser = await User.findByIdAndUpdate(
       req.session.user.id,
       {
-        name,
-        email,
-        ...(newPassword && { password: await bcrypt.hash(newPassword, 10) }),
-        phone,
+        name: validatedName,
+        email: validatedEmail,
+        phone: validatedPhone,
+        nif: validatedNif,
+        role,
+        ...(updatedPassword && { password: updatedPassword }),
       },
       { new: true }
     );
@@ -65,7 +97,11 @@ userController.updateUser = async (req, res) => {
 
     res.redirect("/users/dashboard");
   } catch (error) {
-    res.status(400).render("user/user-edit", { user: req.session.user, error: error.message });
+    console.error("Erro ao atualizar o usuário:", error);
+    res.status(400).render("user/user-edit", {
+      user: req.session.user,
+      error: error.message || "Erro ao atualizar o usuário.",
+    });
   }
 };
 
@@ -83,17 +119,22 @@ userController.registerUser = async (req, res) => {
       });
     }
 
-    // Criptografar a senha
-    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const existingNif = await User.findOne({ nif: userData.nif });
+    if (existingNif) {
+      return res.status(400).render("user/user-register", {
+        error: "NIF já está em uso.",
+        formData: userData,
+      });
+    }
 
     // Criar o novo usuário
     const newUser = new User({
-      name: userData.name,
-      email: userData.email,
-      password: hashedPassword,
-      nif: userData.nif,
-      phone: userData.phone,
-      role: "user", // Define o papel padrão como "user"
+      name: validationsController.validateString(userData.name),
+      email: validationsController.validateEmail(userData.email),
+      password: validationsController.validatePassword(userData.password),
+      nif: validationsController.validateNIF(userData.nif),
+      phone: validationsController.validateNumber(userData.phone),
+      role: userData.role, // Define o papel padrão como "user"
     });
 
     await newUser.save();
