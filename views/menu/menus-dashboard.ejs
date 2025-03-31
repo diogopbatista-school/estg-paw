@@ -77,11 +77,19 @@
             <td><%= menu.category %></td>
             <td><%= new Date(menu.created_at).toLocaleDateString() %></td>
             <td>
-              <a
-                href="/restaurants/manage/<%= restaurant._id %>/menus/<%= menu._id %>"
-                class="btn btn-primary btn-sm"
-                >Abrir Menu</a
-              >
+              <td>
+                <a
+                  href="/restaurants/manage/<%= restaurant._id %>/menus/<%= menu._id %>"
+                  class="btn btn-primary btn-sm"
+                  >Abrir Menu</a
+                >
+                <form
+                  action="/restaurants/manage/<%= restaurant._id %>/menus/<%= menu._id %>/delete"
+                  method="POST"
+                  style="display: inline;">
+                  <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                </form>
+              </td>
             </td>
           </tr>
           <% }); %>

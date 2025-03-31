@@ -1,6 +1,7 @@
 const Restaurant = require("../models/Restaurant");
 const User = require("../models/User");
 const Menu = require("../models/Menu");
+const Dish = require("../models/Dish");
 
 const restaurantController = {};
 
@@ -159,13 +160,66 @@ restaurantController.deleteRestaurant = async (req, res) => {
   try {
     const restaurantId = req.params.id;
 
+    // Buscar todos os menus associados ao restaurante
+    const menus = await Menu.find({ restaurant: restaurantId });
+
+    // Apagar todos os pratos associados aos menus
+    const menuIds = menus.map((menu) => menu._id);
+    await Dish.deleteMany({ menuId: { $in: menuIds } });
+
+    // Apagar todos os menus associados ao restaurante
+    await Menu.deleteMany({ restaurant: restaurantId });
+
     // Apagar o restaurante pelo ID
     await Restaurant.findByIdAndDelete(restaurantId);
 
-    res.redirect("/users/manager-dashboard"); // Redirecionar para o painel do gerente
+    res.redirect("/restaurants/manage"); // Redirecionar para o painel do gerente
   } catch (error) {
-    console.error("Erro ao apagar o restaurante:", error);
-    res.status(500).render("error", { message: "Erro ao apagar o restaurante." });
+    console.error("Erro ao apagar o restaurante, menus e pratos associados:", error);
+    res.status(500).render("error", { message: "Erro ao apagar o restaurante, menus e pratos associados." });
+  }
+};
+
+restaurantController.listRestaurants = async (req, res) => {
+  try {
+    // Verificar se o usuário é um manager
+    if (req.session.user.role !== "manager") {
+      return res.status(403).send("Acesso negado. Apenas managers podem acessar esta página.");
+    }
+
+    // Extrair filtros de pesquisa da query string
+    const filters = {};
+    if (req.query.name) {
+      filters.name = { $regex: req.query.name, $options: "i" }; // Pesquisa por nome (case insensitive)
+    }
+    if (req.query.description) {
+      filters.description = { $regex: req.query.description, $options: "i" }; // Pesquisa por descrição
+    }
+    if (req.query.location) {
+      filters["location.latitude"] = { $regex: req.query.location, $options: "i" }; // Pesquisa por localização
+    }
+
+    // Buscar os restaurantes associados ao manager com base nos filtros
+    const restaurants = await Restaurant.find({
+      manager: req.session.user.id,
+      ...filters,
+    });
+
+    // Renderizar a página com os restaurantes encontrados
+    res.render("user/manager-dashboard", {
+      user: req.session.user,
+      restaurants,
+      filters: req.query, // Passar os filtros para o EJS
+      error: null, // Sem erros
+    });
+  } catch (error) {
+    console.error("Erro ao listar restaurantes:", error);
+    res.render("user/manager-dashboard", {
+      user: req.session.user,
+      restaurants: [],
+      filters: {}, // Passar filtros vazios em caso de erro
+      error: "Erro ao carregar os restaurantes.", // Mensagem de erro
+    });
   }
 };
 

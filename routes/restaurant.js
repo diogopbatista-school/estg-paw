@@ -28,6 +28,5 @@ router.get("/manage/:id/edit", isAuthenticated, restaurantController.showEditRes
 // Atualizar um restaurante
 router.post("/manage/:id/edit", isAuthenticated, restaurantController.updateRestaurant);
 
-router.get("/delete/:id", restaurantController.deleteRestaurant);
-
+router.post("/delete/:id", isAuthenticated, restaurantController.deleteRestaurant);
 module.exports = router;

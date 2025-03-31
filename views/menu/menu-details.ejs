@@ -81,17 +81,23 @@
               <% if (dish.prices) { %> <% dish.prices.forEach(function (price) { %> <%= price.dose %>: <%= price.price.toFixed(2) %>€<br />
               <% }); %> <% } else { %> Nenhum preço disponível <% } %>
             </td>
+            <
             <td>
               <a
                 href="/restaurants/manage/<%= restaurantId %>/menus/<%= menu._id %>/dishes/<%= dish._id %>/edit"
                 class="btn btn-warning btn-sm"
                 >Editar</a
               >
-              <a
-                href="/restaurants/manage/<%= restaurantId %>/menus/<%= menu._id %>/dishes/<%= dish._id %>/delete"
-                class="btn btn-danger btn-sm"
-                >Remover</a
-              >
+              <form
+                action="/restaurants/manage/<%= restaurantId %>/menus/<%= menu._id %>/dishes/<%= dish._id %>/delete"
+                method="POST"
+                style="display: inline">
+                <button
+                  type="submit"
+                  class="btn btn-danger btn-sm">
+                  Remover
+                </button>
+              </form>
             </td>
           </tr>
           <% }); %>

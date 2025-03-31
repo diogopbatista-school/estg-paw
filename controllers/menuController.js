@@ -121,4 +121,21 @@ menuController.createMenu = async (req, res) => {
   }
 };
 
+menuController.removeMenu = async (req, res) => {
+  try {
+    const { restaurantId, menuId } = req.params;
+
+    // Remover os pratos associados ao menu
+    await Dish.deleteMany({ menuId });
+
+    // Remover o menu do banco de dados
+    await Menu.findByIdAndDelete(menuId);
+
+    res.redirect(`/restaurants/manage/${restaurantId}/menus`);
+  } catch (error) {
+    console.error("Erro ao remover o menu e seus pratos associados:", error);
+    res.status(500).render("error", { message: "Erro ao remover o menu e seus pratos associados." });
+  }
+};
+
 module.exports = menuController;

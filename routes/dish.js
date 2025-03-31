@@ -16,6 +16,11 @@ router.get("/restaurants/manage/:restaurantId/menus/:menuId/dishes/create", isAu
 // Rota para criar um prato
 router.post("/restaurants/manage/:restaurantId/menus/:menuId/dishes/submitDish", isAuthenticated, dishController.createDish);
 // Rota para remover um prato
-router.post("/restaurants/manage/:restaurantId/menus/:menuId/dishes/:dishId/delete", isAuthenticated, dishController.removeDish);
+
+router.get("/restaurants/manage/:restaurantId/menus/:menuId/dishes/:dishId/edit", dishController.renderEditDishForm);
+
+router.post("/restaurants/manage/:restaurantId/menus/:menuId/dishes/:dishId/delete", dishController.removeDish);
+
+router.post("/restaurants/manage/:restaurantId/menus/:menuId/dishes/:dishId/update", dishController.updateDish);
 
 module.exports = router;

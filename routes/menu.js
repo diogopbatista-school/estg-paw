@@ -21,4 +21,6 @@ router.get("/restaurants/manage/:restaurantId/menus/:menuId", isAuthenticated, m
 // Criar um novo menu
 router.post("/restaurants/manage/:restaurantId/menus/submitMenu", isAuthenticated, menuController.createMenu);
 
+router.post("/restaurants/manage/:restaurantId/menus/:menuId/delete", menuController.removeMenu);
+
 module.exports = router;
