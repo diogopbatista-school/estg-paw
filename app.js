@@ -37,7 +37,6 @@ app.use(
 
 var indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
-const dashboardRouter = require("./routes/dashboard");
 const restaurantsRouter = require("./routes/restaurant");
 const menuRoutes = require("./routes/menu");
 
@@ -54,7 +53,6 @@ app.use(express.static(path.join(__dirname, "public")));
 // Definição das rotas
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
-app.use("/users/dashboard", dashboardRouter);
 app.use("/restaurants", restaurantsRouter);
 app.use("/", menuRoutes);
 
