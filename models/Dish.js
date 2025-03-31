@@ -16,3 +16,5 @@ const DishSchema = new mongoose.Schema({
     type: String,
   },
 });
+
+module.exports = mongoose.model("Dish", DishSchema);

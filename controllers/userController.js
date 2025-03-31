@@ -1,118 +1,162 @@
-const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const bcrypt = require("bcrypt");
+const validationsController = require("../controllers/validationsController");
 
-let validationsController = require("./validationsController");
+const userController = {};
 
-let userController = {};
-
-// Buscar um único usuário com base em critérios
-userController.getUser = (criteria = {}) => {
-  return User.findOne(criteria).exec();
+// Função para carregar o dashboard do usuário
+userController.getDashboard = (req, res) => {
+  res.render("user/user-dashboard", { user: req.session.user });
 };
 
-// Criar um novo usuário
-userController.registerUser = async (userData) => {
-  const { name, email, nif, password, confirmPassword, phone, role } = userData;
-
-  validationsController.validateString(name); // Valida o nome
-  validationsController.validateEmail(email); // Valida o email
-  validationsController.validateNIF(nif); // Valida o NIF
-  validationsController.validateNumber(phone); // Valida o telefone
-
-  validationsController.validatePasswordsMatch(password, confirmPassword);
-
-  validationsController.validatePassword(password);
-
-  // Verificar se o NIF ou email já está registrado
-  const existingUser = await User.findOne({ $or: [{ nif }, { email }] });
-  if (existingUser) {
-    throw new Error("Já existe um utilizador com este NIF ou email.");
-  }
-
-  // Gerar o hash da senha
-  const saltRounds = 10; // Número de rounds para o salt
-  const hash = await bcrypt.hash(password, saltRounds); // Com o bcrypt nao é preciso guardar o salt na DB
-
-  // Criar o usuário
-  const newUser = new User({
-    name,
-    email,
-    nif,
-    password: hash,
-    role: role || "client",
-    phone,
-  });
-
-  await newUser.save();
-  return newUser;
+// Função para carregar a página de edição de informações do usuário
+userController.getEditPage = (req, res) => {
+  res.render("user/user-edit", { user: req.session.user, error: null });
 };
 
-// Verificar credenciais do usuário
-userController.verifyCredentials = async (email, password) => {
-  const user = await User.findOne({ email }).exec();
-  if (!user) {
-    throw new Error("Usuário não encontrado.");
-  }
+// Função para processar a edição de informações do usuário
+userController.updateUser = async (req, res) => {
+  try {
+    const { name, email, password, newPassword, confirmNewPassword, phone } = req.body;
 
-  // Comparar a senha fornecida com o hash armazenado
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    throw new Error("Senha incorreta.");
-  }
+    // Verificar se a senha atual é necessária para alterar a senha
+    if (newPassword || confirmNewPassword) {
+      if (!password) {
+        throw new Error("A senha atual é obrigatória para alterar a senha.");
+      }
 
-  return user;
-};
+      const user = await User.findById(req.session.user.id);
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        throw new Error("A senha atual está incorreta.");
+      }
 
-// Atualizar informações do usuário
-userController.updateUser = async (userId, userData) => {
-  const { name, email, password, newPassword, confirmNewPassword, phone } = userData;
+      if (newPassword !== confirmNewPassword) {
+        throw new Error("A nova senha e a confirmação não coincidem.");
+      }
 
-  // Verificar se a senha atual foi fornecida para alterar a senha
-  if (newPassword || confirmNewPassword) {
-    if (!password) {
-      throw new Error("A senha atual é obrigatória para alterar a senha.");
+      const isPasswordValidForSecurity = validationsController.validatePassword(newPassword);
+      if (!isPasswordValidForSecurity) {
+        throw new Error("A nova senha não atende aos critérios de segurança.");
+      }
     }
 
-    // Verificar se a senha atual está correta
-    const user = await User.findById(userId);
+    // Atualizar os dados do usuário
+    const updatedUser = await User.findByIdAndUpdate(
+      req.session.user.id,
+      {
+        name,
+        email,
+        ...(newPassword && { password: await bcrypt.hash(newPassword, 10) }),
+        phone,
+      },
+      { new: true }
+    );
+
+    // Atualizar os dados na sessão
+    req.session.user = {
+      id: updatedUser._id,
+      name: updatedUser.name,
+      nif: updatedUser.nif,
+      phone: updatedUser.phone,
+      email: updatedUser.email,
+      role: updatedUser.role,
+    };
+
+    res.redirect("/users/dashboard");
+  } catch (error) {
+    res.status(400).render("user/user-edit", { user: req.session.user, error: error.message });
+  }
+};
+
+// Função para registrar um novo usuário
+userController.registerUser = async (req, res) => {
+  try {
+    const userData = req.body;
+
+    // Verificar se o e-mail já está em uso
+    const existingUser = await User.findOne({ email: userData.email });
+    if (existingUser) {
+      return res.status(400).render("user/user-register", {
+        error: "E-mail já está em uso.",
+        formData: userData,
+      });
+    }
+
+    // Criptografar a senha
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+    // Criar o novo usuário
+    const newUser = new User({
+      name: userData.name,
+      email: userData.email,
+      password: hashedPassword,
+      nif: userData.nif,
+      phone: userData.phone,
+      role: "user", // Define o papel padrão como "user"
+    });
+
+    await newUser.save();
+    console.log("Usuário registrado com sucesso!");
+    res.status(201).redirect("/users/login");
+  } catch (error) {
+    console.error("Erro ao registrar o usuário:", error);
+    res.status(400).render("user/user-register", {
+      error: error.message || "Erro ao registrar o usuário.",
+      formData: req.body,
+    });
+  }
+};
+
+// Função para verificar credenciais de login
+userController.loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Buscar o usuário pelo e-mail
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).render("user/user-login", {
+        error: "E-mail ou senha inválidos.",
+      });
+    }
+
+    // Verificar a senha
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      throw new Error("A senha atual está incorreta.");
+      return res.status(400).render("user/user-login", {
+        error: "E-mail ou senha inválidos.",
+      });
     }
 
-    // Verificar se a nova senha e a confirmação coincidem
-    if (newPassword !== confirmNewPassword) {
-      throw new Error("A nova senha e a confirmação não coincidem.");
-    }
+    // Salvar o usuário na sessão
+    req.session.user = {
+      id: user._id,
+      name: user.name,
+      nif: user.nif,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+    };
 
-    // Validar os critérios de segurança da nova senha
-    const isPasswordValidForSecurity = validationsController.validatePassword(newPassword);
-    if (!isPasswordValidForSecurity) {
-      throw new Error("A nova senha não atende aos critérios de segurança.");
-    }
-
-    // Gerar o hash da nova senha
-    const saltRounds = 10;
-    userData.password = await bcrypt.hash(newPassword, saltRounds);
+    console.log("Login bem-sucedido:", user);
+    res.status(200).redirect("/users/dashboard");
+  } catch (error) {
+    console.error("Erro no login:", error);
+    res.status(500).render("user/user-login", {
+      error: "Erro ao processar o login.",
+    });
   }
+};
 
-  // Atualizar os dados do usuário no banco de dados
-  const updatedUser = await User.findByIdAndUpdate(
-    userId,
-    {
-      name,
-      email,
-      phone,
-      ...(userData.password && { password: userData.password }), // Atualiza a senha apenas se for fornecida
-    },
-    { new: true } // Retorna o documento atualizado
-  );
-
-  if (!updatedUser) {
-    throw new Error("Usuário não encontrado.");
-  }
-
-  return updatedUser;
+// Função para fazer logout
+userController.logoutUser = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Erro ao encerrar a sessão:", err);
+    }
+    res.redirect("/users/login");
+  });
 };
 
 module.exports = userController;
