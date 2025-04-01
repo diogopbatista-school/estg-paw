@@ -2,6 +2,7 @@ const Restaurant = require("../models/Restaurant");
 const User = require("../models/User");
 const Menu = require("../models/Menu");
 const Dish = require("../models/Dish");
+const Order = require("../models/Order");
 
 const restaurantController = {};
 
@@ -58,26 +59,30 @@ restaurantController.getRestaurantDetails = async (req, res) => {
     const restaurantId = req.params.id;
 
     // Buscar o restaurante pelo ID
-    const restaurant = await Restaurant.findById(restaurantId).populate("manager");
+    const restaurant = await Restaurant.findById(restaurantId)
+      .populate("menus") // Popula os menus associados
+      .populate("order_records"); // Popula os registros de pedidos associados
 
     if (!restaurant) {
       return res.status(404).render("error", { message: "Restaurante não encontrado." });
     }
 
-    // Verificar se o usuário autenticado é o manager do restaurante
-    if (restaurant.manager._id.toString() !== req.session.user.id) {
-      return res.status(403).render("error", { message: "Acesso negado." });
-    }
+    // Buscar os pratos associados a cada menu
+    const menusWithDishes = await Promise.all(
+      restaurant.menus.map(async (menu) => {
+        const dishes = await Dish.find({ menuId: menu._id });
+        return { ...menu.toObject(), dishes }; // Adiciona os pratos ao menu
+      })
+    );
 
-    // Buscar os menus associados ao restaurante
-    const menus = await Menu.find({ restaurant: restaurantId });
-    console.log("Menus:", menus); // Adicione este log para depuração
-
-    // Renderizar a página do restaurante com os menus
-    res.render("restaurant/restaurant-dashboard", { restaurant, menus });
+    res.render("restaurant/restaurant-dashboard", {
+      restaurant,
+      menus: menusWithDishes,
+      orderRecords: restaurant.order_records,
+    });
   } catch (error) {
-    console.error("Erro ao abrir o restaurante:", error);
-    res.status(500).render("error", { message: "Erro ao abrir o restaurante." });
+    console.error("Erro ao buscar detalhes do restaurante:", error);
+    res.status(500).render("error", { message: "Erro ao carregar os detalhes do restaurante." });
   }
 };
 

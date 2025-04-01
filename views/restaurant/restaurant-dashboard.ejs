@@ -61,18 +61,45 @@
       </div>
 
       <div class="panel">
-        <h3>Menu</h3>
+        <h3>Menus e Pratos</h3>
         <% if (menus && menus.length > 0) { %>
         <ul class="list-group">
           <% menus.forEach(function (menu) { %>
           <li class="list-group-item">
             <h4><strong>Categoria:</strong> <%= menu.category || "Sem categoria" %></h4>
-            <p><strong>Data de Criação:</strong> <%= menu.created_at.toLocaleDateString() %></p>
+            <p><strong>Data de Criação:</strong> <%= new Date(menu.created_at).toLocaleDateString() %></p>
+            <h5>Pratos:</h5>
+            <% if (menu.dishes && menu.dishes.length > 0) { %>
+            <ul>
+              <% menu.dishes.forEach(function (dish) { %>
+              <li><strong>Nome:</strong> <%= dish.name %> - <strong>Preço:</strong> <%= dish.prices.map(p => `${p.dose}: ${p.price}€`).join(", ") %></li>
+              <% }); %>
+            </ul>
+            <% } else { %>
+            <p class="text-muted">Nenhum prato associado a este menu.</p>
+            <% } %>
           </li>
           <% }); %>
         </ul>
         <% } else { %>
         <p class="text-muted text-center">Este restaurante ainda não possui um menu.</p>
+        <% } %>
+      </div>
+
+      <div class="panel">
+        <h3>Registros de Pedidos</h3>
+        <% if (orderRecords && orderRecords.length > 0) { %>
+        <ul class="list-group">
+          <% orderRecords.forEach(function (order) { %>
+          <li class="list-group-item">
+            <p><strong>ID do Pedido:</strong> <%= order._id %></p>
+            <p><strong>Data:</strong> <%= new Date(order.created_at).toLocaleDateString() %></p>
+            <p><strong>Status:</strong> <%= order.status %></p>
+          </li>
+          <% }); %>
+        </ul>
+        <% } else { %>
+        <p class="text-muted text-center">Nenhum registro de pedido associado a este restaurante.</p>
         <% } %>
       </div>
 

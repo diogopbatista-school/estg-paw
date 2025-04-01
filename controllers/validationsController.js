@@ -135,4 +135,15 @@ validationsController.validateBoolean = (boolean) => {
   return boolean;
 };
 
+validationsController.validatePrice = (price) => {
+  if (typeof price === "undefined") {
+    throw new Error("Campo Preço em Falta");
+  }
+  let result = !isNaN(price) && price >= 0;
+  if (!result) {
+    throw new Error("Preço Inválido");
+  }
+  return price;
+};
+
 module.exports = validationsController;

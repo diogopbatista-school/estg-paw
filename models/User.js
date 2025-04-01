@@ -44,14 +44,22 @@ const UserSchema = new mongoose.Schema({
 });
 
 UserSchema.pre("save", function (next) {
-  // Se o usuário for um manager e o campo restaurants não estiver definido, inicialize como um array vazio
-  if (this.role === "manager" && !this.restaurants) {
-    this.restaurants = [];
+  // Se o usuário for um manager
+  if (this.role === "manager") {
+    this.restaurants = this.restaurants || []; // Inicialize como um array vazio se não estiver definido
+    this.order_records = undefined; // Remova o campo order_records
   }
 
-  // Se o usuário for um client, remova o campo restaurants
-  if (this.role === "client" && this.restaurants) {
-    this.restaurants = undefined; // Remove o campo
+  // Se o usuário for um client
+  if (this.role === "client") {
+    this.restaurants = undefined; // Remova o campo restaurants
+    this.order_records = this.order_records || []; // Inicialize como um array vazio se não estiver definido
+  }
+
+  // Se o usuário for um admin
+  if (this.role === "admin") {
+    this.restaurants = undefined; // Remova o campo restaurants
+    this.order_records = undefined; // Remova o campo order_records
   }
 
   next();

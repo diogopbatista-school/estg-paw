@@ -45,15 +45,15 @@ dishController.createDish = async (req, res) => {
 
     // Criar o array de preços com base nas doses e preços fornecidos
     const dishPrices = doses.map((dose, index) => ({
-      dose,
-      price: parseFloat(prices[index]),
+      dose: dose, // Validar o nome da dose
+      price: validationController.validatePrice(prices[index]), // Validar o preço
     }));
 
-    // Criar o prato no banco de dados
-    // Validate input strings
+    // Validar os campos de entrada
     validationController.validateString(name);
     validationController.validateString(description);
 
+    // Criar o prato no banco de dados
     const newDish = await Dish.create({
       name,
       description,
@@ -70,7 +70,15 @@ dishController.createDish = async (req, res) => {
     res.redirect(`/restaurants/manage/${req.params.restaurantId}/menus/${menuId}`);
   } catch (error) {
     console.error("Erro ao criar o prato:", error);
-    res.status(500).render("error", { message: "Erro ao criar o prato." });
+    res.status(500).render("dish/dish-create", {
+      restaurantId: req.params.restaurantId,
+      menuId: req.params.menuId,
+      name: req.body.name,
+      description: req.body.description,
+      doses: req.body.doses,
+      prices: req.body.prices,
+      error: error.message || "Erro ao criar o prato.",
+    });
   }
 };
 
