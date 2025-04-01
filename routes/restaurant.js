@@ -29,4 +29,7 @@ router.get("/manage/:id/edit", isAuthenticated, restaurantController.showEditRes
 router.post("/manage/:id/edit", isAuthenticated, restaurantController.updateRestaurant);
 
 router.post("/delete/:id", isAuthenticated, restaurantController.deleteRestaurant);
+
+//Rota para buscar restaurantes por nome
+router.get("/search", isAuthenticated, restaurantController.searchRestaurants);
 module.exports = router;

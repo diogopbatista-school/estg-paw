@@ -228,4 +228,21 @@ restaurantController.listRestaurants = async (req, res) => {
   }
 };
 
+//Função para listar todos os restaurantes
+restaurantController.searchRestaurants = async (req, res) => {
+  try {
+    // Buscar todos os restaurantes validados
+    const validatedRestaurants = await Restaurant.find({ validated: true });
+
+    // Renderizar a página com os restaurantes validados
+    res.render("restaurant/restaurant-search", {
+      user: req.session.user,
+      restaurants: validatedRestaurants,
+    });
+  } catch (error) {
+    console.error("Erro ao listar restaurantes validados:", error);
+    res.status(500).render("error", { message: "Erro ao listar restaurantes validados." });
+  }
+};
+
 module.exports = restaurantController;
