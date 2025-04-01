@@ -200,4 +200,23 @@ userController.logoutUser = (req, res) => {
   });
 };
 
+// Função para buscar restaurantes
+userController.searchRestaurants = async (req, res) => {
+  try {
+    const searchQuery = req.query.search || "";
+    const restaurants = await Restaurant.find({
+      name: { $regex: searchQuery, $options: "i" },
+    });
+
+    res.render("restaurants/search-results", {
+      restaurants,
+      searchQuery,
+      user: req.session.user,
+    });
+  } catch (error) {
+    console.error("Erro ao buscar restaurantes:", error);
+    res.status(500).render("error", { message: "Erro ao buscar restaurantes." });
+  }
+};
+
 module.exports = userController;
