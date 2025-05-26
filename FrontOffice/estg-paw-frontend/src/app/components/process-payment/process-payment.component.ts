@@ -42,50 +42,52 @@ export class ProcessPaymentComponent implements OnInit {
 
   private async processPayment(sessionId: string) {
     try {
-      // Recupera dados do pedido salvos no localStorage
-      const orderData = localStorage.getItem('pendingOrder');
-      
-      if (!orderData) {
-        throw new Error('Dados do pedido não encontrados');
-      }
-
-      const pendingOrder = JSON.parse(orderData);
-      
-      console.log('🛒 Processando pedido após pagamento Stripe:', {
-        sessionId,
-        orderData: pendingOrder
-      });
-
-      // Cria o pedido usando o endpoint que já tem a lógica de vouchers
-      this.orderService.createOrder(pendingOrder).subscribe({
-        next: (response) => {
-          console.log('✅ Pedido criado com sucesso após pagamento:', response);
-          
-          this.processing = false;
-          this.success = true;
-          
-          // Limpa dados salvos
-          localStorage.removeItem('pendingOrder');
-          localStorage.removeItem('cartItems');
-          localStorage.removeItem('cartTimeRemaining');
-          
-          this.toastr.success('Pedido realizado com sucesso!');
-            // Redireciona após 2 segundos
-          setTimeout(() => {
-            this.router.navigate(['/track-order']);
-          }, 2000);
+      // Buscar detalhes da sessão Stripe (inclui deliveryAddress nos metadados)
+      this.orderService.getStripeSessionDetails(sessionId).subscribe({
+        next: (sessionResponse) => {
+          if (!sessionResponse.success) {
+            throw new Error('Falha ao obter detalhes da sessão: ' + sessionResponse.error);
+          }
+          const metadata = sessionResponse.metadata;
+          // Montar o payload do pedido a partir dos metadados Stripe
+          const orderData = {
+            customerId: metadata.userId,
+            restaurantId: metadata.restaurantId,
+            items: JSON.parse(metadata.items),
+            type: metadata.orderType,
+            deliveryAddress: metadata.deliveryAddress || '',
+            totalPrice: parseFloat(metadata.finalTotal),
+            voucherDiscount: parseFloat(metadata.voucherDiscount) || 0,
+            appliedVoucher: metadata.appliedVoucher || null
+          };
+          this.orderService.createOrder(orderData).subscribe({
+            next: (response) => {
+              this.processing = false;
+              this.success = true;
+              localStorage.removeItem('pendingOrder');
+              localStorage.removeItem('cartItems');
+              localStorage.removeItem('cartTimeRemaining');
+              this.toastr.success('Pedido realizado com sucesso!');
+              setTimeout(() => {
+                this.router.navigate(['/track-order']);
+              }, 2000);
+            },
+            error: (error) => {
+              this.processing = false;
+              this.error = true;
+              this.errorMessage = error.error?.message || error.message || 'Erro ao processar pedido';
+              this.toastr.error('Erro ao processar pedido: ' + this.errorMessage);
+            }
+          });
         },
         error: (error) => {
-          console.error('❌ Erro ao criar pedido após pagamento:', error);
           this.processing = false;
           this.error = true;
-          this.errorMessage = error.error?.message || error.message || 'Erro ao processar pedido';
-          this.toastr.error('Erro ao processar pedido: ' + this.errorMessage);
+          this.errorMessage = 'Erro ao obter detalhes da sessão: ' + (error.error?.message || error.message);
+          this.toastr.error('Erro ao processar pagamento: ' + this.errorMessage);
         }
       });
-      
     } catch (err: any) {
-      console.error('❌ Erro no processamento do pagamento:', err);
       this.processing = false;
       this.error = true;
       this.errorMessage = err.message || 'Erro desconhecido';

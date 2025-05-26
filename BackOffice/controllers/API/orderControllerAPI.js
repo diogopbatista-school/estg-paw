@@ -30,7 +30,7 @@ const addOrderLog = async (order, newStatus, description) => {
  */
 orderControllerAPI.createOrder = async (req, res) => {
   try {
-    const { customerId, restaurantId, items, type, totalPrice, voucherDiscount, appliedVoucher } = req.body;
+    const { customerId, restaurantId, items, type, deliveryAddress, totalPrice, voucherDiscount, appliedVoucher } = req.body;
 
     console.log("Received order data:", req.body);
 
@@ -49,6 +49,14 @@ orderControllerAPI.createOrder = async (req, res) => {
 
     // Validate restaurant exists
     const restaurant = await validationsController.validateAndFetchById(restaurantId, Restaurant, "Restaurante não encontrado.");
+
+    // Validate delivery address for home delivery orders
+    if (type === "homeDelivery" && (!deliveryAddress || deliveryAddress.trim() === "")) {
+      return res.status(400).json({
+        success: false,
+        message: "Endereço de entrega é obrigatório para pedidos de entrega em casa.",
+      });
+    }
 
     // Transform items to match Order schema
     // Frontend sends: {name, quantity, price, dose, dishId}
@@ -180,6 +188,7 @@ orderControllerAPI.createOrder = async (req, res) => {
       restaurant: restaurantId,
       items: transformedItems,
       type: type,
+      deliveryAddress: deliveryAddress || null,
       totalPrice: totalPrice,
       voucherDiscount: voucherDiscount || 0,
       appliedVoucher: appliedVoucher || null,
@@ -508,7 +517,20 @@ orderControllerAPI.addReview = async (req, res) => {
     await Restaurant.findByIdAndUpdate(order.restaurant._id, { $push: { reviews: review._id } });
 
     // Update user's reviews array
-    await User.findByIdAndUpdate(userId, { $push: { reviews: review._id } }); // Get the populated review
+    await User.findByIdAndUpdate(userId, { $push: { reviews: review._id } });
+
+    // Calculate and update restaurant's average rating
+    const restaurant = await Restaurant.findById(order.restaurant._id).populate("reviews");
+    if (restaurant && restaurant.reviews && restaurant.reviews.length > 0) {
+      const totalRating = restaurant.reviews.reduce((sum, review) => sum + review.rating, 0);
+      const averageRating = totalRating / restaurant.reviews.length;
+
+      // Update restaurant's average rating (rounded to 2 decimal places)
+      restaurant.average_rating = Math.round(averageRating * 100) / 100;
+      await restaurant.save();
+    }
+
+    // Get the populated review
     const populatedReview = await Review.findById(review._id).populate("user", "name").lean();
 
     // Format the date

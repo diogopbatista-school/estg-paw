@@ -71,6 +71,13 @@
                   <i class="fas fa-shopping-bag me-2"></i>
                   {{ getTypeText(order.type) }}
                 </p>
+                
+                <!-- Delivery Address (only shown for Home Delivery orders) -->
+                <p *ngIf="order.type === 'homeDelivery' && order.deliveryAddress" class="mb-2">
+                  <i class="fas fa-map-marker-alt me-2 text-danger"></i>
+                  <strong>Morada de entrega:</strong><br>
+                  <span class="ms-4">{{ order.deliveryAddress }}</span>
+                </p>
 
                 <div class="mt-2">
                   <strong>Itens:</strong>

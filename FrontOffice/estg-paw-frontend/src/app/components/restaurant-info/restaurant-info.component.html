@@ -4,7 +4,8 @@
   <div class="shape shape-1"></div>
   <div class="shape shape-2"></div>
   <div class="shape shape-3"></div>
-  <div class="container-main" *ngIf="!loading && !error">    <!-- Botão Voltar para Lista de Restaurantes -->
+  <div class="container-main" *ngIf="!loading && !error">
+    <!-- Botão Voltar para Lista de Restaurantes -->
     <div class="d-flex justify-content-end align-items-center mb-2">
       <a
         class="btn fw-bold rounded-pill px-4 py-2 shadow-sm"
@@ -48,6 +49,42 @@
             </div>
             <div>
               <h1 class="mb-1">{{ restaurant?.name }}</h1>
+
+              <!-- Star Rating Display -->
+              <div
+                class="d-flex align-items-center mb-2"
+                *ngIf="
+                  restaurant?.average_rating && restaurant.average_rating > 0
+                "
+              >
+                <div class="stars me-2">
+                  <ng-container
+                    *ngFor="
+                      let star of getStarsArray(restaurant.average_rating)
+                    "
+                  >
+                    <i
+                      *ngIf="star === 1"
+                      class="fas fa-star text-warning"
+                      style="font-size: 0.9rem"
+                    ></i>
+                    <i
+                      *ngIf="star === 0.5"
+                      class="fas fa-star-half-alt text-warning"
+                      style="font-size: 0.9rem"
+                    ></i>
+                    <i
+                      *ngIf="star === 0"
+                      class="far fa-star text-muted"
+                      style="font-size: 0.9rem"
+                    ></i>
+                  </ng-container>
+                </div>
+                <span class="text-muted small">
+                  ({{ restaurant.average_rating.toFixed(1) }}/5)
+                </span>
+              </div>
+
               <a
                 [routerLink]="['/restaurant', restaurant?._id, 'order']"
                 class="btn btn-primary mb-3"

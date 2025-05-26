@@ -176,7 +176,7 @@ orderController.renderRegistOrder = async (req, res) => {
  */
 orderController.postRegisterOrder = async (req, res) => {
   try {
-    const { customerId, type, cart } = req.body;
+    const { customerId, type, cart, deliveryAddress } = req.body;
     const restaurantId = req.params.id;
 
     if (!validationsController.validateNumber(customerId)) {
@@ -197,6 +197,11 @@ orderController.postRegisterOrder = async (req, res) => {
     // Validar o tipo de pedido
     if (!["homeDelivery", "takeAway", "eatIn"].includes(type)) {
       return res.status(400).send("Tipo de pedido inválido.");
+    }
+
+    // Validar deliveryAddress para pedidos homeDelivery
+    if (type === "homeDelivery" && (!deliveryAddress || deliveryAddress.trim() === "")) {
+      return res.status(400).send("Endereço de entrega é obrigatório para pedidos de entrega em casa.");
     }
 
     // Verificar se o carrinho está vazio
@@ -262,8 +267,13 @@ orderController.postRegisterOrder = async (req, res) => {
       items: orderItems,
       totalPrice,
       status: "pending",
-      type: "takeAway", // Atualizado para salvar diretamente como string
+      type: type, // Usar o tipo real do formulário
     };
+
+    // Adicionar deliveryAddress apenas para pedidos homeDelivery
+    if (type === "homeDelivery") {
+      newOrderData.deliveryAddress = deliveryAddress;
+    }
 
     // Salvar o pedido no banco de dados
     const newOrder = await orderController.createOrder(newOrderData);
@@ -298,7 +308,8 @@ orderController.acceptOrder = async (req, res) => {
       if (!restaurant.verified) {
         throw new Error("Restaurante não verificado. Você não pode registar pedidos neste restaurante.");
       }
-    });    order.status = "preparing";
+    });
+    order.status = "preparing";
     order.accepted_at = new Date();
 
     // Add log for order acceptance
@@ -306,22 +317,14 @@ orderController.acceptOrder = async (req, res) => {
     await order.save();
 
     // Send real-time notifications
-    notifyCustomer(
-      order.customer.toString(), 
-      `Seu pedido #${order.order_number} foi aceito e está sendo preparado!`, 
-      order
-    );
-    
-    notifyRestaurant(
-      order.restaurant.toString(), 
-      `Pedido #${order.order_number} aceito e em preparação`, 
-      order
-    );
+    notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi aceito e está sendo preparado!`, order);
+
+    notifyRestaurant(order.restaurant.toString(), `Pedido #${order.order_number} aceito e em preparação`, order);
 
     await emitOrderNotificationToCustomer(req, order._id);
 
     // Se for AJAX, responde com JSON, senão faz redirect
-    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+    if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res.json({ success: true, order });
     }
 
@@ -358,17 +361,9 @@ orderController.rejectOrder = async (req, res) => {
     await order.save();
 
     // Send real-time notifications
-    notifyCustomer(
-      order.customer.toString(), 
-      `Seu pedido #${order.order_number} foi cancelado. Motivo: ${motive}`, 
-      order
-    );
-    
-    notifyRestaurant(
-      order.restaurant.toString(), 
-      `Pedido #${order.order_number} cancelado`, 
-      order
-    );
+    notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi cancelado. Motivo: ${motive}`, order);
+
+    notifyRestaurant(order.restaurant.toString(), `Pedido #${order.order_number} cancelado`, order);
 
     await emitOrderNotificationToCustomer(req, order._id);
 
@@ -397,7 +392,8 @@ orderController.readyToDeliver = async (req, res) => {
       if (!restaurant.verified) {
         throw new Error("Restaurante não verificado. Você não pode registar pedidos neste restaurante.");
       }
-    });    order.status = "delivered";
+    });
+    order.status = "delivered";
     order.ready_at = new Date();
 
     // Add log for order ready state
@@ -405,22 +401,14 @@ orderController.readyToDeliver = async (req, res) => {
     await order.save();
 
     // Send real-time notifications
-    notifyCustomer(
-      order.customer.toString(), 
-      `Seu pedido #${order.order_number} está pronto para ${order.type === 'takeAway' ? 'retirada' : order.type === 'homeDelivery' ? 'entrega' : 'ser servido'}!`, 
-      order
-    );
-    
-    notifyRestaurant(
-      order.restaurant.toString(), 
-      `Pedido #${order.order_number} está pronto para entrega`, 
-      order
-    );
+    notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} está pronto para ${order.type === "takeAway" ? "retirada" : order.type === "homeDelivery" ? "entrega" : "ser servido"}!`, order);
+
+    notifyRestaurant(order.restaurant.toString(), `Pedido #${order.order_number} está pronto para entrega`, order);
 
     await emitOrderNotificationToCustomer(req, order._id);
 
     // Se for AJAX, responde com JSON, senão faz redirect
-    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+    if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res.json({ success: true, order });
     }
 
@@ -449,7 +437,8 @@ orderController.finishOrder = async (req, res) => {
       if (!restaurant.verified) {
         throw new Error("Restaurante não verificado. Você não pode registar pedidos neste restaurante.");
       }
-    });    order.status = "finished";
+    });
+    order.status = "finished";
     order.finished_at = new Date();
 
     // Add log for order completion
@@ -461,23 +450,15 @@ orderController.finishOrder = async (req, res) => {
     }
 
     restaurant.order_records.push(orderId);
-    await restaurant.save();    // Send real-time notifications
-    notifyCustomer(
-      order.customer.toString(), 
-      `Seu pedido #${order.order_number} foi concluído com sucesso! Obrigado pela preferência.`, 
-      order
-    );
-    
-    notifyRestaurant(
-      order.restaurant.toString(), 
-      `Pedido #${order.order_number} foi finalizado com sucesso`, 
-      order
-    );
+    await restaurant.save(); // Send real-time notifications
+    notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi concluído com sucesso! Obrigado pela preferência.`, order);
+
+    notifyRestaurant(order.restaurant.toString(), `Pedido #${order.order_number} foi finalizado com sucesso`, order);
 
     await emitOrderNotificationToCustomer(req, order._id);
 
     // Se for AJAX, responde com JSON, senão faz redirect
-    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+    if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res.json({ success: true, order });
     }
 
@@ -585,7 +566,8 @@ orderController.cancelOrder = async (req, res) => {
     }
     if (customReason) {
       description += ` - ${customReason}`;
-    }    await addOrderLog(order, "canceled", description);
+    }
+    await addOrderLog(order, "canceled", description);
     await order.save();
 
     // Adiciona à lista de registros do restaurante
@@ -596,22 +578,14 @@ orderController.cancelOrder = async (req, res) => {
     await restaurant.save();
 
     // Send real-time notifications
-    notifyCustomer(
-      order.customer.toString(), 
-      `Seu pedido #${order.order_number} foi cancelado pelo restaurante. Motivo: ${order.motive}`, 
-      order
-    );
-    
-    notifyRestaurant(
-      order.restaurant.toString(), 
-      `Pedido #${order.order_number} foi cancelado`, 
-      order
-    );
+    notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi cancelado pelo restaurante. Motivo: ${order.motive}`, order);
+
+    notifyRestaurant(order.restaurant.toString(), `Pedido #${order.order_number} foi cancelado`, order);
 
     await emitOrderNotificationToCustomer(req, order._id);
 
     // Se for AJAX, responde com JSON, senão faz redirect
-    if (req.xhr || req.headers['x-requested-with'] === 'XMLHttpRequest') {
+    if (req.xhr || req.headers["x-requested-with"] === "XMLHttpRequest") {
       return res.json({ success: true, order });
     }
 
@@ -629,16 +603,14 @@ orderController.cancelOrder = async (req, res) => {
 // DRY helper to emit socket notification to customer after order/log change
 const emitOrderNotificationToCustomer = async (req, orderId) => {
   const Order = require("../models/Order");
-  const populatedOrder = await Order.findById(orderId)
-    .populate("customer", "name email phone")
-    .populate("restaurant", "name");
-  const io = req.app && req.app.get ? req.app.get('io') : (global.io || null);
+  const populatedOrder = await Order.findById(orderId).populate("customer", "name email phone").populate("restaurant", "name");
+  const io = req.app && req.app.get ? req.app.get("io") : global.io || null;
   if (io && populatedOrder && populatedOrder.customer && populatedOrder.customer._id) {
-    console.log('[Socket] Emitindo orderNotification para sala:', `customer-${populatedOrder.customer._id}`);
-    io.to(`customer-${populatedOrder.customer._id}`).emit('orderNotification', {
-      type: 'order-status',
+    console.log("[Socket] Emitindo orderNotification para sala:", `customer-${populatedOrder.customer._id}`);
+    io.to(`customer-${populatedOrder.customer._id}`).emit("orderNotification", {
+      type: "order-status",
       orderData: populatedOrder,
-      message: 'O histórico do seu pedido foi atualizado.'
+      message: "O histórico do seu pedido foi atualizado.",
     });
   }
 };
@@ -648,17 +620,17 @@ const emitOrderNotificationToCustomer = async (req, orderId) => {
  * Creates a review for an order
  */
 orderController.createReview = async (orderId, reviewData, userId) => {
-  const order = await Order.findById(orderId).populate('restaurant');
+  const order = await Order.findById(orderId).populate("restaurant");
   if (!order) {
-    throw new Error('Pedido não encontrado');
+    throw new Error("Pedido não encontrado");
   }
 
-  if (order.status !== 'finished') {
-    throw new Error('Só é possível avaliar pedidos finalizados');
+  if (order.status !== "finished") {
+    throw new Error("Só é possível avaliar pedidos finalizados");
   }
 
   if (order.review) {
-    throw new Error('Este pedido já possui uma avaliação');
+    throw new Error("Este pedido já possui uma avaliação");
   }
 
   const review = new Review({
@@ -666,7 +638,7 @@ orderController.createReview = async (orderId, reviewData, userId) => {
     user: userId,
     rating: reviewData.rating,
     comment: reviewData.comment,
-    created_at: new Date()
+    created_at: new Date(),
   });
 
   await review.save();
@@ -676,16 +648,23 @@ orderController.createReview = async (orderId, reviewData, userId) => {
   await order.save();
 
   // Update restaurant's reviews array
-  await Restaurant.findByIdAndUpdate(
-    order.restaurant._id,
-    { $push: { reviews: review._id } }
-  );
+  await Restaurant.findByIdAndUpdate(order.restaurant._id, { $push: { reviews: review._id } });
 
   // Update user's reviews array
-  await User.findByIdAndUpdate(
-    userId,
-    { $push: { reviews: review._id } }
-  );
+  await User.findByIdAndUpdate(userId, { $push: { reviews: review._id } });
+
+  // Calculate and update restaurant's average rating
+  const restaurant = await Restaurant.findById(order.restaurant._id).populate("reviews");
+  if (restaurant && restaurant.reviews && restaurant.reviews.length > 0) {
+    const totalRating = restaurant.reviews.reduce((sum, review) => sum + review.rating, 0);
+    const averageRating = totalRating / restaurant.reviews.length;
+
+    // Update restaurant's average rating (rounded to 2 decimal places)
+    restaurant.average_rating = Math.round(averageRating * 100) / 100;
+    await restaurant.save();
+  }
+
+  console.log("Avaliação criada com sucesso:", review);
 
   return review;
 };
@@ -694,13 +673,13 @@ orderController.createReview = async (orderId, reviewData, userId) => {
  * Get a review for an order
  */
 orderController.getReview = async (orderId) => {
-  const order = await Order.findById(orderId).populate('review');
+  const order = await Order.findById(orderId).populate("review");
   if (!order) {
-    throw new Error('Pedido não encontrado');
+    throw new Error("Pedido não encontrado");
   }
 
   if (!order.review) {
-    throw new Error('Avaliação não encontrada');
+    throw new Error("Avaliação não encontrada");
   }
 
   return order.review;
@@ -710,22 +689,22 @@ orderController.getReview = async (orderId) => {
  * Delete a review from an order
  */
 orderController.deleteReview = async (orderId, reviewId, userId) => {
-  const order = await Order.findById(orderId).populate('review');
+  const order = await Order.findById(orderId).populate("review");
   if (!order) {
-    throw new Error('Pedido não encontrado');
+    throw new Error("Pedido não encontrado");
   }
 
   const review = await Review.findById(reviewId);
   if (!review) {
-    throw new Error('Avaliação não encontrada');
+    throw new Error("Avaliação não encontrada");
   }
 
   if (review.user.toString() !== userId.toString()) {
-    throw new Error('Você não tem permissão para deletar esta avaliação');
+    throw new Error("Você não tem permissão para deletar esta avaliação");
   }
 
   if (review.response) {
-    throw new Error('Não é possível deletar uma avaliação que já possui resposta do restaurante');
+    throw new Error("Não é possível deletar uma avaliação que já possui resposta do restaurante");
   }
 
   // Remove review from order
@@ -733,18 +712,26 @@ orderController.deleteReview = async (orderId, reviewId, userId) => {
   await order.save();
 
   // Remove review from restaurant
-  await Restaurant.findByIdAndUpdate(
-    review.restaurant,
-    { $pull: { reviews: review._id } }
-  );
+  await Restaurant.findByIdAndUpdate(review.restaurant, { $pull: { reviews: review._id } });
 
   // Remove review from user
-  await User.findByIdAndUpdate(
-    userId,
-    { $pull: { reviews: review._id } }
-  );
+  await User.findByIdAndUpdate(userId, { $pull: { reviews: review._id } });
 
   await Review.findByIdAndDelete(reviewId);
+
+  // Recalculate restaurant's average rating after deletion
+  const restaurant = await Restaurant.findById(review.restaurant).populate("reviews");
+  if (restaurant) {
+    if (restaurant.reviews && restaurant.reviews.length > 0) {
+      const totalRating = restaurant.reviews.reduce((sum, review) => sum + review.rating, 0);
+      const averageRating = totalRating / restaurant.reviews.length;
+      restaurant.average_rating = Math.round(averageRating * 100) / 100;
+    } else {
+      // No reviews left, reset average rating to 0
+      restaurant.average_rating = 0;
+    }
+    await restaurant.save();
+  }
 };
 
 module.exports = orderController;

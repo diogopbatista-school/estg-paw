@@ -46,7 +46,7 @@ interface Order {
   standalone: true,
   imports: [CommonModule, RouterLink, MatSnackBarModule],
   templateUrl: './track-order.component.html',
-  styleUrl: './track-order.component.scss'
+  styleUrl: './track-order.component.scss',
 })
 export class TrackOrderComponent implements OnInit, OnDestroy {
   orders: Order[] = [];
@@ -54,7 +54,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
   pagedOrders: Order[] = [];
   loading = true;
   error: string | null = null;
-  
+
   // User data
   userId: string | null = null;
   private orderSubscription: Subscription | null = null;
@@ -65,7 +65,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
   totalPages = 1;
   pages: number[] = [];
 
-  // Valid order states
+  // Valid order states for tracking (excludes cancelled and finished)
   validStates = ['pending', 'preparing', 'delivered'];
 
   constructor(
@@ -87,7 +87,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
     this.initializeSocketConnection();
     this.loadOrders();
   }
-  
+
   ngOnDestroy(): void {
     // Clean up socket subscription when component is destroyed
     if (this.orderSubscription) {
@@ -95,26 +95,29 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
     }
     this.socketService.disconnect();
   }
-    private initializeSocketConnection(): void {
-    console.log('🔗 Initializing socket connection for real-time order tracking');
-    
+  private initializeSocketConnection(): void {
+    console.log(
+      '🔗 Initializing socket connection for real-time order tracking'
+    );
+
     // Listen for order notifications with direct order manipulation (like restaurant dashboard)
-    this.orderSubscription = this.socketService.listenOrderNotifications()
-      .subscribe(notification => {
+    this.orderSubscription = this.socketService
+      .listenOrderNotifications()
+      .subscribe((notification) => {
         this.handleOrderNotification(notification);
       });
   }
-    private handleOrderNotification(notification: any): void {
+  private handleOrderNotification(notification: any): void {
     if (!notification) return;
-    
+
     console.log('🔔 Received order notification:', notification);
-    
+
     // Handle the actual notification structure from the backend
     if (notification.type === 'order-status' && notification.orderData) {
       // This is the structure sent by notifyCustomer function
       console.log('📋 Order status updated:', notification.orderData);
       this.updateOrderInList(notification.orderData);
-      
+
       const statusText = this.getStatusText(notification.orderData.status);
       this.toastr.success(
         `Pedido #${notification.orderData.order_number} ${statusText}`,
@@ -125,9 +128,10 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       console.log('❌ Order cancelled:', notification);
       if (notification.orderData || notification._id) {
         const orderId = notification.orderData?._id || notification._id;
-        const orderNumber = notification.orderData?.order_number || notification.order_number;
+        const orderNumber =
+          notification.orderData?.order_number || notification.order_number;
         this.removeOrderFromList(orderId);
-        
+
         this.toastr.warning(
           `Pedido #${orderNumber} foi cancelado`,
           'Pedido Cancelado!'
@@ -139,7 +143,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       if (notification.orderData || notification._id) {
         const orderData = notification.orderData || notification;
         this.addOrderToList(orderData);
-        
+
         this.toastr.info(
           `Pedido #${orderData.order_number} recebido`,
           'Novo Pedido!'
@@ -150,7 +154,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       const orderData = notification.orderData || notification;
       console.log('🔄 Generic order update:', orderData);
       this.updateOrderInList(orderData);
-      
+
       this.toastr.info(
         notification.message || 'Pedido atualizado',
         'Atualização'
@@ -163,7 +167,8 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
         'Notificação'
       );
     }
-  }loadOrders(): void {
+  }
+  loadOrders(): void {
     if (!this.userId) {
       const user = this.authService.getCurrentUser();
       this.userId = user?._id ?? null;
@@ -181,15 +186,19 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       next: (orders) => {
         console.log('📋 Orders loaded successfully:', orders.length, 'orders');
         console.log('📋 Orders data:', orders);
-        
+
         this.orders = orders;
         this.filterOrders();
         this.updatePagination();
         this.loading = false;
         this.error = null;
         this.cdr.detectChanges();
-        
-        console.log('📋 Filtered orders:', this.filteredOrders.length, 'active orders');
+
+        console.log(
+          '📋 Filtered orders:',
+          this.filteredOrders.length,
+          'active orders'
+        );
       },
       error: (error) => {
         console.error('❌ Error loading orders:', error);
@@ -197,21 +206,26 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
         this.loading = false;
         this.toastr.error('Erro ao carregar pedidos', 'Erro');
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
   filterOrders(): void {
-    // Filtra para mostrar apenas pedidos que NÃO estão finalizados
+    // Filtra para mostrar apenas pedidos que NÃO estão finalizados ou cancelados
     this.filteredOrders = this.orders
-      .filter(order => order.status !== 'finished')
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .filter(
+        (order) => order.status !== 'finished' && order.status !== 'cancelled'
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     this.updatePagination();
   }
 
   updatePagination(): void {
     this.totalPages = Math.ceil(this.filteredOrders.length / this.itemsPerPage);
-    this.pages = Array.from({length: this.totalPages}, (_, i) => i + 1);
+    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
     this.setPage(1);
   }
 
@@ -219,7 +233,10 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     const startIndex = (page - 1) * this.itemsPerPage;
-    this.pagedOrders = this.filteredOrders.slice(startIndex, startIndex + this.itemsPerPage);
+    this.pagedOrders = this.filteredOrders.slice(
+      startIndex,
+      startIndex + this.itemsPerPage
+    );
   }
 
   getStatusClass(status: string): string {
@@ -228,7 +245,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       preparing: 'bg-info',
       delivered: 'bg-success',
       finished: 'bg-primary',
-      cancelled: 'bg-danger'
+      cancelled: 'bg-danger',
     };
     return statusClasses[status] || 'bg-secondary';
   }
@@ -239,7 +256,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       preparing: 'Em Preparação',
       delivered: 'Pronto para Entrega',
       finished: 'Finalizado',
-      cancelled: 'Cancelado'
+      cancelled: 'Cancelado',
     };
     return statusTexts[status] || status;
   }
@@ -248,7 +265,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
     const typeTexts: { [key: string]: string } = {
       takeAway: 'Para Levar',
       homeDelivery: 'Entrega em Casa',
-      eatIn: 'Comer no Local'
+      eatIn: 'Comer no Local',
     };
     return typeTexts[type] || type;
   }
@@ -259,7 +276,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
   }
   cancelOrder(orderId: string): void {
     const motive = window.prompt('Por favor, insira o motivo do cancelamento:');
-    
+
     if (motive === null) {
       // User clicked Cancel
       return;
@@ -273,76 +290,85 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       error: (error) => {
         console.error('Error canceling order:', error);
         this.toastr.error(error.error?.message || 'Erro ao cancelar pedido');
-      }
+      },
     });
-  }formatDate(dateStr: string): string {
+  }
+  formatDate(dateStr: string): string {
     if (!dateStr) return '';
-    
+
     const orderDate = new Date(dateStr);
     if (isNaN(orderDate.getTime())) return '';
 
     const now = new Date();
     const isToday = orderDate.toDateString() === now.toDateString();
-    
+
     if (isToday) {
       return orderDate.toLocaleTimeString('pt-PT', {
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false
+        hour12: false,
       });
     } else {
-      return orderDate.toLocaleString('pt-PT', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      }).replace(',', '');
+      return orderDate
+        .toLocaleString('pt-PT', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
+        .replace(',', '');
     }
   }
 
   formatBlockDate(date: string): string {
     const blockDate = new Date(date);
-    blockDate.setMinutes(blockDate.getMinutes() + blockDate.getTimezoneOffset());
+    blockDate.setMinutes(
+      blockDate.getMinutes() + blockDate.getTimezoneOffset()
+    );
     return blockDate.toLocaleDateString('pt-PT', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
     });
   }
 
   // Direct order manipulation methods (like restaurant dashboard)
   private updateOrderInList(updatedOrder: Order): void {
     console.log('🔄 Updating order in list:', updatedOrder);
-    
+
     if (!updatedOrder || !updatedOrder._id) {
       console.error('❌ Cannot update order: missing order ID');
       return;
     }
-    
+
     // Find and update the order in the main orders array
-    const orderIndex = this.orders.findIndex(order => order._id === updatedOrder._id);
+    const orderIndex = this.orders.findIndex(
+      (order) => order._id === updatedOrder._id
+    );
     if (orderIndex !== -1) {
       this.orders[orderIndex] = updatedOrder;
-      console.log(`🔄 Updated order ${updatedOrder._id} with status: ${updatedOrder.status}`);
+      console.log(
+        `🔄 Updated order ${updatedOrder._id} with status: ${updatedOrder.status}`
+      );
     } else {
       // If order not found, add it (might be a new order for this user)
       console.log(`🔄 Order ${updatedOrder._id} not found, adding to list`);
       this.orders.unshift(updatedOrder);
     }
-    
+
     // Refresh filtered view and pagination
     this.filterOrders();
     this.cdr.detectChanges();
   }
-  
+
   private removeOrderFromList(orderId: string): void {
     console.log('🗑️ Removing order from list:', orderId);
-    
+
     const initialLength = this.orders.length;
-    this.orders = this.orders.filter(order => order._id !== orderId);
-    
+    this.orders = this.orders.filter((order) => order._id !== orderId);
+
     if (this.orders.length < initialLength) {
       console.log(`🗑️ Removed order ${orderId} from list`);
       this.filterOrders();
@@ -351,17 +377,19 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       console.log(`❌ Order ${orderId} not found in list`);
     }
   }
-  
+
   private addOrderToList(newOrder: Order): void {
     console.log('➕ Adding new order to list:', newOrder);
-    
+
     // Check if order already exists to avoid duplicates
-    const existingOrderIndex = this.orders.findIndex(order => order._id === newOrder._id);
+    const existingOrderIndex = this.orders.findIndex(
+      (order) => order._id === newOrder._id
+    );
     if (existingOrderIndex === -1) {
       // Add new order at the beginning (most recent first)
       this.orders.unshift(newOrder);
       console.log(`➕ Added new order ${newOrder._id} to list`);
-      
+
       // Refresh filtered view and pagination
       this.filterOrders();
       this.cdr.detectChanges();

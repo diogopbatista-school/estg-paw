@@ -48,7 +48,8 @@ const OrderSchema = new mongoose.Schema({
         required: true,
       },
     },
-  ],  totalPrice: {
+  ],
+  totalPrice: {
     type: Number,
     required: true,
   },
@@ -79,6 +80,13 @@ const OrderSchema = new mongoose.Schema({
     enum: ["homeDelivery", "takeAway", "eatIn"],
     type: String,
     required: true,
+  },
+  deliveryAddress: {
+    type: String,
+    required: function () {
+      return this.type === "homeDelivery";
+    },
+    default: null,
   },
   created_at: {
     type: Date,

@@ -381,6 +381,13 @@ function populateOrderModal(order) {
                 <p><strong>Nome:</strong> ${order.customer?.name || "N/A"}</p>
                 <p><strong>Email:</strong> ${order.customer?.email || "N/A"}</p>
                 <p><strong>Telefone:</strong> ${order.customer?.phone || "N/A"}</p>
+                <p><strong>Tipo de Pedido:</strong> ${getOrderTypeText(order.type)}</p>
+                ${
+                  order.type === "homeDelivery" && order.deliveryAddress
+                    ? `<p><strong><i class="fas fa-map-marker-alt me-1"></i>Morada de Entrega:</strong><br>
+                     <span class="text-muted">${order.deliveryAddress}</span></p>`
+                    : ""
+                }
             </div>
         </div>
         
@@ -507,6 +514,15 @@ function getStatusColor(status) {
     cancelled: "danger",
   };
   return colorMap[status] || "secondary";
+}
+
+function getOrderTypeText(type) {
+  const typeMap = {
+    homeDelivery: "Entrega ao Domicílio",
+    takeAway: "Takeaway",
+    eatIn: "Comer no Local",
+  };
+  return typeMap[type] || type;
 }
 
 // Export functions for global access

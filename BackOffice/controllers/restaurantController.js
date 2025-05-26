@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const asyncHandler = require("express-async-handler");
-const multer = require("multer");
 const fsPromises = require("fs/promises");
 const mongoose = require("mongoose");
 const path = require("path");

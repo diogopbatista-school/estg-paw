@@ -11,6 +11,10 @@ var LocalStrategy = require("passport-local").Strategy;
 var bcrypt = require("bcrypt");
 var User = require("./models/User"); // Certifique-se de que o modelo está correto
 
+// Swagger dependencies
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger.json");
+
 var indexRouter = require("./routes/index");
 var usersRouter = require("./routes/user");
 var adminRouter = require("./routes/admin"); // Importa as rotas de admin
@@ -128,6 +132,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Swagger documentation route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 // Rotas da API (devem vir antes das outras rotas para dar prioridade)
 app.use("/api/auth", apiAuthRouter);
 app.use("/api/restaurants", apiRestaurantRouter);
@@ -147,10 +154,10 @@ app.use("/order", orderRoutes);
 // Página inicial
 app.use("/", indexRouter);
 
-//ultima rota caso não tenha sido encontrada (deve vir por último)
+// ultima rota caso não tenha sido encontrada (deve vir por último)
 app.use((req, res, next) => {
   // Se for uma requisição de API, retorna JSON
-  if (req.path.startsWith('/api/')) {
+  if (req.path.startsWith("/api/")) {
     return res.status(404).json({ error: "API endpoint not found" });
   }
   // Caso contrário, renderiza a página de erro
@@ -169,10 +176,10 @@ app.use(function (err, req, res, next) {
   res.locals.error = req.app.get("env") === "development" ? err : {};
 
   // Se for uma requisição de API, retorna JSON
-  if (req.path.startsWith('/api/')) {
-    return res.status(err.status || 500).json({ 
-      error: err.message || 'Internal Server Error',
-      ...(req.app.get("env") === "development" && { stack: err.stack })
+  if (req.path.startsWith("/api/")) {
+    return res.status(err.status || 500).json({
+      error: err.message || "Internal Server Error",
+      ...(req.app.get("env") === "development" && { stack: err.stack }),
     });
   }
 

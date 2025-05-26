@@ -181,6 +181,38 @@
           <option value="eatIn">Eat In</option>
         </select>
       </div>
+
+      <!-- Delivery Address Field (only for Home Delivery) -->
+      <div class="mb-3" *ngIf="orderType === 'homeDelivery'">
+        <label class="form-label">
+          <i class="fas fa-map-marker-alt me-2"></i>Morada de Entrega
+        </label>
+        <textarea
+          class="form-control"
+          [(ngModel)]="deliveryAddress"
+          placeholder="Insira a morada completa para entrega..."
+          rows="3"
+          required
+        ></textarea>
+        <small class="form-text text-muted">
+          Por favor, forneça a morada completa incluindo código postal para
+          garantir uma entrega precisa.
+        </small>
+      </div>
+
+      <!-- Alert for missing delivery address -->
+      <div
+        *ngIf="
+          orderType === 'homeDelivery' &&
+          (!deliveryAddress || deliveryAddress.trim() === '') &&
+          cartItems.length > 0
+        "
+        class="alert alert-warning"
+      >
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        Por favor, insira a morada de entrega para finalizar o pedido.
+      </div>
+
       <!-- Voucher Section -->
       <div class="mb-3 mt-4">
         <label class="form-label">🎟️ Vouchers</label>
@@ -339,7 +371,7 @@
       <button
         *ngIf="getTotal() > 0"
         class="btn btn-success w-100 mt-3"
-        [disabled]="cartItems.length === 0 || loading"
+        [disabled]="!isOrderFormValid() || loading"
         [class.loading]="loading"
         type="button"
         (click)="payWithStripe()"
@@ -362,7 +394,7 @@
       <button
         *ngIf="getTotal() <= 0 && cartItems.length > 0"
         class="btn btn-success w-100 mt-3"
-        [disabled]="cartItems.length === 0"
+        [disabled]="!isOrderFormValid()"
         (click)="placeOrder()"
       >
         <i class="fas fa-gift me-1"></i>

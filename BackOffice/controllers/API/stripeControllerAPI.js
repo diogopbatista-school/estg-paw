@@ -20,7 +20,7 @@ const roundToTwoDecimals = (value) => Math.round(value * 100) / 100;
  */
 stripeControllerAPI.createCheckoutSession = async (req, res) => {
   try {
-    const { items, restaurantId, orderType, userId, voucherDiscount, appliedVoucher } = req.body;
+    const { items, restaurantId, orderType, userId, voucherDiscount, appliedVoucher, deliveryAddress } = req.body;
 
     // Validate required fields
     if (!items || !restaurantId || !orderType || !userId) {
@@ -89,6 +89,7 @@ stripeControllerAPI.createCheckoutSession = async (req, res) => {
         voucherDiscount: voucherDiscountAmount.toString(),
         appliedVoucher: appliedVoucher || "",
         finalTotal: finalTotal.toString(),
+        deliveryAddress: orderType === "homeDelivery" ? deliveryAddress : "",
       },
     });
 
@@ -287,6 +288,55 @@ stripeControllerAPI.createVoucher = async (buyerId, amount, recipientEmail) => {
       success: false,
       error: error.message
     };
+  }
+};
+
+/**
+ * Retrieves Stripe session details by session ID
+ * @param {Object} req - Request object
+ * @param {Object} res - Response object
+ */
+stripeControllerAPI.getSessionDetails = async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    if (!sessionId) {
+      return res.status(400).json({ success: false, error: "Session ID is required." });
+    }
+
+    console.log("Retrieving Stripe session:", sessionId);
+
+    // Retrieve the session from Stripe
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    
+    console.log("Session retrieved:", {
+      id: session.id,
+      hasMetadata: !!session.metadata,
+      metadata: session.metadata
+    });
+
+    // You might want to add a security check here to ensure the session's payment_status is 'paid'
+    // before allowing order creation based on it, though Stripe's best practice
+    // is to rely on webhooks for 'checkout.session.completed' for fulfillment.
+    // For example:
+    // if (session.payment_status !== 'paid') {
+    //   console.warn(`Stripe session ${sessionId} payment status is ${session.payment_status}.`);
+    //   return res.status(402).json({ success: false, error: "Payment not yet confirmed or failed." });
+    // }
+
+    res.status(200).json({
+      success: true,
+      metadata: session.metadata,
+      customer_email: session.customer_details ? session.customer_details.email : null,
+      payment_status: session.payment_status,
+      // You can add any other session details the frontend might need
+    });
+
+  } catch (error) {
+    console.error("Error retrieving Stripe session details:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message || "Failed to retrieve session details"
+    });
   }
 };
 

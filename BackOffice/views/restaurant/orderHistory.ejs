@@ -299,6 +299,26 @@
                                   <strong>Telefone:</strong> <%= order.customer.phone %>
                                 </p>
                               <% } %>
+                              <p class="mb-1">
+                                <strong>Tipo de Pedido:</strong> 
+                                <% if (order.type === 'homeDelivery') { %>
+                                  <i class="fas fa-home me-1"></i>Entrega ao Domicílio
+                                <% } else if (order.type === 'takeAway') { %>
+                                  <i class="fas fa-box me-1"></i>Takeaway
+                                <% } else if (order.type === 'eatIn') { %>
+                                  <i class="fas fa-utensils me-1"></i>Comer no Local
+                                <% } else { %>
+                                  <%= order.type %>
+                                <% } %>
+                              </p>
+                              <% if (order.type === 'homeDelivery' && order.deliveryAddress) { %>
+                                <div class="mt-2 p-2 bg-light rounded">
+                                  <strong><i class="fas fa-map-marker-alt me-2"></i>Morada de Entrega:</strong>
+                                  <div class="text-muted small mt-1">
+                                    <%= order.deliveryAddress %>
+                                  </div>
+                                </div>
+                              <% } %>
                             </div>
                           <% } else { %>
                             <p class="text-muted">Informações do cliente não disponíveis</p>

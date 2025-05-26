@@ -58,6 +58,7 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   selectedCategory: string = '';
   orderType: 'takeAway' | 'homeDelivery' | 'eatIn' = 'takeAway';
+  deliveryAddress: string = '';
   restaurantId: string = '';
   // Voucher properties
   userVouchers: Voucher[] = [];
@@ -118,6 +119,24 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.clearTimer();
+  }
+
+  isOrderFormValid(): boolean {
+    // Check if cart has items
+    if (this.cartItems.length === 0) {
+      return false;
+    }
+
+    // Check if delivery address is provided for home delivery orders
+    if (
+      this.orderType === 'homeDelivery' &&
+      (!this.deliveryAddress || this.deliveryAddress.trim() === '')
+    ) {
+      console.log('Endereço de entrega é obrigatório para pedidos de entrega em casa.');
+      return false;
+    }
+
+    return true;
   }
 
   loadRestaurantAndDishes(): void {
@@ -302,6 +321,12 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Validate delivery address for home delivery orders
+    if (this.orderType === 'homeDelivery' && (!this.deliveryAddress || this.deliveryAddress.trim() === '')) {
+      this.toastr.error('Por favor, insira a morada de entrega para pedidos de entrega ao domicílio.');
+      return;
+    }
+
     const currentUser = this.authService.getCurrentUser();
     console.log('Current user when placing order:', currentUser);
 
@@ -328,6 +353,7 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
       restaurantId: this.restaurantId,
       items: orderItems,
       type: this.orderType,
+      deliveryAddress: this.orderType === 'homeDelivery' ? this.deliveryAddress : null,
       totalPrice: this.getTotal(),
       voucherDiscount: this.appliedVoucherDiscount,
       appliedVoucher: this.selectedVoucher?.id || null,
@@ -462,6 +488,13 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
       this.router.navigate(['/login']);
       return;
     }
+
+    // Validate delivery address for home delivery orders
+    if (this.orderType === 'homeDelivery' && (!this.deliveryAddress || this.deliveryAddress.trim() === '')) {
+      this.toastr.error('Por favor, insira a morada de entrega para pedidos de entrega ao domicílio.');
+      return;
+    }
+
     if (this.cartItems.length === 0) {
       this.toastr.error('Seu carrinho está vazio!');
       return;
@@ -495,6 +528,7 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
         restaurantId: this.restaurantId,
         items: orderItems,
         type: this.orderType,
+        deliveryAddress: this.orderType === 'homeDelivery' ? this.deliveryAddress : '',
         totalPrice: this.getSubtotal(),
         voucherDiscount: this.appliedVoucherDiscount,
         appliedVoucher: this.selectedVoucher?.id || null,
@@ -509,6 +543,7 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
         restaurantId: this.restaurantId,
         orderType: this.orderType,
         userId: currentUser?._id || currentUser?.id,
+        deliveryAddress: this.orderType === 'homeDelivery' ? this.deliveryAddress : '', // Incluir deliveryAddress no payload
         voucherDiscount: this.appliedVoucherDiscount,
         appliedVoucher: this.selectedVoucher?.id || null,
       };

@@ -105,4 +105,9 @@ export class OrderService {
       payload
     );
   }
+
+  // Obter detalhes da sessão Stripe
+  getStripeSessionDetails(sessionId: string): Observable<any> {
+    return this.http.get<any>(`${api.api}/stripe/session/${sessionId}`);
+  }
 }

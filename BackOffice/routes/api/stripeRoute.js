@@ -16,4 +16,13 @@ router.post("/create-checkout-session", stripeControllerAPI.createCheckoutSessio
  */
 router.post("/create-voucher-session", stripeControllerAPI.createVoucherSession);
 
+/**
+ * @route GET /api/stripe/session/:sessionId
+ * @desc Get Stripe session details by session ID
+ * @access Public (removido o middleware de autenticação para evitar bloqueio no FrontOffice)
+ */
+router.get("/session/:sessionId", function(req, res) {
+  return stripeControllerAPI.getSessionDetails(req, res);
+});
+
 module.exports = router;

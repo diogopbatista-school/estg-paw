@@ -138,15 +138,17 @@ export class RestaurantInfoComponent implements OnInit {
 
   getUniqueCategories(): string[] {
     const dishes = this.getDishesFromActiveMenu();
-    return Array.from(new Set(dishes.map((dish: any) => dish.category)))
-      .filter((category): category is string => category != null && category !== '');
-  }  getDishesFromActiveMenuByCategory(category: string): any[] {
+    return Array.from(new Set(dishes.map((dish: any) => dish.category))).filter(
+      (category): category is string => category != null && category !== ''
+    );
+  }
+  getDishesFromActiveMenuByCategory(category: string): any[] {
     const dishes = this.getDishesFromActiveMenu();
     return dishes
       .filter((dish: any) => dish.category === category)
       .map((dish: any) => ({
         ...dish,
-        prices: this.validatePrices(dish.prices)
+        prices: this.validatePrices(dish.prices),
       }));
   }
 
@@ -154,24 +156,28 @@ export class RestaurantInfoComponent implements OnInit {
     if (!prices || !Array.isArray(prices)) {
       return [{ dose: 'Padrão', price: 0 }];
     }
-    return prices.map(price => ({
+    return prices.map((price) => ({
       dose: price.dose || 'Padrão',
-      price: typeof price.price === 'number' ? price.price : 0
+      price: typeof price.price === 'number' ? price.price : 0,
     }));
   }
 
   getAllCategories(): string[] {
     if (!this.restaurant?.menus) return [];
-    
-    const allDishes = this.restaurant.menus.flatMap((menu: any) => menu.dishes || []);
+
+    const allDishes = this.restaurant.menus.flatMap(
+      (menu: any) => menu.dishes || []
+    );
     return Array.from(new Set(allDishes.map((dish: any) => dish.category)))
-      .filter((category): category is string => category != null && category !== '')
+      .filter(
+        (category): category is string => category != null && category !== ''
+      )
       .sort();
   }
 
   getMenusWithCategory(category: string): any[] {
     if (!this.restaurant?.menus) return [];
-    
+
     return this.restaurant.menus.filter((menu: any) => {
       return menu.dishes?.some((dish: any) => dish.category === category);
     });
@@ -179,7 +185,7 @@ export class RestaurantInfoComponent implements OnInit {
 
   setSelectedCategory(category: string | null): void {
     this.selectedCategory = category;
-    
+
     if (category === null) {
       // Se nenhuma categoria estiver selecionada, seleciona o primeiro menu
       if (this.restaurant?.menus?.length > 0) {
@@ -197,23 +203,54 @@ export class RestaurantInfoComponent implements OnInit {
 
   shouldShowMenu(menu: any): boolean {
     if (!this.selectedCategory) return true;
-    return menu.dishes?.some((dish: any) => dish.category === this.selectedCategory);
-  }  openImageModal(event: MouseEvent, imageUrl: string): void {
+    return menu.dishes?.some(
+      (dish: any) => dish.category === this.selectedCategory
+    );
+  }
+  openImageModal(event: MouseEvent, imageUrl: string): void {
     this.selectedImage = imageUrl;
-    
+
     const modal = document.querySelector('.image-modal') as HTMLElement;
     if (modal) {
       // Posicionar o modal na posição atual do scroll
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollTop =
+        window.pageYOffset || document.documentElement.scrollTop;
       modal.style.top = `${scrollTop}px`;
       modal.style.height = '100vh';
     }
-    
+
     this.showImageModal = true;
   }
 
   closeImageModal(): void {
     this.showImageModal = false;
     this.selectedImage = null;
+  }
+
+  // Usado para mostrar estrelas de avaliação
+  getStarsArray(rating: number): number[] {
+    const ratingRounded = Math.round(rating * 2) / 2; // Arredonda para 0.5 mais próximo
+    const fullStars = Math.floor(ratingRounded);
+    const halfStar = ratingRounded % 1 !== 0;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
+    const starsArray = [];
+
+    // Adiciona estrelas cheias
+    for (let i = 0; i < fullStars; i++) {
+      starsArray.push(1); // 1 = estrela cheia
+    }
+
+    // Adiciona meia estrela se necessário
+    if (halfStar) {
+      starsArray.push(0.5); // 0.5 = meia estrela
+    }
+
+    // Adiciona estrelas vazias
+    for (let i = 0; i < emptyStars; i++) {
+      starsArray.push(0); // 0 = estrela vazia
+    }
+
+    return starsArray;
   }
 }

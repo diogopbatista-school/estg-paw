@@ -63,7 +63,8 @@
         <form
           action="/order/submitRegister/<%= restaurant._id %>"
           method="POST"
-          id="orderForm">          <!-- NIF do Cliente -->
+          id="orderForm">
+          <!-- NIF do Cliente -->
           <div class="mb-4">
             <label
               for="customerId"
@@ -130,6 +131,28 @@
                 </label>
               </div>
             </div>
+          </div>
+
+          <!-- Endereço de Entrega (aparece apenas para Home Delivery) -->
+          <div
+            class="mb-4"
+            id="deliveryAddressSection"
+            style="display: none">
+            <label
+              for="deliveryAddress"
+              class="form-label"
+              >Endereço de Entrega</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-map-marker-alt"></i></span>
+              <textarea
+                class="form-control"
+                id="deliveryAddress"
+                name="deliveryAddress"
+                rows="3"
+                placeholder="Digite o endereço completo para entrega..."></textarea>
+            </div>
+            <small class="form-text text-muted mt-1">Forneça o endereço completo incluindo rua, número, cidade e código postal</small>
           </div>
 
           <!-- Filtro de pratos -->

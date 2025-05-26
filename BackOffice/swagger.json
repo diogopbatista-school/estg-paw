@@ -1,0 +1,2210 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "ESTG PAW GRUPO 25 - Food Delivery API",
+    "description": "API documentation for the ESTG PAW food delivery platform",
+    "version": "1.0.0",
+    "contact": {
+      "name": "ESTG PAW Team - Grupo 25",
+      "email": "8230367@estg.ipp.t"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api",
+      "description": "Local development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "User name"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "User email"
+          },
+          "nif": {
+            "type": "string",
+            "description": "User NIF"
+          },
+          "role": {
+            "type": "string",
+            "enum": ["superAdmin", "manager", "admin", "client"],
+            "description": "User role"
+          },
+          "phone": {
+            "type": "string",
+            "description": "User phone number"
+          },
+          "profileImage": {
+            "type": "string",
+            "description": "Profile image URL"
+          },
+          "isBlocked": {
+            "type": "boolean",
+            "description": "Whether user is blocked from placing orders"
+          },
+          "blockedUntil": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date until user is blocked"
+          },
+          "monthlyCancellations": {
+            "type": "number",
+            "description": "Number of cancellations this month"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "User creation date"
+          }
+        }
+      },
+      "Restaurant": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Restaurant ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Restaurant name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Restaurant description"
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number",
+                "description": "Restaurant latitude"
+              },
+              "longitude": {
+                "type": "number",
+                "description": "Restaurant longitude"
+              }
+            }
+          },
+          "phone": {
+            "type": "number",
+            "description": "Restaurant phone"
+          },
+          "image": {
+            "type": "string",
+            "description": "Restaurant image URL"
+          },
+          "verified": {
+            "type": "boolean",
+            "description": "Verification status"
+          },
+          "average_rating": {
+            "type": "number",
+            "description": "Average rating"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Restaurant creation date"
+          }
+        }
+      },
+      "Dish": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Dish ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Dish name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Dish description"
+          },
+          "menuId": {
+            "type": "string",
+            "description": "Menu ID reference"
+          },
+          "prices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dose": {
+                  "type": "string",
+                  "description": "Portion size"
+                },
+                "price": {
+                  "type": "number",
+                  "description": "Price for this portion"
+                }
+              }
+            },
+            "description": "Array of prices for different portions"
+          },
+          "category": {
+            "type": "string",
+            "description": "Dish category"
+          },
+          "image": {
+            "type": "string",
+            "description": "Dish image URL"
+          },
+          "nutritionalInfo": {
+            "type": "object",
+            "properties": {
+              "calories": { "type": "number" },
+              "carbs": { "type": "number" },
+              "protein": { "type": "number" },
+              "fat": { "type": "number" },
+              "fiber": { "type": "number" },
+              "sugar": { "type": "number" }
+            }
+          },
+          "nutriScore": {
+            "type": "string",
+            "enum": ["A", "B", "C", "D", "E"],
+            "description": "Nutritional score"
+          },
+          "allergens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of allergens"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Dish creation date"
+          }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Order ID"
+          },
+          "restaurant": {
+            "type": "string",
+            "description": "Restaurant ID"
+          },
+          "customer": {
+            "type": "string",
+            "description": "Customer ID"
+          },
+          "order_number": {
+            "type": "number",
+            "description": "Order number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "dish": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "category": { "type": "string" },
+                    "image": { "type": "string" }
+                  }
+                },
+                "dose": {
+                  "type": "string",
+                  "description": "Portion size"
+                },
+                "price": {
+                  "type": "number",
+                  "description": "Item price"
+                },
+                "quantity": {
+                  "type": "number",
+                  "description": "Quantity ordered"
+                }
+              }
+            }
+          },
+          "totalPrice": {
+            "type": "number",
+            "description": "Total order amount"
+          },
+          "voucherDiscount": {
+            "type": "number",
+            "description": "Voucher discount applied"
+          },
+          "appliedVoucher": {
+            "type": "string",
+            "description": "Applied voucher ID"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "preparing", "delivered", "finished", "canceled"],
+            "description": "Order status"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["homeDelivery", "takeAway", "eatIn"],
+            "description": "Order type"
+          },
+          "typeOfcancelation": {
+            "type": "string",
+            "enum": ["customer", "restaurant", "other"],
+            "description": "Type of cancellation"
+          },
+          "motive": {
+            "type": "string",
+            "description": "Cancellation motive"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order creation date"
+          },
+          "accepted_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order acceptance date"
+          },
+          "ready_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order ready date"
+          },
+          "finished_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Order finish date"
+          }
+        }
+      },
+      "Voucher": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Voucher ID"
+          },
+          "code": {
+            "type": "string",
+            "description": "Voucher code"
+          },
+          "discount": {
+            "type": "number",
+            "description": "Voucher discount amount"
+          },
+          "expirationDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Voucher expiration date"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether voucher is active"
+          },
+          "createdBy": {
+            "type": "string",
+            "description": "ID of user who created the voucher"
+          },
+          "assignedTo": {
+            "type": "string",
+            "description": "ID of user the voucher is assigned to"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Voucher creation date"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Voucher last update date"
+          }
+        }
+      },
+      "Menu": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Menu ID"
+          },
+          "restaurant": {
+            "type": "string",
+            "description": "Restaurant ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Menu name"
+          },
+          "dishes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of dish IDs"
+          },
+          "totalPrice": {
+            "type": "number",
+            "description": "Total menu price"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Menu creation date"
+          }
+        }
+      },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Review ID"
+          },
+          "restaurant": {
+            "type": "string",
+            "description": "Restaurant ID"
+          },
+          "user": {
+            "type": "string",
+            "description": "User ID"
+          },
+          "rating": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5,
+            "description": "Rating from 0 to 5"
+          },
+          "comment": {
+            "type": "string",
+            "description": "Review comment"
+          },
+          "image": {
+            "type": "string",
+            "description": "Review image URL"
+          },
+          "response": {
+            "type": "object",
+            "properties": {
+              "text": {
+                "type": "string",
+                "description": "Response text"
+              },
+              "user": {
+                "type": "string",
+                "description": "User ID who responded"
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time",
+                "description": "Response creation date"
+              }
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Review creation date"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User login",
+        "description": "Authenticate user and return JWT token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "User email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "User password"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "JWT token"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User registration",
+        "description": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password", "name"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "User email"
+                  },
+                  "password": {
+                    "type": "string",
+                    "description": "User password"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "User name"
+                  },
+                  "profileImage": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Profile image file"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Registration failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/edit": {
+      "put": {
+        "tags": ["User"],
+        "summary": "Edit user profile",
+        "description": "Update authenticated user's profile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "User name"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "User email"
+                  },
+                  "profileImage": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Profile image file"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/findByEmail/{email}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Find user by email",
+        "description": "Get user information by email (for voucher validation)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "User email"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/vouchers": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get user vouchers",
+        "description": "Get all vouchers for authenticated user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vouchers retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Voucher"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/voucher/validate/{code}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Validate voucher code",
+        "description": "Validate a voucher code",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Voucher code"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Voucher is valid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Voucher"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Voucher not found or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/voucher/apply": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Apply voucher",
+        "description": "Apply a voucher to user's account",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["code"],
+                "properties": {
+                  "code": {
+                    "type": "string",
+                    "description": "Voucher code"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Voucher applied successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "voucher": {
+                      "$ref": "#/components/schemas/Voucher"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid voucher or already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dishes/menu/{menuId}": {
+      "get": {
+        "tags": ["Dishes"],
+        "summary": "Get dishes from menu",
+        "description": "Get all dishes from a specific menu with optional filters",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "menuId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Menu ID"
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by category"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dishes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Dish"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Menu not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dishes/restaurant/{restaurantId}": {
+      "get": {
+        "tags": ["Dishes"],
+        "summary": "Get dishes from restaurant",
+        "description": "Get all dishes from a restaurant with optional filters",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Restaurant ID"
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by category"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dishes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Dish"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Restaurant not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dishes/categories": {
+      "get": {
+        "tags": ["Dishes"],
+        "summary": "Get all dish categories",
+        "description": "Get all available dish categories",
+        "responses": {
+          "200": {
+            "description": "Categories retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dishes/check-name": {
+      "get": {
+        "tags": ["Dishes"],
+        "summary": "Check dish name",
+        "description": "Check if a dish name can be recognized by the nutrition API",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Dish name to check"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dish name check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "recognized": {
+                      "type": "boolean"
+                    },
+                    "suggestions": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get user orders",
+        "description": "Get all orders for logged in user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Orders"],
+        "summary": "Create order",
+        "description": "Create a new order",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["restaurant", "items"],
+                "properties": {
+                  "restaurant": {
+                    "type": "string",
+                    "description": "Restaurant ID"
+                  },
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "dish": {
+                          "type": "string",
+                          "description": "Dish ID"
+                        },
+                        "quantity": {
+                          "type": "number",
+                          "description": "Quantity"
+                        }
+                      }
+                    }
+                  },
+                  "deliveryAddress": {
+                    "type": "string",
+                    "description": "Delivery address"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid order data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/check-blocked": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Check if user is blocked",
+        "description": "Check if user is blocked from placing orders",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User status check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "blocked": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{orderId}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get specific order",
+        "description": "Get a specific order by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Order not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{orderId}/status": {
+      "put": {
+        "tags": ["Orders"],
+        "summary": "Update order status",
+        "description": "Update order status (restaurant/admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["status"],
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": ["pending", "confirmed", "preparing", "ready", "delivered", "cancelled"],
+                    "description": "New order status"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Order status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{orderId}/cancel": {
+      "put": {
+        "tags": ["Orders"],
+        "summary": "Cancel order",
+        "description": "Cancel an order",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order cancelled successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Order"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cannot cancel order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get all restaurants",
+        "description": "Get all restaurants",
+        "responses": {
+          "200": {
+            "description": "Restaurants retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Restaurant"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/verified": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get verified restaurants",
+        "description": "Get all verified restaurants",
+        "responses": {
+          "200": {
+            "description": "Verified restaurants retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Restaurant"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/featured": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get featured restaurants",
+        "description": "Get featured restaurants",
+        "responses": {
+          "200": {
+            "description": "Featured restaurants retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Restaurant"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/search": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Search restaurants",
+        "description": "Search restaurants by name or cuisine",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query"
+          },
+          {
+            "in": "query",
+            "name": "cuisine",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Cuisine type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Restaurant"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/{restaurantId}": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get restaurant by ID",
+        "description": "Get a specific restaurant by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Restaurant ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurant retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Restaurant"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Restaurant not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/{restaurantId}/menus": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get restaurant with menus",
+        "description": "Get a restaurant with all its menus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Restaurant ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurant with menus retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Restaurant"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Restaurant not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/{restaurantId}/menus-dishes": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get restaurant with menus and dishes",
+        "description": "Get a restaurant with all its menus and dishes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Restaurant ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurant with menus and dishes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Restaurant"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Restaurant not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/by-dish-category/{category}": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get restaurants by dish category",
+        "description": "Get all restaurants that serve dishes of a specific category",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Dish category"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurants retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Restaurant"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/{restaurantId}/orders": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get restaurant orders",
+        "description": "Get all orders for a specific restaurant",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Restaurant ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurant orders retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stripe/create-checkout-session": {
+      "post": {
+        "tags": ["Payment"],
+        "summary": "Create checkout session",
+        "description": "Create a Stripe checkout session for order payment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["orderId"],
+                "properties": {
+                  "orderId": {
+                    "type": "string",
+                    "description": "Order ID"
+                  },
+                  "successUrl": {
+                    "type": "string",
+                    "description": "Success redirect URL"
+                  },
+                  "cancelUrl": {
+                    "type": "string",
+                    "description": "Cancel redirect URL"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout session created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stripe/create-voucher-session": {
+      "post": {
+        "tags": ["Payment"],
+        "summary": "Create voucher checkout session",
+        "description": "Create a Stripe checkout session for voucher purchase",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["amount"],
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Voucher amount"
+                  },
+                  "successUrl": {
+                    "type": "string",
+                    "description": "Success redirect URL"
+                  },
+                  "cancelUrl": {
+                    "type": "string",
+                    "description": "Cancel redirect URL"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Voucher checkout session created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/user/{userId}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get orders for specific user",
+        "description": "Get all orders for a specific user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "userId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/restaurant/{restaurantId}": {
+      "get": {
+        "tags": ["Orders"],
+        "summary": "Get restaurant orders",
+        "description": "Get all orders for a specific restaurant",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Restaurant ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Orders retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{orderId}/review": {
+      "post": {
+        "tags": ["Orders", "Reviews"],
+        "summary": "Add review to order",
+        "description": "Add a review to a specific order",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["rating"],
+                "properties": {
+                  "rating": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 5,
+                    "description": "Rating from 0 to 5"
+                  },
+                  "comment": {
+                    "type": "string",
+                    "description": "Review comment"
+                  },
+                  "image": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Review image"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid review data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Orders", "Reviews"],
+        "summary": "Get order review",
+        "description": "Get review for a specific order",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Review"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Review not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/orders/{orderId}/review/{reviewId}": {
+      "delete": {
+        "tags": ["Orders", "Reviews"],
+        "summary": "Delete order review",
+        "description": "Delete a review for a specific order",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "orderId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Order ID"
+          },
+          {
+            "in": "path",
+            "name": "reviewId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Review ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Review deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Review not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/{restaurantId}/menus": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get restaurant menus",
+        "description": "Get restaurant details with its menus",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Restaurant ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurant with menus retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Restaurant"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "menus": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Menu"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Restaurant not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/{restaurantId}/menus-dishes": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get restaurant with menus and dishes",
+        "description": "Get restaurant details with its menus and dishes",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "restaurantId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Restaurant ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurant with menus and dishes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/Restaurant"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "menus": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "allOf": [
+                              {
+                                "$ref": "#/components/schemas/Menu"
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "dishes": {
+                                    "type": "array",
+                                    "items": {
+                                      "$ref": "#/components/schemas/Dish"
+                                    }
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Restaurant not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/restaurants/by-dish-category/{category}": {
+      "get": {
+        "tags": ["Restaurants"],
+        "summary": "Get restaurants by dish category",
+        "description": "Get restaurants that serve dishes of a specific category",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "category",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Dish category"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restaurants retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Restaurant"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stripe/create-voucher-session": {
+      "post": {
+        "tags": ["Stripe"],
+        "summary": "Create voucher checkout session",
+        "description": "Create a Stripe checkout session for voucher purchase",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["amount", "currency"],
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Voucher amount"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "description": "Currency code (e.g., EUR)"
+                  },
+                  "success_url": {
+                    "type": "string",
+                    "description": "Success redirect URL"
+                  },
+                  "cancel_url": {
+                    "type": "string",
+                    "description": "Cancel redirect URL"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout session created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "sessionId": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

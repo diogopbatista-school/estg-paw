@@ -224,6 +224,11 @@
                     <p class="mb-2">
                       <strong>Data:</strong> {{ formatDate(order.createdAt) }}
                     </p>
+                    <!-- Delivery Address (only shown for Home Delivery orders) -->
+                    <p *ngIf="order.type === 'homeDelivery' && order.deliveryAddress" class="mb-2">
+                      <strong>Morada:</strong><br>
+                      <small class="text-muted">{{ order.deliveryAddress }}</small>
+                    </p>
                     <p class="mb-0">
                       <strong>Estado:</strong>
                       <span
