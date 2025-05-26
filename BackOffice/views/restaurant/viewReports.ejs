@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Relatórios do Restaurante</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+      href="/stylesheets/restaurant/viewReports.css"
+      rel="stylesheet" />
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm">
+      <div class="container-fluid">
+        <button
+          type="button"
+          id="sidebarCollapse"
+          class="btn">
+          <i class="fas fa-bars"></i>
+        </button>
+        <span class="navbar-brand ms-3">Relatórios do Restaurante</span>
+        <a
+          href="/restaurants/dashboard/<%= restaurantId %>"
+          class="btn btn-secondary ms-auto">
+          <i class="fas fa-arrow-left"></i> Voltar
+        </a>
+      </div>
+    </nav>
+
+    <!-- SIDEBAR -->
+    <div class="wrapper d-flex align-items-stretch">
+      <nav
+        id="sidebar"
+        class="sidebar">
+        <div class="p-4 pt-5">
+          <ul class="list-unstyled components mb-5">
+            <li><a href="#yearly-chart">Gráfico Anual</a></li>
+            <li><a href="#monthly-chart">Gráfico Mensal</a></li>
+            <li><a href="#daily-chart">Gráfico Diário</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <!-- CONTEÚDO PRINCIPAL -->
+      <div id="content">
+        <div class="container-main">
+          <!-- YEARLY CHART -->
+          <div
+            id="yearly-chart"
+            class="row mt-4 mb-4">
+            <div class="col-md-12">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title mb-3"><i class="fas fa-chart-line me-2"></i>Estatísticas Anuais</h5>
+                  
+                  <!-- Yearly Summary Stats -->
+                  <div class="row mb-4">
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Total de Pedidos</h6>
+                          <p class="stat-card-value"><%= yearlyStats.totalOrders %></p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Faturação Total</h6>
+                          <p class="stat-card-value"><%= yearlyStats.totalRevenue.toFixed(2) %>€</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Tempo Médio</h6>
+                          <p class="stat-card-value"><%= yearlyStats.avgTime.toFixed(1) %> min</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Valor Médio</h6>
+                          <p class="stat-card-value"><%= (yearlyStats.totalOrders > 0 ? (yearlyStats.totalRevenue / yearlyStats.totalOrders).toFixed(2) : '0.00') %>€</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Year Filter -->
+                  <form class="filter-form mb-4" action="" method="GET" id="yearlyFilterForm">
+                    <input type="hidden" name="chart" value="yearly-chart">
+                    <div class="row align-items-end">
+                      <div class="col-md-3">
+                        <label for="yearFilter" class="form-label">Ano</label>
+                        <select class="form-select" id="yearFilter" name="year">
+                          <% 
+                            const currentYear = new Date().getFullYear();
+                            for (let year = currentYear; year >= currentYear - 5; year--) { 
+                          %>
+                            <option value="<%= year %>" <%= selectedYear === year ? 'selected' : '' %>><%= year %></option>
+                          <% } %>
+                        </select>
+                      </div>
+                      <div class="col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                        <a href="/restaurants/<%= restaurantId %>/charts?chart=yearly-chart&year=<%= new Date().getFullYear() %>" class="btn btn-outline-secondary">
+                          <i class="fas fa-calendar-day me-1"></i> Ano Atual
+                        </a>
+                      </div>
+                    </div>
+                  </form>
+                  
+                  <canvas
+                    id="yearlyChart"
+                    height="120"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- MONTHLY CHART -->
+          <div
+            id="monthly-chart"
+            class="row mt-4 mb-4">
+            <div class="col-md-12">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title mb-3"><i class="fas fa-chart-bar me-2"></i>Estatísticas Mensais</h5>
+                  
+                  <!-- Monthly Summary Stats -->
+                  <div class="row mb-4">
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Total de Pedidos</h6>
+                          <p class="stat-card-value"><%= monthlyStats.totalOrders %></p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Faturação Total</h6>
+                          <p class="stat-card-value"><%= monthlyStats.totalRevenue.toFixed(2) %>€</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Tempo Médio</h6>
+                          <p class="stat-card-value"><%= monthlyStats.avgTime.toFixed(1) %> min</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Valor Médio</h6>
+                          <p class="stat-card-value"><%= (monthlyStats.totalOrders > 0 ? (monthlyStats.totalRevenue / monthlyStats.totalOrders).toFixed(2) : '0.00') %>€</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Month and Year Filter -->
+                  <form class="filter-form mb-4" action="" method="GET" id="monthlyFilterForm">
+                    <input type="hidden" name="chart" value="monthly-chart">
+                    <div class="row align-items-end">
+                      <div class="col-md-3">
+                        <label for="yearFilterMonth" class="form-label">Ano</label>
+                        <select class="form-select" id="yearFilterMonth" name="year">
+                          <% 
+                            for (let year = currentYear; year >= currentYear - 5; year--) { 
+                          %>
+                            <option value="<%= year %>" <%= selectedYear === year ? 'selected' : '' %>><%= year %></option>
+                          <% } %>
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label for="monthFilter" class="form-label">Mês</label>
+                        <select class="form-select" id="monthFilter" name="month">
+                          <option value="0" <%= selectedMonth === 0 ? 'selected' : '' %>>Janeiro</option>
+                          <option value="1" <%= selectedMonth === 1 ? 'selected' : '' %>>Fevereiro</option>
+                          <option value="2" <%= selectedMonth === 2 ? 'selected' : '' %>>Março</option>
+                          <option value="3" <%= selectedMonth === 3 ? 'selected' : '' %>>Abril</option>
+                          <option value="4" <%= selectedMonth === 4 ? 'selected' : '' %>>Maio</option>
+                          <option value="5" <%= selectedMonth === 5 ? 'selected' : '' %>>Junho</option>
+                          <option value="6" <%= selectedMonth === 6 ? 'selected' : '' %>>Julho</option>
+                          <option value="7" <%= selectedMonth === 7 ? 'selected' : '' %>>Agosto</option>
+                          <option value="8" <%= selectedMonth === 8 ? 'selected' : '' %>>Setembro</option>
+                          <option value="9" <%= selectedMonth === 9 ? 'selected' : '' %>>Outubro</option>
+                          <option value="10" <%= selectedMonth === 10 ? 'selected' : '' %>>Novembro</option>
+                          <option value="11" <%= selectedMonth === 11 ? 'selected' : '' %>>Dezembro</option>
+                        </select>
+                      </div>
+                      <div class="col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                        <a href="/restaurants/<%= restaurantId %>/charts?chart=monthly-chart&year=<%= new Date().getFullYear() %>&month=<%= new Date().getMonth() %>" class="btn btn-outline-secondary">
+                          <i class="fas fa-calendar-day me-1"></i> Mês Atual
+                        </a>
+                      </div>
+                    </div>
+                  </form>
+                  
+                  <canvas
+                    id="restaurantChart"
+                    height="120"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DAILY CHART -->
+          <div
+            id="daily-chart"
+            class="row mt-4 mb-4">
+            <div class="col-md-12">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title mb-3"><i class="fas fa-chart-line me-2"></i>Estatísticas Diárias</h5>
+                  
+                  <!-- Daily Summary Stats -->
+                  <div class="row mb-4">
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Total de Pedidos</h6>
+                          <p class="stat-card-value"><%= dailyStats.totalOrders %></p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Faturação Total</h6>
+                          <p class="stat-card-value"><%= dailyStats.totalRevenue.toFixed(2) %>€</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Tempo Médio</h6>
+                          <p class="stat-card-value"><%= dailyStats.avgTime.toFixed(1) %> min</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                      <div class="stat-card">
+                        <div class="stat-card-body">
+                          <h6 class="stat-card-title">Valor Médio</h6>
+                          <p class="stat-card-value"><%= (dailyStats.totalOrders > 0 ? (dailyStats.totalRevenue / dailyStats.totalOrders).toFixed(2) : '0.00') %>€</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Date Filter -->
+                  <form class="filter-form mb-4" action="" method="GET" id="dailyFilterForm">
+                    <input type="hidden" name="chart" value="daily-chart">
+                    <div class="row align-items-end">
+                      <div class="col-md-3">
+                        <label for="dateFilter" class="form-label">Data</label>
+                        <input type="date" class="form-control" id="dateFilter" name="date" value="<%= selectedDate.toISOString().split('T')[0] %>">
+                      </div>
+                      <div class="col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Filtrar</button>
+                        <a href="/restaurants/<%= restaurantId %>/charts?chart=daily-chart&date=<%= new Date().toISOString().split('T')[0] %>" class="btn btn-outline-secondary">
+                          <i class="fas fa-calendar-day me-1"></i> Data Atual
+                        </a>
+                      </div>
+                    </div>
+                  </form>
+                  
+                  <canvas
+                    id="dailyChart"
+                    height="120"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Data variables passed from server to client
+      const yearlyData = <%- JSON.stringify(yearlyData) %>;
+      const statsByMonth = <%- JSON.stringify(statsByMonth) %>;
+      const statsByDay = <%- JSON.stringify(statsByDay) %>;
+      const statsBySpecificDay = <%- JSON.stringify(statsBySpecificDay) %>;
+
+      // Scroll to the appropriate chart section if specified in URL
+      document.addEventListener('DOMContentLoaded', function() {
+        // Get the chart parameter from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const chartSection = urlParams.get('chart');
+        
+        if (chartSection) {
+          const targetElement = document.getElementById(chartSection);
+          if (targetElement) {
+            // Add a small delay to ensure the page has fully loaded
+            setTimeout(() => {
+              window.scrollTo({
+                top: targetElement.offsetTop - 70, // Offset for the navbar
+                behavior: 'smooth'
+              });
+            }, 100);
+          }
+        }
+      });
+    </script>
+    <script src="/javascripts/sidebar.js"></script>
+    <script src="/javascripts/viewReports.js"></script>
+  </body>
+</html>

@@ -1,0 +1,285 @@
+<!-- filepath: c:\Users\diogo\Documents\GitHub\estg-paw\FrontOffice\estg-paw-frontend\src\app\components\restaurant-info\restaurant-info.component.html.new -->
+<div class="restaurant-info-container">
+  <!-- Background shapes -->
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+  <div class="container-main" *ngIf="!loading && !error">    <!-- Botão Voltar para Lista de Restaurantes -->
+    <div class="d-flex justify-content-end align-items-center mb-2">
+      <a
+        class="btn fw-bold rounded-pill px-4 py-2 shadow-sm"
+        [routerLink]="['/restaurants']"
+        style="
+          background: linear-gradient(90deg, #42a5f5, #26c6da 90%);
+          color: #fff;
+          border: none;
+          box-shadow: 0 2px 12px #26c6da40;
+        "
+      >
+        <i class="fas fa-arrow-left me-2"></i> Voltar para Restaurantes
+      </a>
+    </div>
+
+    <!-- Restaurant Info Section -->
+    <div class="restaurant-info">
+      <div class="header">
+        <h3 class="mb-0">
+          <i class="fas fa-store me-2"></i> Informações do Restaurante
+        </h3>
+      </div>
+      <div class="content">
+        <div class="d-flex justify-content-between align-items-start mb-4">
+          <div class="d-flex">
+            <div class="me-4">
+              <img
+                *ngIf="restaurant?.image"
+                [src]="getRestaurantImageUrl(restaurant.image)"
+                [alt]="restaurant?.name"
+                class="rounded-circle"
+                style="width: 100px; height: 100px; object-fit: cover"
+              />
+              <div
+                *ngIf="!restaurant?.image"
+                class="bg-secondary text-white d-flex justify-content-center align-items-center rounded-circle"
+                style="width: 100px; height: 100px"
+              >
+                <i class="fas fa-store fa-2x"></i>
+              </div>
+            </div>
+            <div>
+              <h1 class="mb-1">{{ restaurant?.name }}</h1>
+              <a
+                [routerLink]="['/restaurant', restaurant?._id, 'order']"
+                class="btn btn-primary mb-3"
+              >
+                <i class="fas fa-shopping-cart me-2"></i>Fazer Pedido
+              </a>
+              <p>
+                <strong
+                  ><i class="fas fa-info-circle me-2"></i> Descrição:</strong
+                >
+                {{ restaurant?.description || "Sem descrição" }}
+              </p>
+              <p>
+                <strong><i class="fas fa-phone me-2"></i> Telefone:</strong>
+                {{ restaurant?.phone }}
+              </p>
+              <p>
+                <strong
+                  ><i class="fas fa-map-marker-alt me-2"></i>
+                  Localização:</strong
+                >
+                Latitude: {{ restaurant?.location?.latitude }}, Longitude:
+                {{ restaurant?.location?.longitude }}
+              </p>
+              <p>
+                <strong
+                  ><i class="fas fa-check-circle me-2"></i> Verificado:</strong
+                >
+                <span
+                  [class]="
+                    'badge ' +
+                    (restaurant?.verified ? 'bg-success' : 'bg-warning')
+                  "
+                >
+                  {{ restaurant?.verified ? "Sim" : "Não" }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="my-4" />
+
+      <!-- Menus Section -->
+      <div class="menu-section">
+        <h3 class="section-title">
+          <i class="fas fa-utensils me-2"></i> Menus
+        </h3>
+        <!-- Category Filters -->
+        <div class="category-tabs" *ngIf="getAllCategories().length">
+          <button
+            class="category-btn"
+            [class.active]="selectedCategory === null"
+            (click)="setSelectedCategory(null)"
+          >
+            <i class="fas fa-utensils"></i> Todas
+          </button>
+          <button
+            *ngFor="let category of getAllCategories()"
+            class="category-btn"
+            [class.active]="category === selectedCategory"
+            (click)="setSelectedCategory(category)"
+          >
+            <i class="fas fa-utensils"></i> {{ category }}
+          </button>
+        </div>
+        <!-- Menu Tabs -->
+        <div class="menu-selection mb-4" *ngIf="restaurant?.menus?.length">
+          <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <button
+              *ngFor="let menu of restaurant.menus"
+              class="btn menu-btn"
+              [class.active]="menu._id === activeMenuId"
+              (click)="setActiveMenu(menu._id)"
+              [style.display]="shouldShowMenu(menu) ? 'inline-flex' : 'none'"
+            >
+              <i class="fas fa-book-open me-2"></i>
+              {{ menu.name }}
+              <span class="menu-badge ms-2" *ngIf="menu.dishes?.length">
+                {{ menu.dishes.length }}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Menu Content -->
+        <div *ngIf="hasDishes(); else noDishes">
+          <ng-container *ngFor="let category of getUniqueCategories()">
+            <div class="category-divider">
+              <span><i class="fas fa-utensils me-2"></i>{{ category }}</span>
+            </div>
+
+            <div class="row">
+              <div
+                class="col-md-6 mb-4"
+                *ngFor="let dish of getDishesFromActiveMenuByCategory(category)"
+              >
+                <div class="dish-card">
+                  <div
+                    class="dish-header"
+                    (click)="
+                      openImageModal($event, getDishImageUrl(dish.image))
+                    "
+                  >
+                    <img
+                      *ngIf="dish.image"
+                      [src]="getDishImageUrl(dish.image)"
+                      [alt]="dish.name"
+                      class="dish-image"
+                    />
+                    <div *ngIf="!dish.image" class="no-image">
+                      <i class="fas fa-image"></i>
+                    </div>
+                    <div class="dish-zoom">
+                      <i class="fas fa-search-plus"></i>
+                    </div>
+                  </div>
+                  <div class="dish-content">
+                    <h3 class="dish-title">{{ dish.name }}</h3>
+                    <p class="dish-description">{{ dish.description }}</p>
+
+                    <!-- Nutritional Information -->
+                    <div class="nutrition-section">
+                      <div class="nutri-score" *ngIf="dish.nutriScore">
+                        <span class="nutri-label">NutriScore:</span>
+                        <span
+                          [class]="
+                            'nutriScore nutriScore-' +
+                            dish.nutriScore.toLowerCase()
+                          "
+                        >
+                          {{ dish.nutriScore }}
+                        </span>
+                      </div>
+
+                      <div
+                        class="nutrition-details"
+                        *ngIf="dish.nutritionalInfo"
+                      >
+                        <h4>
+                          <i class="fas fa-info-circle"></i> Informação
+                          Nutricional
+                        </h4>
+                        <ul class="nutrition-list">
+                          <li *ngIf="dish.nutritionalInfo.calories">
+                            Calorias: {{ dish.nutritionalInfo.calories }}kcal
+                          </li>
+                          <li *ngIf="dish.nutritionalInfo.protein">
+                            Proteínas: {{ dish.nutritionalInfo.protein }}g
+                          </li>
+                          <li *ngIf="dish.nutritionalInfo.carbohydrates">
+                            Carboidratos:
+                            {{ dish.nutritionalInfo.carbohydrates }}g
+                          </li>
+                          <li *ngIf="dish.nutritionalInfo.fat">
+                            Gorduras: {{ dish.nutritionalInfo.fat }}g
+                          </li>
+                        </ul>
+                      </div>
+
+                      <!-- Allergens -->
+                      <div
+                        class="allergens-section"
+                        *ngIf="dish.allergens?.length"
+                      >
+                        <h4>
+                          <i class="fas fa-exclamation-triangle"></i> Alergénios
+                        </h4>
+                        <ul class="allergen-list">
+                          <li *ngFor="let allergen of dish.allergens">
+                            {{ allergen }}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    <ul class="price-list">
+                      <li *ngFor="let price of dish.prices">
+                        <span class="dose-name">{{ price.dose }}</span>
+                        <span class="price-value">{{
+                          formatPrice(price.price)
+                        }}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+
+        <ng-template #noDishes>
+          <div class="alert alert-warning text-center mt-3">
+            <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+            <p>Este menu ainda não possui pratos.</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div class="container-main text-center" *ngIf="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
+
+    <!-- Error State -->
+    <div class="container-main" *ngIf="error">
+      <div class="alert alert-danger">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ error }}
+      </div>
+    </div>
+    <!-- Image Modal -->
+    <div
+      class="image-modal"
+      [class.active]="showImageModal"
+      (click)="closeImageModal()"
+    >
+      <div class="modal-content">
+        <img
+          [src]="selectedImage"
+          class="modal-image"
+          *ngIf="selectedImage"
+          (click)="$event.stopPropagation()"
+        />
+        <button class="close-button" (click)="closeImageModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

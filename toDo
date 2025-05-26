@@ -1,0 +1,10 @@
+FrontOffice
+
+
+Opcional : - list-restaurant: filtar por : localizaçao ( API google ) ( Se tivermos tempo)
+
+Opcional : Colocar o list-order em row de tabelas e que seja para expandir
+
+BackOffice:
+
+          Refresh sempre que aceitar pedidos ( ficar estatico na mesma seçao)  // nao estou a conseguir

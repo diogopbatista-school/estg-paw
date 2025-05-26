@@ -1,0 +1,241 @@
+<div class="shape shape-1"></div>
+<div class="shape shape-2"></div>
+<div class="shape shape-3"></div>
+
+<div class="register-container">
+  <div class="register-card">
+    <div class="header-shape"></div>
+    <div class="card-header">
+      <h3><i class="fas fa-user-plus me-2"></i>Criar Conta</h3>
+    </div>
+
+    <div class="card-body">
+      <div *ngIf="error" class="alert alert-danger">
+        <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+      </div>
+      <form (ngSubmit)="register()" #registerForm="ngForm">
+        <div class="row">
+          <!-- Nome -->
+          <div class="col-md-6">
+            <div class="input-group">
+              <div class="position-relative">
+                <i class="fas fa-user input-icon"></i>
+                <input
+                  type="text"
+                  class="form-control input-with-icon"
+                  id="name"
+                  name="name"
+                  [(ngModel)]="user.name"
+                  placeholder="Nome completo"
+                  required
+                  #name="ngModel"
+                />
+              </div>
+              <div
+                *ngIf="name.invalid && (name.dirty || name.touched)"
+                class="validation-error"
+              >
+                Nome é obrigatório.
+              </div>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="col-md-6">
+            <div class="input-group">
+              <div class="position-relative">
+                <i class="fas fa-envelope input-icon"></i>
+                <input
+                  type="email"
+                  class="form-control input-with-icon"
+                  id="email"
+                  name="email"
+                  [(ngModel)]="user.email"
+                  placeholder="Email"
+                  required
+                  #email="ngModel"
+                />
+              </div>
+              <div
+                *ngIf="email.invalid && (email.dirty || email.touched)"
+                class="validation-error"
+              >
+                E-mail válido é obrigatório.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- NIF -->
+          <div class="col-md-6">
+            <div class="input-group">
+              <div class="position-relative">
+                <i class="fas fa-id-card input-icon"></i>
+                <input
+                  type="text"
+                  class="form-control input-with-icon"
+                  id="nif"
+                  name="nif"
+                  [(ngModel)]="user.nif"
+                  placeholder="NIF (9 dígitos)"
+                  required
+                  maxlength="9"
+                  pattern="[0-9]{9}"
+                  #nif="ngModel"
+                />
+              </div>
+              <div
+                *ngIf="nif.invalid && (nif.dirty || nif.touched)"
+                class="validation-error"
+              >
+                NIF deve conter 9 dígitos numéricos.
+              </div>
+            </div>
+          </div>
+
+          <!-- Telefone -->
+          <div class="col-md-6">
+            <div class="input-group">
+              <div class="position-relative">
+                <i class="fas fa-phone input-icon"></i>
+                <input
+                  type="text"
+                  class="form-control input-with-icon"
+                  id="phone"
+                  name="phone"
+                  [(ngModel)]="user.phone"
+                  placeholder="Telefone"
+                  required
+                  maxlength="9"
+                  pattern="[0-9]{9}"
+                  #phone="ngModel"
+                />
+              </div>
+              <div
+                *ngIf="phone.invalid && (phone.dirty || phone.touched)"
+                class="validation-error"
+              >
+                Telefone deve conter 9 dígitos numéricos.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Password -->
+          <div class="col-md-6">
+            <div class="input-group">
+              <div class="position-relative">
+                <i class="fas fa-lock input-icon"></i>
+                <input
+                  [type]="isPasswordVisible ? 'text' : 'password'"
+                  class="form-control input-with-icon"
+                  id="password"
+                  name="password"
+                  [(ngModel)]="user.password"
+                  placeholder="Senha"
+                  required
+                  #password="ngModel"
+                />
+                <i
+                  class="fas toggle-password"
+                  [ngClass]="{
+                    'fa-eye-slash': !isPasswordVisible,
+                    'fa-eye': isPasswordVisible
+                  }"
+                  (click)="togglePasswordVisibility()"
+                ></i>
+              </div>
+              <div
+                *ngIf="password.invalid && (password.dirty || password.touched)"
+                class="validation-error"
+              >
+                Senha é obrigatória.
+              </div>
+            </div>
+          </div>
+
+          <!-- Confirmar Password -->
+          <div class="col-md-6">
+            <div class="input-group">
+              <div class="position-relative">
+                <i class="fas fa-lock input-icon"></i>
+                <input
+                  [type]="isConfirmPasswordVisible ? 'text' : 'password'"
+                  class="form-control input-with-icon"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  [(ngModel)]="user.confirmPassword"
+                  placeholder="Confirmar senha"
+                  required
+                  #confirmPassword="ngModel"
+                />
+                <i
+                  class="fas toggle-password"
+                  [ngClass]="{
+                    'fa-eye-slash': !isConfirmPasswordVisible,
+                    'fa-eye': isConfirmPasswordVisible
+                  }"
+                  (click)="toggleConfirmPasswordVisibility()"
+                ></i>
+              </div>
+              <div
+                *ngIf="
+                  confirmPassword.invalid &&
+                  (confirmPassword.dirty || confirmPassword.touched)
+                "
+                class="validation-error"
+              >
+                Confirmação de senha é obrigatória.
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Imagem de Perfil -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="profile-upload">
+              <div class="upload-preview">
+                <img *ngIf="imagePreview" [src]="imagePreview" alt="Preview" />
+                <div *ngIf="!imagePreview" class="upload-placeholder">
+                  <i class="fas fa-user"></i>
+                </div>
+              </div>
+              <label for="profileImage" class="upload-button">
+                <i class="fas fa-camera me-1"></i> Selecionar Imagem
+                <input
+                  type="file"
+                  id="profileImage"
+                  name="profileImage"
+                  class="upload-input"
+                  accept="image/*"
+                  (change)="onFileChange($event)"
+                />
+              </label>
+              <small class="form-text text-muted mt-2"
+                >Formatos permitidos: JPG, JPEG, PNG</small
+              >
+            </div>
+          </div>
+        </div>
+        <!-- Botão de Registro -->
+        <button
+          type="submit"
+          class="btn-register"
+          [disabled]="registerForm.invalid"
+        >
+          <i class="fas fa-user-plus me-2"></i>Criar Conta
+        </button>
+      </form>
+    </div>
+    <div class="card-footer">
+      <p>
+        Já possui uma conta?
+        <a routerLink="/login"
+          >Entrar <i class="fas fa-sign-in-alt ms-1"></i
+        ></a>
+      </p>
+    </div>
+  </div>
+</div>

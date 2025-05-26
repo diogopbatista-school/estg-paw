@@ -1,0 +1,408 @@
+<div class="container-fluid mt-4">
+  <!-- User Blocked Warning -->
+  <div *ngIf="userBlocked" class="alert alert-danger mb-4">
+    <h4><i class="fas fa-ban me-2"></i>Conta Temporariamente Bloqueada</h4>
+    <p>{{ blockMessage }}</p>
+    <a [routerLink]="['/restaurant', restaurantId]" class="btn btn-secondary">
+      <i class="fas fa-arrow-left me-2"></i>Voltar ao Restaurante
+    </a>
+  </div>
+
+  <div class="row" *ngIf="!userBlocked">
+    <!-- Menu Section -->
+    <div class="col-lg-8">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">Menu</h3>
+        </div>
+        <div class="card-body">
+          <!-- Search and Filter -->
+          <div class="mb-3">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Search dishes..."
+              [(ngModel)]="searchTerm"
+              (input)="filterDishes()"
+            />
+          </div>
+
+          <!-- Categories Filter -->
+          <div class="mb-3">
+            <select
+              class="form-select"
+              [(ngModel)]="selectedCategory"
+              (change)="filterDishes()"
+            >
+              <option value="">All Categories</option>
+              <option *ngFor="let category of categories" [value]="category">
+                {{ category }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Dishes Grid -->
+          <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="col" *ngFor="let dish of filteredDishes">
+              <div class="card h-100">
+                <img
+                  [src]="dish.image"
+                  class="card-img-top"
+                  [alt]="dish.name"
+                />
+                <div class="card-body">
+                  <h5 class="card-title">{{ dish.name }}</h5>
+                  <p class="card-text">{{ dish.description }}</p>
+                  <div class="form-group mb-3">
+                    <label class="form-label">Select Portion Size</label>
+                    <select class="form-select" #selectedDose>
+                      <option
+                        *ngFor="let priceOption of dish.prices"
+                        [value]="priceOption.dose"
+                        [attr.data-price]="priceOption.price"
+                      >
+                        {{ priceOption.dose }} -
+                        {{ priceOption.price | currency : "EUR" }}
+                      </option>
+                    </select>
+                  </div>
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <div class="input-group me-2" style="width: 120px">
+                      <span class="input-group-text">Qty</span>
+                      <input
+                        type="number"
+                        class="form-control"
+                        #quantity
+                        min="1"
+                        value="1"
+                      />
+                    </div>
+                    <button
+                      class="btn btn-primary"
+                      (click)="
+                        addToCart(
+                          dish,
+                          selectedDose.value,
+                          selectedDose.selectedOptions[0].getAttribute(
+                            'data-price'
+                          ),
+                          +quantity.value
+                        )
+                      "
+                    >
+                      Add to Cart
+                    </button>
+                  </div>
+                  <div class="mt-2">
+                    <a
+                      [routerLink]="['/restaurant', restaurantId]"
+                      class="btn btn-link px-0"
+                      >Back to Restaurant</a
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cart Section - Fixed Position -->
+<div class="sticky-cart" [class.has-items]="cartItems.length > 0">
+  <div class="card">
+    <div class="card-header bg-primary text-white">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">Your Order</h3>
+        <div *ngIf="cartItems.length > 0" class="timer-display">
+          <div
+            [class.warning]="timeRemaining <= 120"
+            class="d-flex align-items-center"
+          >
+            <i class="fas fa-clock me-2"></i>
+            <span>{{ formatTime(timeRemaining) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- Cart Items -->
+      <div class="cart-items">
+        <div class="cart-item" *ngFor="let item of cartItems">
+          <div class="mb-2">
+            <div class="d-flex justify-content-between">
+              <div>
+                <h6 class="mb-0">{{ item.name }}</h6>
+                <small class="text-muted d-block"
+                  >{{ item.dose }} - {{ item.price | currency : "EUR" }}</small
+                >
+              </div>
+              <div class="d-flex align-items-center">
+                <button
+                  class="btn btn-sm btn-outline-primary me-2"
+                  (click)="decreaseQuantity(item)"
+                >
+                  -
+                </button>
+                <span>{{ item.quantity }}</span>
+                <button
+                  class="btn btn-sm btn-outline-primary ms-2"
+                  (click)="increaseQuantity(item)"
+                >
+                  +
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-danger ms-3"
+                  (click)="removeFromCart(item)"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <div class="text-end mt-1">
+              <small class="text-muted"
+                >Total:
+                {{ item.price * item.quantity | currency : "EUR" }}</small
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Order Type Selection -->
+      <div class="mb-3 mt-4">
+        <label class="form-label">Order Type</label>
+        <select class="form-select" [(ngModel)]="orderType">
+          <option value="takeAway">Take Away</option>
+          <option value="homeDelivery">Home Delivery</option>
+          <option value="eatIn">Eat In</option>
+        </select>
+      </div>
+      <!-- Voucher Section -->
+      <div class="mb-3 mt-4">
+        <label class="form-label">🎟️ Vouchers</label>
+
+        <!-- Show message when cart is empty -->
+        <div *ngIf="cartItems.length === 0" class="alert alert-warning">
+          <i class="fas fa-shopping-cart"></i>
+          Adicione itens ao carrinho para aplicar vouchers
+        </div>
+
+        <!-- Show voucher controls when cart has items -->
+        <div *ngIf="cartItems.length > 0">
+          <!-- Voucher Selection Buttons -->
+          <div class="btn-group w-100 mb-3" role="group">
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              [class.active]="showVoucherInput === 'select'"
+              (click)="toggleVoucherInput('select')"
+              [disabled]="appliedVoucherDiscount > 0"
+            >
+              Meus Vouchers
+            </button>
+            <button
+              type="button"
+              class="btn btn-outline-primary"
+              [class.active]="showVoucherInput === 'manual'"
+              (click)="toggleVoucherInput('manual')"
+              [disabled]="appliedVoucherDiscount > 0"
+            >
+              Código Manual
+            </button>
+          </div>
+          <!-- Select from user vouchers -->
+          <div *ngIf="showVoucherInput === 'select'">
+            <select
+              class="form-select"
+              [(ngModel)]="selectedVoucher"
+              (ngModelChange)="onVoucherSelectionChange()"
+              [disabled]="appliedVoucherDiscount > 0"
+            >
+              <option [ngValue]="null">Selecione um voucher...</option>
+              <option *ngFor="let voucher of userVouchers" [ngValue]="voucher">
+                {{ voucher.code }} - {{ voucher.discount | number : "1.2-2" }}€
+                - Expira em {{ voucher.expirationDate | date : "dd/MM/yyyy" }}
+              </option>
+            </select>
+            <small class="text-muted" *ngIf="userVouchers.length === 0">
+              Você não possui vouchers disponíveis
+            </small>
+            <small
+              class="text-info"
+              *ngIf="userVouchers.length > 0 && appliedVoucherDiscount === 0"
+            >
+              💡 Tip: Se o valor do voucher for maior que o total do carrinho, o
+              valor restante será preservado para uso futuro
+            </small>
+          </div>
+          <!-- Manual voucher code input -->
+          <div *ngIf="showVoucherInput === 'manual'" class="input-group">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Digite o código do voucher (ex: VOUCHER123)"
+              [(ngModel)]="manualVoucherCode"
+              (keyup.enter)="validateManualVoucherCode()"
+              maxlength="20"
+              [disabled]="appliedVoucherDiscount > 0"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="validateManualVoucherCode()"
+              [disabled]="
+                !manualVoucherCode.trim() || appliedVoucherDiscount > 0
+              "
+            >
+              Aplicar
+            </button>
+          </div>
+          <!-- Applied voucher display -->
+          <div
+            *ngIf="appliedVoucherDiscount > 0"
+            class="alert alert-success mt-2"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <strong>🎟️ Voucher Aplicado</strong><br />
+                <small>{{ getVoucherDiscountText() }}</small>
+              </div>
+              <button
+                class="btn btn-sm btn-outline-danger"
+                (click)="removeVoucherDiscount()"
+              >
+                Remover
+              </button>
+            </div>
+          </div>
+
+          <!-- Voucher usage info -->
+          <div
+            *ngIf="
+              appliedVoucherDiscount > 0 &&
+              selectedVoucher &&
+              appliedVoucherDiscount < selectedVoucher.discount
+            "
+            class="alert alert-info mt-2"
+          >
+            <small>
+              <i class="fas fa-info-circle"></i> Este voucher será parcialmente
+              usado. O valor restante ({{
+                (selectedVoucher.discount - appliedVoucherDiscount).toFixed(2)
+              }}€) ficará disponível para futuras compras.
+            </small>
+          </div>
+        </div>
+        <!-- End voucher controls -->
+      </div>
+      <!-- End voucher section --><!-- Order Summary -->
+      <div class="card bg-light mt-3">
+        <div class="card-body">
+          <h6 class="card-title">Order Summary</h6>
+          <div class="d-flex justify-content-between">
+            <span>Subtotal:</span>
+            <span>{{ getSubtotal() | number : "1.2-2" }}€</span>
+          </div>
+          <div
+            *ngIf="appliedVoucherDiscount > 0"
+            class="d-flex justify-content-between text-success"
+          >
+            <span>Desconto Voucher:</span>
+            <span>-{{ appliedVoucherDiscount | number : "1.2-2" }}€</span>
+          </div>
+          <hr />
+          <div class="d-flex justify-content-between">
+            <strong>Total:</strong>
+            <strong [class.text-success]="isOrderFullyCoveredByVoucher()">
+              {{ getTotal() | number : "1.2-2" }}€
+              <span
+                *ngIf="isOrderFullyCoveredByVoucher()"
+                class="badge bg-success ms-2"
+                >GRÁTIS</span
+              >
+            </strong>
+          </div>
+          <!-- Voucher savings message -->
+          <div *ngIf="appliedVoucherDiscount > 0" class="mt-2">
+            <small class="text-success fw-bold">
+              {{ getVoucherSavingsMessage() }}
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pay with Stripe Button - Main payment option -->
+      <button
+        *ngIf="getTotal() > 0"
+        class="btn btn-success w-100 mt-3"
+        [disabled]="cartItems.length === 0 || loading"
+        [class.loading]="loading"
+        type="button"
+        (click)="payWithStripe()"
+      >
+        <span
+          *ngIf="loading"
+          class="spinner-border spinner-border-sm me-2"
+          role="status"
+        >
+          <span class="visually-hidden">Processando...</span>
+        </span>
+        <i *ngIf="!loading" class="fab fa-cc-stripe me-1"></i>
+        <span *ngIf="loading">Processando...</span>
+        <span *ngIf="!loading"
+          >Pagar com Stripe ({{ getTotal() | currency : "EUR" }})</span
+        >
+      </button>
+
+      <!-- Free order button when total is 0 -->
+      <button
+        *ngIf="getTotal() <= 0 && cartItems.length > 0"
+        class="btn btn-success w-100 mt-3"
+        [disabled]="cartItems.length === 0"
+        (click)="placeOrder()"
+      >
+        <i class="fas fa-gift me-1"></i>
+        Finalizar Pedido Grátis
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Timer Warning Modal -->
+<div class="modal fade" id="timerWarningModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title">Time Warning</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          Your cart will be cleared in 2 minutes. Please complete your order
+          soon!
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="proceedToCheckout()"
+        >
+          Proceed to Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

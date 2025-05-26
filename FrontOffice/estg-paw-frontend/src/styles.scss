@@ -1,0 +1,342 @@
+/* You can add global styles to this file, and also import other style files */
+@use 'bootstrap/dist/css/bootstrap.min.css';
+@use '@fortawesome/fontawesome-free/css/all.min.css';
+@use 'ngx-toastr/toastr';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  padding: 20px 0;
+  background: linear-gradient(135deg, #80cbc4, #26a69a);
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+  color: #343a40;
+  line-height: 1.6;
+  margin: 0;
+  background-attachment: fixed;
+  background-size: cover;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: #00b7ff;
+  text-decoration: none;
+  transition: color 0.3s;
+
+  &:hover {
+    color: #0078a8;
+    text-decoration: underline;
+  }
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: rgba(229, 243, 240, 0.85);
+  border-radius: 30px;
+  padding: 2.5rem;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);  overflow: hidden;
+  position: relative;
+  transition: all 0.4s ease-in-out;
+    &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at top left, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+    opacity: 0.6;
+    z-index: 0;
+    border-radius: 50%;
+    transform: rotate(-3deg);
+  }
+    & > * {
+    position: relative;
+    z-index: 1;
+  }
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 34px;
+    background: linear-gradient(45deg, rgba(255,255,255,0.3), rgba(38, 166, 154, 0.2));
+    z-index: -1;
+    pointer-events: none;
+  }
+}
+
+/* Header and Navigation */
+header {
+  background-color: #0d6efd;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar {
+  padding: 15px 0;
+}
+
+.navbar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.navbar h1 {
+  font-size: 1.5rem;
+  color: white;
+  margin: 0;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+}
+
+.nav-links li {
+  margin-left: 30px;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  transition: opacity 0.3s;
+}
+
+.nav-links a:hover {
+  color: white;
+  opacity: 0.8;
+  text-decoration: none;
+}
+
+/* Main content area */
+main {
+  min-height: calc(100vh - 180px); /* Subtract header and footer height */
+  padding: 0;
+}
+
+/* Footer */
+footer {
+  background-color: #f8f9fa;
+  padding: 20px 0;
+  border-top: 1px solid #e9ecef;
+  color: #6c757d;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Form styling */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #b2dfdb;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    border-color: #26a69a;
+    outline: none;
+    box-shadow: 0 0 0 0.25rem rgba(38, 166, 154, 0.25);
+    background-color: #f5fbfa;
+  }
+}
+
+/* Button styling */
+.btn {
+  display: inline-block;
+  font-weight: 500;
+  text-align: center;
+  vertical-align: middle;
+  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 0.25rem;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.btn-primary {
+  background-color: #0d6efd;
+  border: 1px solid #0d6efd;
+  color: white;
+
+  &:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+  }
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  border: 1px solid #6c757d;
+  color: white;
+
+  &:hover {
+    background-color: #5c636a;
+    border-color: #565e64;
+  }
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  border: 1px solid #dc3545;
+  color: white;
+
+  &:hover {
+    background-color: #bb2d3b;
+    border-color: #b02a37;
+  }
+}
+
+/* Card styling */
+.card {
+  background-color: #f5fbfa;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(38, 166, 154, 0.08);
+}
+
+.card-header {
+  padding: 1rem 1.5rem;
+  background-color: rgba(178, 223, 219, 0.2);
+  border-bottom: 1px solid rgba(38, 166, 154, 0.1);
+  font-weight: 600;
+  color: #00796b;
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Utility classes */
+.text-center {
+  text-align: center;
+}
+
+.text-primary {
+  color: #0d6efd;
+}
+
+.text-secondary {
+  color: #6c757d;
+}
+
+.text-danger {
+  color: #dc3545;
+}
+
+.mt-1 {
+  margin-top: 0.25rem;
+}
+.mt-2 {
+  margin-top: 0.5rem;
+}
+.mt-3 {
+  margin-top: 1rem;
+}
+.mt-4 {
+  margin-top: 1.5rem;
+}
+.mt-5 {
+  margin-top: 3rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+.mb-3 {
+  margin-bottom: 1rem;
+}
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+.mb-5 {
+  margin-bottom: 3rem;
+}
+
+/* Alert styling */
+.alert {
+  border-radius: 12px;
+  padding: 1rem;
+  border: none;
+}
+
+.alert-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #ff8f00;
+  border-left: 4px solid #ffb74d;
+}
+
+.alert-danger {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #e53935;
+  border-left: 4px solid #ef5350;
+}
+
+/* Badge styling */
+.badge {
+  padding: 0.5em 0.8em;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  body {
+    padding: 20px;
+  }
+
+  .navbar .container {
+    flex-direction: column;
+  }
+
+  .nav-links {
+    margin-top: 15px;
+  }
+
+  .nav-links li {
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+}

@@ -1,0 +1,139 @@
+.container {
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.sticky-cart {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 380px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+
+  .card-body {
+    max-height: calc(100vh - 180px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+  }
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+  }
+
+  &.has-items {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    transform: translateY(0);
+  }
+
+  .card-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-radius: 8px 8px 0 0;
+  }
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  }
+}
+
+.timer-display {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.2);
+  font-weight: 500;
+
+  &.warning {
+    background: rgba(255, 193, 7, 0.3);
+    animation: pulse 1s infinite;
+  }
+}
+
+// Estilo para o modal de aviso
+.modal-header.bg-warning {
+  background-color: #ffc107;
+  color: #000;
+}
+
+// Melhorias visuais no carrinho
+.cart-item {
+  transition: background-color 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 4px;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+// Ajuste para o conteúdo principal
+.col-md-8 {
+  margin-right: 400px; // Espaço para o carrinho fixo
+}
+
+@media (max-width: 992px) {
+  .sticky-cart {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: auto;
+    width: 100%;
+    max-height: 60vh;
+    border-radius: 16px 16px 0 0;
+    margin: 0;
+  }
+
+  .col-md-8 {
+    margin-right: 0;
+    margin-bottom: 60vh;
+  }
+}
+
+// Loading Animation
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+// Stripe button enhancement
+.btn-success {
+  position: relative;
+  overflow: hidden;
+  
+  &.loading {
+    cursor: not-allowed;
+  }
+  
+  .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+}

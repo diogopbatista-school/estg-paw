@@ -1,0 +1,169 @@
+<div class="dashboard-container">
+  <!-- Floating shape elements -->
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm">
+    <div class="container-fluid">
+      <button
+        type="button"
+        id="sidebarCollapse"
+        class="btn p-0 border-0 bg-transparent d-flex align-items-center gap-2"
+        (click)="toggleSidebar()"
+      >
+        <ng-container *ngIf="user?.profileImage; else noProfileImgNav">
+          <img
+            [src]="user?.profileImage || ''"
+            alt="Perfil"
+            class="rounded-circle"
+            style="width: 48px; height: 48px; object-fit: cover"
+          />
+        </ng-container>
+        <ng-template #noProfileImgNav>
+          <div
+            class="bg-secondary text-white d-flex justify-content-center align-items-center rounded-circle"
+            style="width: 48px; height: 48px"
+          >
+            <i class="fas fa-user fa-lg"></i>
+          </div>
+        </ng-template>
+        <span
+          class="ms-2 fw-semibold"
+          style="
+            font-size: 1.15rem;
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            letter-spacing: 0.5px;
+            color: #212529;
+          "
+        >
+          <i class="fas fa-hand-sparkles me-1 text-warning"></i>Olá,
+          {{ getUserName() }}
+        </span>
+      </button>
+      <span class="navbar-brand ms-3">Dashboard</span>
+      <div class="ms-auto d-flex gap-2">
+        <a routerLink="/restaurants" class="btn btn-primary">
+          <i class="fas fa-utensils me-1"></i> Ver Restaurantes
+        </a>
+        <a routerLink="/orders" class="btn btn-info text-white">
+          <i class="fas fa-receipt me-1"></i> Visualizar Pedidos
+        </a>
+        <a routerLink="/orders/track" class="btn btn-success">
+          <i class="fas fa-truck me-1"></i> Acompanhar Pedidos
+        </a>
+        <a routerLink="/create-voucher" class="btn btn-warning">
+          <i class="fas fa-gift me-1"></i> Comprar Voucher
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrapper d-flex align-items-stretch">
+    <!-- SIDEBAR -->
+    <nav id="sidebar" class="sidebar" [class.active]="sidebarActive">
+      <div class="p-4 pt-5 text-center">
+        <h5 class="text-light mb-4">Perfil</h5>
+      </div>
+      <div class="p-4">
+        <ul class="list-unstyled components mb-5">
+          <li>
+            <a
+              routerLink="/dashboard/userInfo"
+              class="btn btn-warning w-100 mb-2"
+              ><i class="fas fa-user me-2"></i> Dados Pessoais</a
+            >
+          </li>
+          <li>
+            <a routerLink="/dashboard/edit" class="btn btn-warning w-100 mb-2"
+              ><i class="fas fa-edit me-2"></i> Editar Perfil</a
+            >
+          </li>
+          <li>
+            <a href="#" (click)="logout()" class="btn btn-danger w-100"
+              ><i class="fas fa-sign-out-alt me-2"></i> Logout</a
+            >
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="content" [class.active]="sidebarActive">
+      <router-outlet></router-outlet>
+      <div
+        class="container-main"
+        *ngIf="
+          !router.url.endsWith('/userInfo') && !router.url.endsWith('/edit')
+        "
+      >
+        <div class="container mt-4">
+          <!-- Voucher Payment Success Message -->
+          <div *ngIf="showVoucherSuccess" class="row mb-4">
+            <div class="col-12">
+              <div
+                class="alert alert-success border-0 shadow-sm"
+                style="border-radius: 12px"
+              >
+                <div class="text-center py-3">
+                  <i
+                    class="fas fa-check-circle text-success mb-3"
+                    style="font-size: 3rem"
+                  ></i>
+                  <h4 class="text-success mb-2">Pagamento confirmado!</h4>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Track Orders Section -->
+          <div class="row mb-5">
+            <div class="col-12">
+              <div class="card shadow-sm hover-shadow border-0">
+                <div class="card-body p-4">
+                  <div
+                    class="d-flex justify-content-between align-items-center"
+                  >
+                    <div>
+                      <h4 class="mb-1">Acompanhar Pedidos</h4>
+                      <p class="text-muted mb-0">
+                        Visualize e gerencie seus pedidos ativos
+                      </p>
+                    </div>
+                    <a
+                      routerLink="/orders/track"
+                      class="btn btn-lg btn-primary"
+                    >
+                      <i class="fas fa-truck me-2"></i>
+                      Ver Meus Pedidos
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Categories Section -->
+          <div class="row g-4 justify-content-center">
+            <div class="col-6 col-md-3" *ngFor="let cat of dishCategories">
+              <button
+                class="category-btn w-100 h-100 d-flex flex-column align-items-center justify-content-center p-4 border-0 shadow-sm rounded bg-white hover-shadow"
+                (click)="onCategoryClick(cat)"
+              >
+                <i
+                  [ngClass]="cat.icon"
+                  class="mb-2"
+                  style="font-size: 2.2rem; color: #ff9800"
+                ></i>
+                <span class="fw-semibold" style="font-size: 1.1rem">{{
+                  cat.label
+                }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

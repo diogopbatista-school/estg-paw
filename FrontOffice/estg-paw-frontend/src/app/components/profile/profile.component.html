@@ -1,0 +1,56 @@
+<div class="profile-container">
+  <!-- Cabeçalho do perfil -->
+  <div class="profile-header">
+    <div class="profile-avatar" *ngIf="user?.profileImage">
+      <img [src]="user?.profileImage" alt="Profile Image" />
+    </div>
+    <div class="profile-avatar no-image" *ngIf="!user?.profileImage">
+      <span>{{ getUserInitials() }}</span>
+    </div>
+    <h2>{{ user?.name }}</h2>
+    <p class="subtitle">{{ user?.email }}</p>
+  </div>
+
+  <!-- Detalhes do perfil -->
+  <div class="profile-details">
+    <div class="card">
+      <div class="card-header">
+        <h3>Informações Pessoais</h3>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <div class="info-label">Nome:</div>
+          <div class="info-value">{{ user?.name }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Email:</div>
+          <div class="info-value">{{ user?.email }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">NIF:</div>
+          <div class="info-value">{{ user?.nif }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Telefone:</div>
+          <div class="info-value">{{ user?.phone }}</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">Papel:</div>
+          <div class="info-value">{{ getUserRole() }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botões de ação -->
+    <div class="action-buttons">
+      <button class="edit-button" routerLink="/profile/edit">
+        <i class="fas fa-edit"></i>
+        Editar Perfil
+      </button>
+      <button class="logout-button" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i>
+        Sair
+      </button>
+    </div>
+  </div>
+</div>

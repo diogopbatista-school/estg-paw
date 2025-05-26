@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <link rel="stylesheet" href="/stylesheets/user/userDashboard.css" />
+</head>
+
+<body>
+  <!-- Floating shape elements -->
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+  
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top shadow-sm">
+    <div class="container-fluid">
+      <button type="button" id="sidebarCollapse" class="btn">
+        <i class="fas fa-bars"></i>
+      </button>
+      <span class="navbar-brand ms-3">Dashboard</span>
+    </div>
+  </nav>
+
+  <div class="wrapper d-flex align-items-stretch">
+    <!-- SIDEBAR -->
+    <nav id="sidebar" class="sidebar">
+      <div class="p-4 pt-5 text-center">
+        <% if (user.profileImage) { %>
+        <img src="<%= user.profileImage %>" alt="Imagem de Perfil" class="rounded-circle mb-3" style="width: 100px; height: 100px; object-fit: cover;" />
+        <% } else { %>
+        <div class="bg-secondary text-white d-flex justify-content-center align-items-center rounded-circle mb-3" style="width: 100px; height: 100px;">
+          <i class="fas fa-user fa-2x"></i>
+        </div>
+        <% } %>
+        <h5 class="text-light mb-4"><%= user.name %></h5>
+      </div>
+
+      <div class="p-4">
+        <ul class="list-unstyled components mb-5">
+          <li><a href="#inicio"><i class="fas fa-home me-2"></i> Início</a></li>
+          <% if (user.role === "admin" || user.role === "superAdmin") { %>
+          <li><a href="#restaurantes"><i class="fas fa-utensils me-2"></i> Restaurantes</a></li>
+          <li><a href="#users"><i class="fas fa-users me-2"></i> Utilizadores</a></li>
+          <% } %>
+          <% if (user.role==="manager" ) { %>
+          <li><a href="#meus-restaurantes"><i class="fas fa-store me-2"></i> Meus Restaurantes</a></li>
+          <% } %>
+          <li><a href="/user/edit/<%= user._id %>"><i class="fas fa-user-edit me-2"></i> Editar Perfil</a></li>
+          <li><a href="/user/logout" class="btn w-100 text-start">
+              <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="content">
+      <!-- Conteúdo do Dashboard existente -->
+      <div class="container-main">
+        <% if (error && error !=="" ) { %>
+        <div class="alert alert-danger">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <%= error %>
+        </div>
+        <% } %>
+        
+        <div class="container mt-4">
+          <div id="inicio">
+            <h1 class="mb-4"><i class="fas fa-tachometer-alt me-2"></i> Bem-vindo, <%= user.name %> !</h1>
+
+            <!-- Informações do user -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-user me-2"></i> Informações do Utilizador</h5>
+              </div>
+              
+              <div class="card-body d-flex align-items-center">
+                <!-- Foto de Perifl do user -->
+                <div class="me-4 justify-content-left">
+                  <% if (user.profileImage) { %>
+                  <img
+                    src="<%= user.profileImage %>"
+                    alt="Imagem de Perfil"
+                    class="rounded-circle"
+                    style="width: 100px; height: 100px; object-fit: cover;" />
+                  <% } else { %>
+                  <div
+                    class="bg-secondary text-white d-flex justify-content-center align-items-center rounded-circle"
+                    style="width: 100px; height: 100px">
+                    <i class="fas fa-user fa-2x"></i>
+                  </div>
+                  <% } %>
+                </div>
+                
+                <div>
+                  <p><strong><i class="fas fa-user me-2"></i>Nome:</strong> <%= user.name %></p>
+                  <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> <%= user.email %></p>
+                  <p><strong><i class="fas fa-phone me-2"></i>Telefone:</strong> <%= user.phone %></p>
+                  <p><strong><i class="fas fa-id-card me-2"></i>NIF:</strong> <%= user.nif %></p>
+                </div>
+              </div>  
+              
+              <div class="card-footer bg-transparent">
+                <a href="/user/edit/<%= user._id %>" class="btn btn-warning">
+                  <i class="fas fa-edit me-2"></i> Editar Perfil
+                </a>
+              </div>  
+            </div>
+          </div>
+
+          <!-- Dados para o Admin -->
+          <% if (user.role==="admin" || user.role==="superAdmin" ) { %>
+          <div id="restaurantes">
+            <div class="row">
+              <!-- Secção de Restaurantes -->
+              <div class="col-md-12 mb-3">
+                <div class="card shadow-sm">
+                  <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-utensils me-2"></i> Restaurantes</h4>
+                  </div>
+
+                  <div class="card-body">
+                    <div class="row mb-4">
+                      <div class="col-md-4">
+                        <div class="card bg-light">
+                          <div class="card-body text-center">
+                            <h5>Total</h5>
+                            <h3 class="text-primary"><%= adminData.numberOfRestaurants %></h3>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-4">
+                        <div class="card bg-light">
+                          <div class="card-body text-center">
+                            <h5>Validados</h5>
+                            <h3 class="text-success"><%= adminData.numberOfRestaurantsValidated %></h3>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="col-md-4">
+                        <div class="card bg-light">
+                          <div class="card-body text-center">
+                            <h5>Não Validados</h5>
+                            <h3 class="text-danger"><%= adminData.numberOfRestaurantsNotValidated %></h3>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <hr />
+
+                    <!-- Seção de filtros para restaurantes no painel do admin -->
+                    <h5><i class="fas fa-filter me-2"></i> Filtrar por:</h5>
+                    <form method="GET" action="/user/dashboard" class="row mb-3">
+                      <div class="col-md-2">
+                        <input type="text" name="name" class="form-control" placeholder="Nome" value="<%= query.name || '' %>" />
+                      </div>
+
+                      <div class="col-md-2">
+                        <input type="text" name="description" class="form-control" placeholder="Descrição" value="<%= query.description || '' %>" />
+                      </div>
+
+                      <div class="col-md-2">
+                        <input type="text" name="phone" class="form-control" placeholder="Telefone" value="<%= query.phone || '' %>" />
+                      </div>
+
+                      <div class="col-md-2">
+                        <select name="verified" class="form-control">
+                          <option value="">Todos</option>
+                          <option value="true" <%=query.verified==="true" ? "selected" : "" %>>Validados</option>
+                          <option value="false" <%=query.verified==="false" ? "selected" : "" %>>Não Validados
+                          </option>
+                        </select>
+                      </div>
+
+                      <div class="col-md-2">
+                        <select name="sort" class="form-control">
+                          <option value="">Ordenar por</option>
+                          <option value="asc" <%=query.sort==="asc" ? "selected" : "" %>>Preço Total (Crescente)
+                          </option>
+                          <option value="desc" <%=query.sort==="desc" ? "selected" : "" %>>Preço Total (Decrescente)
+                          </option>
+                        </select>
+                      </div>
+
+                      <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-filter"></i> Aplicar
+                        </button>
+                      </div>
+
+                      <div class="col-md-1">
+                        <a href="/user/dashboard" class="btn btn-secondary">
+                          <i class="fas fa-undo"></i> Limpar
+                        </a>
+                      </div>
+                    </form>
+
+                    <h5><i class="fas fa-list me-2"></i> Lista de Restaurantes</h5>
+                    <% if (adminData.restaurants.length> 0) { %>
+                    <div class="table-responsive">
+                      <table class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th>Nome</th>
+                            <th>Descrição</th>
+                            <th>Telefone</th>
+                            <th>Localização</th>
+                            <th>Preço Médio</th>
+                            <th>Validado</th>
+                            <th>Ações</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          <% adminData.restaurants.forEach(function (restaurant) { %>
+                          <tr>
+                            <td> <%= restaurant.name %> </td>
+                            <td> <%= restaurant.description || "Sem descrição" %> </td>
+                            <td> <%= restaurant.phone || "Sem telefone" %> </td>
+                            <td>
+                              <small>
+                                <i class="fas fa-map-marker-alt me-1"></i> Lat: <%= restaurant.location.latitude || "N/A" %><br />
+                                <i class="fas fa-map-marker-alt me-1"></i> Long: <%= restaurant.location.longitude || "N/A" %>
+                              </small>
+                            </td>
+                            <td> €<%= restaurant.average_price ? restaurant.average_price.toFixed(2) : '0.00' %> </td>
+                            <td>
+                              <span class="badge <%= restaurant.verified ? 'bg-success' : 'bg-danger' %>">
+                                <%= restaurant.verified ? "Sim" : "Não" %>
+                              </span>
+                            </td>
+                            <td>
+                              <div class="btn-group">
+                                <a href="/admin/toggle-validation/<%= restaurant._id %>" class="btn <%= restaurant.verified ? 'btn-danger' : 'btn-success' %> btn-sm">
+                                  <i class="fas <%= restaurant.verified ? 'fa-times' : 'fa-check' %>"></i>
+                                </a>
+                                <a href="/restaurants/edit/<%= restaurant._id %>" class="btn btn-warning btn-sm">
+                                  <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="/restaurants/dashboard/<%= restaurant._id %>" class="btn btn-info btn-sm">
+                                  <i class="fas fa-sign-in-alt"></i>
+                                </a>
+                                <form action="/restaurants/delete/<%= restaurant._id %>" method="POST" onsubmit="return confirm('Tem certeza que deseja apagar este restaurante?')" style="display: inline;">
+                                  <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i></button>
+                                </form>
+                              </div>
+                            </td>
+                          </tr>
+                          <% }); %>
+                        </tbody>
+                      </table>
+                    </div>
+                    <% } else { %>
+                    <div class="text-center text-muted mt-4 mb-4">
+                      <i class="fas fa-search fa-3x mb-3"></i>
+                      <p>Nenhum restaurante encontrado.</p>
+                    </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          
+          <div id="users">
+            <!-- Secção de users -->
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <!-- Card Utilizadores -->
+                <div class="card shadow-sm">
+                  <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-users me-2"></i> Utilizadores</h4>
+                  </div>
+
+                  <div class="card-body">
+                    <!-- Total de Utilizadores -->
+                    <div class="card bg-light mb-4">
+                      <div class="card-body text-center">
+                        <h5>Total de Utilizadores</h5>
+                        <h3 class="text-primary"><%= adminData.numberOfUsers %></h3>
+                      </div>
+                    </div>
+                    <hr />
+                    <!-- Filtros -->
+                    <h5><i class="fas fa-filter me-2"></i> Filtrar por:</h5>
+                    <form method="GET" action="/user/dashboard#users" class="row mb-3">
+                      <div class="col-md-2">
+                        <input type="text" name="userName" class="form-control" placeholder="Nome" value="<%= query.userName || '' %>" />
+                      </div>
+                      <div class="col-md-2">
+                        <input type="text" name="userEmail" class="form-control" placeholder="Email" value="<%= query.userEmail || '' %>" />
+                      </div>
+                      <div class="col-md-2">
+                        <input type="text" name="userPhone" class="form-control" placeholder="Telefone" value="<%= query.userPhone || '' %>" />
+                      </div>
+                      <div class="col-md-2">
+                        <input type="text" name="userRole" class="form-control" placeholder="Função" value="<%= query.userRole || '' %>" />
+                      </div>
+                      <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fas fa-filter"></i> Aplicar
+                        </button>
+                      </div>
+                      <div class="col-md-2">
+                        <a href="/user/dashboard#users" class="btn btn-secondary">
+                          <i class="fas fa-undo"></i> Limpar
+                        </a>
+                      </div>
+                    </form>
+                    
+                    <!-- Lista de Utilizadores -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h5><i class="fas fa-list me-2"></i> Lista de Utilizadores</h5>
+                      <a href="/user/register" class="btn btn-success">
+                        <i class="fas fa-user-plus me-2"></i> Novo Utilizador
+                      </a>
+                    </div>
+                    <% if (adminData.users.length> 0) { %>
+                    <div class="table-responsive">
+                      <table class="table table-striped">
+                        <thead>
+                          <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Telefone</th>
+                            <th>Função</th>
+                            <th>Ações</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% adminData.users.forEach(function (user) { %>
+                          <tr>
+                            <td><%= user.name %></td>
+                            <td><%= user.email %></td>
+                            <td><%= user.phone || "Sem telefone" %></td>
+                            <td><%= user.role.charAt(0).toUpperCase() + user.role.slice(1) %></td>
+                            <td>
+                              <% if (String(user._id)===String(currentUser._id)) { %>
+                              <span class="badge bg-info">Você</span>
+                              <% } else if (currentUser.role==="superAdmin" && user.role==="superAdmin" ) { %>
+                              <!-- Não mostrar botões para superAdmin que gerem outros superAdmins -->
+                              <span class="badge bg-secondary">SuperAdmin</span>
+                              <% } else if (currentUser.role==="superAdmin" && user.role==="admin" ) { %>
+                              <!-- Mostrar botões normais para superAdmin que gerem admins -->
+                              <div class="btn-group">
+                                <a href="/user/edit/<%= user._id %>" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                                <a href="/user/delete/<%= user._id %>" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja apagar este utilizador?')"><i class="fas fa-trash"></i></a>
+                              </div>
+                              <% } else if (user.role==="admin" ) { %>
+                              <!-- Mostrar badge de Admin apenas se o user não for superAdmin -->
+                              <span class="badge bg-secondary">Admin</span>
+                              <% } else { %>
+                              <!-- Botões normais para outros users -->
+                              <div class="btn-group">
+                                <% if (user.role==="manager" ) { %>
+                                <form method="GET" action="/restaurants/register" style="display: inline-block;">
+                                  <input type="hidden" name="manager" value="<%= user._id %>">
+                                  <button type="submit" class="btn btn-success btn-sm"><i class="fas fa-store"></i></button>
+                                </form>
+                                <% } %>
+                                <a href="/user/edit/<%= user._id %>" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+                                <a href="/user/delete/<%= user._id %>" class="btn btn-danger btn-sm" onclick="return confirm('Tem certeza que deseja apagar este utilizador?')"><i class="fas fa-trash"></i></a>
+                              </div>
+                              <% } %>
+                            </td>
+                          </tr>
+                          <% }); %>
+                        </tbody>
+                      </table>
+                    </div>
+                    <% } else { %>
+                    <div class="text-center text-muted mt-4 mb-4">
+                      <i class="fas fa-users-slash fa-3x mb-3"></i>
+                      <p>Nenhum utilizador encontrado.</p>
+                    </div>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Secção do Manager -->
+          <% if (user.role==="manager" ) { %>
+          <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+              <h4 class="mb-0"><i class="fas fa-store me-2"></i> Seus Restaurantes</h4>
+            </div>
+
+            <div class="card-body">
+              <!-- Info Total Validados Não Validados -->
+              <div class="row mb-4">
+                <div class="col-md-4">
+                  <div class="card bg-light">
+                    <div class="card-body text-center">
+                      <h5>Total</h5>
+                      <h3 class="text-primary"><%= managerData.numberOfRestaurants %></h3>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card bg-light">
+                    <div class="card-body text-center">
+                      <h5>Validados</h5>
+                      <h3 class="text-success"><%= managerData.numberOfRestaurantsValidated %></h3>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="card bg-light">
+                    <div class="card-body text-center">
+                      <h5>Não Validados</h5>
+                      <h3 class="text-danger"><%= managerData.numberOfRestaurantsNotValidated %></h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <hr />
+              <div class="text-start mb-3">
+                <a href="/restaurants/register" class="btn btn-success">
+                  <i class="fas fa-plus me-2"></i> Abrir Novo Restaurante
+                </a>
+              </div>
+
+              <!-- Filtros -->
+              <h5><i class="fas fa-filter me-2"></i> Filtrar por:</h5>
+              <form method="GET" action="/user/dashboard#restaurantes" class="row mb-3">
+                <div class="col-md-2">
+                  <input type="text" name="name" class="form-control" placeholder="Nome" value="<%= query.name || '' %>" />
+                </div>
+
+                <div class="col-md-2">
+                  <input type="text" name="description" class="form-control" placeholder="Descrição" value="<%= query.description || '' %>" />
+                </div>
+
+                <div class="col-md-2">
+                  <input type="text" name="phone" class="form-control" placeholder="Telefone" value="<%= query.phone || '' %>" />
+                </div>
+
+                <div class="col-md-2">
+                  <select name="verified" class="form-control">
+                    <option value="">Todos</option>
+                    <option value="true" <%=query.verified==="true" ? "selected" : "" %>>Validados</option>
+                    <option value="false" <%=query.verified==="false" ? "selected" : "" %>>Não Validados</option>
+                  </select>
+                </div>
+
+                <div class="col-md-2">
+                  <select name="sort" class="form-control">
+                    <option value="">Ordenar</option>
+                    <option value="asc" <%=query.sort==="asc" ? "selected" : "" %>>Preço Total (Crescente)</option>
+                    <option value="desc" <%=query.sort==="desc" ? "selected" : "" %>>Preço Total (Decrescente)</option>
+                  </select>
+                </div>
+
+                <div class="col-md-1">
+                  <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Aplicar
+                  </button>
+                </div>
+                <div class="col-md-1">
+                  <a href="/user/dashboard#restaurantes" class="btn btn-secondary">
+                    <i class="fas fa-undo"></i> Limpar
+                  </a>
+                </div>
+              </form>
+
+              <!-- Lista de Restaurantes do Manager -->
+              <h5><i class="fas fa-list me-2"></i> Lista de Restaurantes</h5>
+              <% if (managerData.restaurants.length> 0) { %>
+              <div class="table-responsive">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Descrição</th>
+                      <th>Telefone</th>
+                      <th>Localização</th>
+                      <th>Preço Médio</th>
+                      <th>Validado</th>
+                      <th>Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% managerData.restaurants.forEach(function (restaurant) { %>
+                    <tr>
+                      <td> <%= restaurant.name %> </td>
+                      <td> <%= restaurant.description || "Sem descrição" %> </td>
+                      <td> <%= restaurant.phone || "Sem telefone" %> </td>
+                      <td>
+                        <small>
+                          <i class="fas fa-map-marker-alt me-1"></i> Lat: <%= restaurant.location.latitude || "N/A" %><br />
+                          <i class="fas fa-map-marker-alt me-1"></i> Long: <%= restaurant.location.longitude || "N/A" %>
+                        </small>
+                      </td>
+                      <td> €<%= restaurant.average_price.toFixed(2) %> </td>
+                      <td>
+                        <span class="badge <%= restaurant.verified ? 'bg-success' : 'bg-danger' %>">
+                          <%= restaurant.verified ? "Sim" : "Não" %>
+                        </span>
+                      </td>
+                      <td>
+                        <div class="btn-group">
+                          <a href="/restaurants/dashboard/<%= restaurant._id %>" class="btn btn-info btn-sm" title="Entrar">
+                            <i class="fas fa-sign-in-alt"></i>
+                          </a>
+                          <a href="/restaurants/edit/<%= restaurant._id %>" class="btn btn-warning btn-sm" title="Editar">
+                            <i class="fas fa-edit"></i>
+                          </a>
+                          <a href="/manager/delete-restaurant/<%= restaurant._id %>" class="btn btn-danger btn-sm" title="Apagar" onclick="return confirm('Tem certeza que deseja apagar este restaurante?')">
+                            <i class="fas fa-trash-alt"></i>
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                    <% }); %>
+                  </tbody>
+                </table>
+              </div>
+              <% } else { %>
+              <div class="text-center text-muted mt-4 mb-4">
+                <i class="fas fa-store-slash fa-3x mb-3"></i>
+                <p>Nenhum restaurante encontrado.</p>
+              </div>
+              <% } %>
+            </div>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/javascripts/sidebar.js"></script>
+</body>
+</html>

@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Criar Prato</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="/stylesheets/dish/register.css" />
+  </head>
+
+  <body>
+    <div class="container mt-5">
+      <h2 class="mb-4"><i class="fas fa-utensils me-2"></i>Criar Novo Prato</h2>
+
+      <% if (error) { %>
+      <div
+        class="alert alert-danger"
+        role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i><%= error %>
+      </div>
+      <% } %>
+
+      <form
+        action="/dish/submitRegister/<%= menuId %>"
+        method="POST"
+        enctype="multipart/form-data">
+        <div class="mb-3">
+          <label
+            for="name"
+            class="form-label">
+            Nome do Prato
+          </label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-tag"></i></span>
+            <input
+              type="text"
+              class="form-control"
+              id="name"
+              name="name"
+              placeholder="Digite o nome do prato"
+              value="<%= name || '' %>"
+              required />
+          </div>
+        </div>
+
+        <!-- Container para status de reconhecimento da API -->
+        <div
+          id="api-recognition-status"
+          class="mb-3"></div>
+
+        <div class="mb-3">
+          <label
+            for="description"
+            class="form-label">
+            Descrição
+          </label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+            <textarea
+              class="form-control"
+              id="description"
+              name="description"
+              rows="3"
+              placeholder="Digite a descrição do prato"
+              required>
+ <%= description || '' %> </textarea
+            >
+          </div>
+        </div>
+
+        <div
+          class="mb-3"
+          id="category-container">
+          <label
+            for="category"
+            class="form-label">
+            Categoria
+          </label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-list"></i></span>
+            <select
+              id="category"
+              name="category"
+              class="form-select"
+              required>
+              <% if (categories && categories.length > 0) { %> <% categories.forEach(category => { %>
+              <option value="<%= category %>"><%= category %></option>
+              <% }); %> <% } %>
+            </select>
+          </div>
+          <button
+            type="button"
+            class="btn btn-link p-0 mt-2"
+            onclick="showNewCategoryField()">
+            <i class="fas fa-plus-circle me-1"></i>Outra categoria
+          </button>
+        </div>
+
+        <div
+          id="new-category-container"
+          class="mb-3"
+          style="display: none">
+          <label
+            for="newCategory"
+            class="form-label">
+            Nova Categoria
+          </label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-folder-plus"></i></span>
+            <input
+              type="text"
+              id="newCategory"
+              name="newCategory"
+              class="form-control"
+              placeholder="Digite a nova categoria" />
+          </div>
+          <button
+            type="button"
+            class="btn btn-link p-0 mt-2"
+            onclick="hideNewCategoryField()">
+            <i class="fas fa-arrow-left me-1"></i>Voltar para lista de categorias
+          </button>
+        </div>
+
+        <div id="price-container">
+          <% if (doses && prices && doses.length > 0 && prices.length > 0) { %> <% doses.forEach((dose, index) => { %>
+          <div class="mb-3 price-row">
+            <div class="row">
+              <div class="col-md-5">
+                <label
+                  for="dose"
+                  class="form-label">
+                  Dose
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-balance-scale"></i></span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="doses[]"
+                    value="<%= dose %>"
+                    required />
+                </div>
+              </div>
+
+              <div class="col-md-5">
+                <label
+                  for="price"
+                  class="form-label">
+                  Preço
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    name="prices[]"
+                    value="<%= prices[index] %>"
+                    required />
+                </div>
+              </div>
+
+              <div class="col-md-2 d-flex align-items-end">
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm"
+                  onclick="removePriceField(this)">
+                  <i class="fas fa-trash me-1"></i>Remover
+                </button>
+              </div>
+            </div>
+          </div>
+          <% }); %> <% } else { %>
+          <div class="mb-3 price-row">
+            <div class="row">
+              <div class="col-md-5">
+                <label
+                  for="dose"
+                  class="form-label">
+                  Dose
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-balance-scale"></i></span>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="doses[]"
+                    placeholder="Ex.: Pequena, Média, Grande"
+                    required />
+                </div>
+              </div>
+
+              <div class="col-md-5">
+                <label
+                  for="price"
+                  class="form-label">
+                  Preço
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
+                  <input
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    name="prices[]"
+                    placeholder="Digite o preço"
+                    required />
+                </div>
+              </div>
+
+              <div class="col-md-2 d-flex align-items-end">
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm"
+                  onclick="removePriceField(this)">
+                  <i class="fas fa-trash me-1"></i>Remover
+                </button>
+              </div>
+            </div>
+          </div>
+          <% } %>
+        </div>
+
+        <!-- Informações Nutricionais -->
+        <div class="mb-3 mt-4">
+          <div class="card">
+            <div class="card-header bg-light">
+              <h5 class="mb-0"><i class="fas fa-apple-alt me-2"></i>Informações Nutricionais</h5>
+            </div>
+            <div class="card-body">
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Informação Nutricional Automática:</strong> Ao criar este prato, o sistema buscará automaticamente as seguintes informações da API Spoonacular:
+                <ul class="mt-2 mb-0">
+                  <li>Valores nutricionais (calorias, carboidratos, proteínas, gorduras, etc.)</li>
+                  <li>NutriScore (classificação nutricional de A a E)</li>
+                  <li>Informações sobre alérgenos</li>
+                </ul>
+              </div>
+              <p class="text-muted small">Estas informações serão baseadas no nome do prato. Você poderá visualizá-las após a criação ou editar o prato posteriormente para atualizar as informações nutricionais.</p>
+
+              <!-- Botão para exibir formulário manual (ajuda durante problemas) -->
+              <div class="d-grid gap-2 my-3">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary"
+                  id="show-manual-button"
+                  onclick="document.getElementById('nutrition-manual-container').style.display='block';">
+                  <i class="fas fa-edit me-1"></i> Inserir informações nutricionais manualmente
+                </button>
+              </div>
+
+              <!-- Formulário de informações nutricionais manuais (inicialmente oculto) -->
+              <div
+                id="nutrition-manual-container"
+                class="mt-3"
+                style="display: none">
+                <hr />
+                <h6 class="mb-3">Inserir Informações Nutricionais Manualmente</h6>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label
+                      for="calories"
+                      class="form-label"
+                      >Calorias (kcal)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="calories"
+                      name="nutritionalInfo[calories]"
+                      min="0"
+                      step="1"
+                      placeholder="Ex.: 250" />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label
+                      for="carbs"
+                      class="form-label"
+                      >Carboidratos (g)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="carbs"
+                      name="nutritionalInfo[carbs]"
+                      min="0"
+                      step="0.1"
+                      placeholder="Ex.: 30" />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label
+                      for="protein"
+                      class="form-label"
+                      >Proteínas (g)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="protein"
+                      name="nutritionalInfo[protein]"
+                      min="0"
+                      step="0.1"
+                      placeholder="Ex.: 15" />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label
+                      for="fat"
+                      class="form-label"
+                      >Gorduras (g)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fat"
+                      name="nutritionalInfo[fat]"
+                      min="0"
+                      step="0.1"
+                      placeholder="Ex.: 8" />
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label
+                      for="fiber"
+                      class="form-label"
+                      >Fibras (g)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="fiber"
+                      name="nutritionalInfo[fiber]"
+                      min="0"
+                      step="0.1"
+                      placeholder="Ex.: 3" />
+                  </div>
+                  <div class="col-md-6 mb-3">
+                    <label
+                      for="sugar"
+                      class="form-label"
+                      >Açúcares (g)</label
+                    >
+                    <input
+                      type="number"
+                      class="form-control"
+                      id="sugar"
+                      name="nutritionalInfo[sugar]"
+                      min="0"
+                      step="0.1"
+                      placeholder="Ex.: 5" />
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label
+                    for="nutriScore"
+                    class="form-label"
+                    >NutriScore</label
+                  >
+                  <select
+                    class="form-select"
+                    id="nutriScore"
+                    name="nutriScore">
+                    <option value="">Selecionar...</option>
+                    <option value="A">A - Excelente valor nutricional</option>
+                    <option value="B">B - Bom valor nutricional</option>
+                    <option value="C">C - Valor nutricional médio</option>
+                    <option value="D">D - Valor nutricional baixo</option>
+                    <option value="E">E - Valor nutricional muito baixo</option>
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label
+                    for="allergens"
+                    class="form-label"
+                    >Alérgenos (separe por vírgula)</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="allergens"
+                    name="allergens"
+                    placeholder="Ex.: gluten, leite, soja" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label
+            for="image"
+            class="form-label">
+            Imagem do Prato
+          </label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-image"></i></span>
+            <input
+              type="file"
+              class="form-control"
+              id="image"
+              name="image"
+              accept="image/*" />
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline-secondary mb-3"
+          onclick="addPriceField()">
+          <i class="fas fa-plus-circle me-1"></i>Adicionar Preço
+        </button>
+        <div class="d-flex justify-content-between mt-4">
+          <a
+            href="/restaurants/dashboard/<%= restaurantId %>"
+            class="btn btn-secondary">
+            <i class="fas fa-times me-2"></i>Cancelar
+          </a>
+          <button
+            type="submit"
+            class="btn btn-success">
+            <i class="fas fa-save me-2"></i>Criar Prato
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Carregando scripts no final do body para garantir que o DOM esteja completamente carregado -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/javascripts/dish/registerDish.js"></script>
+  </body>
+</html>

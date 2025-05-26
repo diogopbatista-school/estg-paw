@@ -1,0 +1,321 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="header-shape"></div>
+    <div class="card-header">
+      <h3><i class="fas fa-user-edit me-2"></i>Editar Perfil</h3>
+    </div>
+    <div class="card-body">
+      <div *ngIf="error" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+        <button type="button" class="btn-close" (click)="error = ''"></button>
+      </div>
+      <form (ngSubmit)="editUser()" #editForm="ngForm">
+        <div class="row">
+          <!-- Nome -->
+          <div class="col-md-6">
+            <div class="form-group mb-3">
+              <label for="name" class="form-label">Nome completo</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-user"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  [(ngModel)]="user.name"
+                  placeholder="Nome completo"
+                  required
+                  #name="ngModel"
+                  (input)="clearError()"
+                />
+              </div>
+              <div
+                *ngIf="name.invalid && (name.dirty || name.touched)"
+                class="validation-error"
+              >
+                Nome é obrigatório.
+              </div>
+            </div>
+          </div>
+          <!-- Email -->
+          <div class="col-md-6">
+            <div class="form-group mb-3">
+              <label for="email" class="form-label">Email</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-envelope"></i>
+                </span>
+                <input
+                  type="email"
+                  class="form-control"
+                  id="email"
+                  name="email"
+                  [(ngModel)]="user.email"
+                  placeholder="Email"
+                  required
+                  #email="ngModel"
+                  (input)="clearError()"
+                />
+              </div>
+              <div
+                *ngIf="email.invalid && (email.dirty || email.touched)"
+                class="validation-error"
+              >
+                E-mail válido é obrigatório.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- NIF -->
+          <div class="col-md-6">
+            <div class="form-group mb-3">
+              <label for="nif" class="form-label">NIF</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-id-card"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="nif"
+                  name="nif"
+                  [(ngModel)]="user.nif"
+                  placeholder="NIF (9 dígitos)"
+                  required
+                  maxlength="9"
+                  pattern="[0-9]{9}"
+                  #nif="ngModel"
+                  (input)="clearError()"
+                />
+              </div>
+              <div
+                *ngIf="nif.invalid && (nif.dirty || nif.touched)"
+                class="validation-error"
+              >
+                NIF deve conter 9 dígitos numéricos.
+              </div>
+            </div>
+          </div>
+          <!-- Telefone -->
+          <div class="col-md-6">
+            <div class="form-group mb-3">
+              <label for="phone" class="form-label">Telefone</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-phone"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="phone"
+                  name="phone"
+                  [(ngModel)]="user.phone"
+                  placeholder="Telefone"
+                  required
+                  maxlength="9"
+                  pattern="[0-9]{9}"
+                  #phone="ngModel"
+                  (input)="clearError()"
+                />
+              </div>
+              <div
+                *ngIf="phone.invalid && (phone.dirty || phone.touched)"
+                class="validation-error"
+              >
+                Telefone deve conter 9 dígitos numéricos.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- Password Atual (obrigatório para utilizadores não admin) -->
+          <div class="col-md-12">
+            <div class="form-group mb-3">
+              <label for="currentPassword" class="form-label"
+                >Senha atual</label
+              >
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-key"></i>
+                </span>
+                <input
+                  [type]="isCurrentPasswordVisible ? 'text' : 'password'"
+                  class="form-control"
+                  id="currentPassword"
+                  name="currentPassword"
+                  [(ngModel)]="user.currentPassword"
+                  placeholder="Senha atual (obrigatória para editar dados)"
+                  required
+                  #currentPassword="ngModel"
+                  (input)="clearError()"
+                  (focus)="user.currentPassword = ''"
+                />
+                <button
+                  class="input-group-text password-toggle"
+                  type="button"
+                  (click)="toggleCurrentPasswordVisibility()"
+                >
+                  <i
+                    class="fas"
+                    [ngClass]="{
+                      'fa-eye-slash': !isCurrentPasswordVisible,
+                      'fa-eye': isCurrentPasswordVisible
+                    }"
+                  ></i>
+                </button>
+              </div>
+              <div
+                *ngIf="
+                  currentPassword.invalid &&
+                  (currentPassword.dirty || currentPassword.touched)
+                "
+                class="validation-error"
+              >
+                Senha atual é obrigatória.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <!-- Password -->
+          <div class="col-md-6">
+            <div class="form-group mb-3">
+              <label for="password" class="form-label">Nova senha</label>
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-lock"></i>
+                </span>
+                <input
+                  [type]="isPasswordVisible ? 'text' : 'password'"
+                  class="form-control"
+                  id="password"
+                  name="password"
+                  [(ngModel)]="user.password"
+                  placeholder="Nova senha (opcional)"
+                  #password="ngModel"
+                  (input)="clearError()"
+                  (focus)="user.password = ''"
+                />
+                <button
+                  class="input-group-text password-toggle"
+                  type="button"
+                  (click)="togglePasswordVisibility()"
+                >
+                  <i
+                    class="fas"
+                    [ngClass]="{
+                      'fa-eye-slash': !isPasswordVisible,
+                      'fa-eye': isPasswordVisible
+                    }"
+                  ></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- Confirmar Password -->
+          <div class="col-md-6">
+            <div class="form-group mb-3">
+              <label for="confirmPassword" class="form-label"
+                >Confirmar senha</label
+              >
+              <div class="input-group">
+                <span class="input-group-text">
+                  <i class="fas fa-lock"></i>
+                </span>
+                <input
+                  [type]="isConfirmPasswordVisible ? 'text' : 'password'"
+                  class="form-control"
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  [(ngModel)]="user.confirmPassword"
+                  placeholder="Confirmar senha"
+                  #confirmPassword="ngModel"
+                  (input)="clearError()"
+                  (focus)="user.confirmPassword = ''"
+                />
+                <button
+                  class="input-group-text password-toggle"
+                  type="button"
+                  (click)="toggleConfirmPasswordVisibility()"
+                >
+                  <i
+                    class="fas"
+                    [ngClass]="{
+                      'fa-eye-slash': !isConfirmPasswordVisible,
+                      'fa-eye': isConfirmPasswordVisible
+                    }"
+                  ></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão para limpar campos de senha -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <button
+              type="button"
+              class="btn btn-outline-secondary btn-sm"
+              (click)="clearPasswordFields()"
+            >
+              <i class="fas fa-eraser me-1"></i> Limpar campos de senha
+            </button>
+          </div>
+        </div>
+
+        <!-- Imagem de Perfil -->
+        <div class="row">
+          <div class="col-md-12">
+            <div class="profile-upload">
+              <div class="upload-preview">
+                <img
+                  *ngIf="imagePreview || user?.profileImage"
+                  [src]="getProfileImageUrl(user.profileImage)"
+                  alt="Preview"
+                />
+                <div
+                  *ngIf="!imagePreview && !user?.profileImage"
+                  class="upload-placeholder"
+                ></div>
+              </div>
+              <label for="profileImage" class="upload-button">
+                <i class="fas fa-camera me-1"></i> Selecionar Imagem
+                <input
+                  type="file"
+                  id="profileImage"
+                  name="profileImage"
+                  class="upload-input"
+                  accept="image/*"
+                  (change)="onFileChange($event)"
+                />
+              </label>
+              <small class="form-text text-muted mt-2"
+                >Formatos permitidos: JPG, JPEG, PNG</small
+              >
+            </div>
+          </div>
+        </div>
+        <!-- Botão de Editar -->        <button
+          type="submit"
+          class="btn-register"
+          [disabled]="editForm.invalid"
+        >
+          <i class="fas fa-save me-2"></i>Guardar Alterações
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary mt-2 w-100"
+          (click)="navigateToDashboard()"
+        >
+          <i class="fas fa-arrow-left me-1"></i> Cancelar
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

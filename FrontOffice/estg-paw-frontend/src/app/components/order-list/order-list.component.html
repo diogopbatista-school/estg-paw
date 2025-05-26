@@ -1,0 +1,523 @@
+<div class="container mt-4">
+  <!-- Back to Dashboard Button -->
+  <div class="d-flex justify-content-end align-items-center mb-2">
+    <a
+      class="btn fw-bold rounded-pill px-4 py-2 shadow-sm"
+      [routerLink]="['/dashboard']"
+      style="
+        background: linear-gradient(90deg, #42a5f5, #26c6da 90%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 2px 12px #26c6da40;
+      "
+    >
+      <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+    </a>
+  </div>
+
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="display-6 text-primary fw-bold">
+        <i class="fas fa-history me-2"></i>Histórico de Pedidos
+      </h2>
+    </div>
+  </div>
+
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="row justify-content-center my-5">
+    <div class="col-auto">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="alert alert-danger shadow-sm">
+    <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+  </div>
+
+  <!-- Orders list -->
+  <div *ngIf="!loading && !error" class="row">
+    <div class="col-12">
+      <!-- Search and filter controls -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-body bg-light">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="fas fa-search text-primary"></i>
+                </span>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Pesquisar pedidos..."
+                  [(ngModel)]="searchTerm"
+                  (input)="filterOrders()"
+                />
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="fas fa-filter text-primary"></i>
+                </span>
+                <select
+                  class="form-select"
+                  [(ngModel)]="selectedStatus"
+                  (change)="filterOrders()"
+                >
+                  <option value="">Todos os estados</option>
+                  <option value="pending">Pendente</option>
+                  <option value="preparing">Em Preparação</option>
+                  <option value="delivered">Pronto para Entrega</option>
+                  <option value="finished">Finalizado</option>
+                  <option value="cancelled">Cancelado</option>
+                </select>
+              </div>
+            </div>
+            <!-- Filtro por data -->
+            <div class="col-md-3">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="far fa-calendar-alt text-primary"></i>
+                </span>
+                <input
+                  type="date"
+                  class="form-control"
+                  [(ngModel)]="selectedDate"
+                  (change)="filterOrders()"
+                />
+              </div>
+            </div>
+            <!-- Filtro por preço -->
+            <div class="col-md-3">
+              <div class="input-group">
+                <span class="input-group-text bg-white">
+                  <i class="fas fa-euro-sign text-primary"></i>
+                </span>
+                <select
+                  class="form-select"
+                  [(ngModel)]="selectedPrice"
+                  (change)="filterOrders()"
+                >
+                  <option value="">Ordenar por preço</option>
+                  <option value="asc">Menor preço</option>
+                  <option value="desc">Maior preço</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button
+                class="btn btn-outline-secondary w-100"
+                (click)="clearFilters()"
+              >
+                <i class="fas fa-times me-1"></i> Limpar filtros
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="pagedOrders.length === 0" class="text-center py-5">
+        <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+        <h4 class="text-muted">Nenhum pedido encontrado</h4>
+        <p class="text-muted">
+          Tente ajustar os filtros ou faça seu primeiro pedido!
+        </p>
+      </div>
+
+      <!-- Orders expandable list -->
+      <div class="orders-list" *ngIf="pagedOrders.length > 0">
+        <div
+          *ngFor="let order of pagedOrders"
+          class="order-card-expandable mb-4 order-{{ order.status }}"
+        >
+          <!-- Card header with summary info -->
+          <div
+            class="card-header-expandable"
+            (click)="toggleOrderDetails(order._id)"
+          >
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="d-flex align-items-center">
+                <button class="btn btn-sm btn-link toggle-btn me-2">
+                  <i
+                    class="fas"
+                    [class.fa-chevron-down]="!isOrderExpanded(order._id)"
+                    [class.fa-chevron-up]="isOrderExpanded(order._id)"
+                  ></i>
+                </button>
+                <span class="badge bg-secondary me-2"
+                  >#{{ order.order_number }}</span
+                >
+                <span [class]="'status-badge status-' + order.status">
+                  <i
+                    class="fas"
+                    [class.fa-clock]="order.status === 'pending'"
+                    [class.fa-blender]="order.status === 'preparing'"
+                    [class.fa-check-circle]="order.status === 'delivered'"
+                    [class.fa-flag-checkered]="order.status === 'finished'"
+                    [class.fa-times-circle]="order.status === 'cancelled'"
+                    class="me-1"
+                  ></i>
+                  {{ getStatusText(order.status) }}
+                </span>
+              </div>
+              <div class="d-flex align-items-center">
+                <!-- Review indicator -->
+                <div
+                  *ngIf="order.review"
+                  class="d-flex align-items-center me-3"
+                >
+                  <div class="stars me-2">
+                    <i
+                      *ngFor="let star of [1, 2, 3, 4, 5]"
+                      [class]="
+                        star <= order.review.rating
+                          ? 'fas fa-star text-warning'
+                          : 'fas fa-star text-muted'
+                      "
+                      style="font-size: 0.8rem"
+                    ></i>
+                  </div>
+                  <span
+                    class="badge"
+                    [class.bg-warning]="!order.review.response"
+                    [class.bg-success]="order.review.response"
+                  >
+                    {{ order.review.response ? "Respondida" : "Pendente" }}
+                  </span>
+                </div>
+                <!-- Restaurant name -->
+                <span class="restaurant-name me-3 text-muted">
+                  <i class="fas fa-store me-1"></i>{{ order.restaurant.name }}
+                </span>
+                <!-- Date -->
+                <div class="date-time me-3">
+                  <i class="far fa-calendar-alt me-1"></i>
+                  {{ formatDate(order.createdAt) }}
+                </div>
+                <!-- Price -->
+                <div class="price-tag">
+                  <strong>€{{ order.totalPrice.toFixed(2) }}</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expandable content -->
+          <div class="card-body-expandable" *ngIf="isOrderExpanded(order._id)">
+            <div class="row">
+              <!-- Order type and basic info -->
+              <div class="col-md-4 mb-3">
+                <div class="info-section">
+                  <h6 class="fw-bold mb-3">
+                    <i class="fas fa-info-circle me-2 text-primary"></i
+                    >Informações do Pedido
+                  </h6>
+                  <div class="info-details">
+                    <p class="mb-2">
+                      <strong>Tipo:</strong> {{ getTypeText(order.type) }}
+                    </p>
+                    <p class="mb-2">
+                      <strong>Data:</strong> {{ formatDate(order.createdAt) }}
+                    </p>
+                    <p class="mb-0">
+                      <strong>Estado:</strong>
+                      <span
+                        [class]="'badge ms-1 ' + getStatusClass(order.status)"
+                      >
+                        {{ getStatusText(order.status) }}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Order items -->
+              <div class="col-md-8 mb-3">
+                <div class="items-section">
+                  <h6 class="fw-bold mb-3">
+                    <i class="fas fa-utensils me-2 text-primary"></i>Itens do
+                    Pedido
+                  </h6>
+                  <div class="items-list">
+                    <div
+                      *ngFor="let item of order.items"
+                      class="item-row d-flex justify-content-between align-items-center mb-2"
+                    >
+                      <span>
+                        <i class="fas fa-utensils me-2 text-muted"></i>
+                        {{ item.dish.name }}
+                        <span class="badge bg-info ms-2"
+                          >x{{ item.quantity }}</span
+                        >
+                      </span>
+                      <span class="price fw-bold"
+                        >€{{ (item.price * item.quantity).toFixed(2) }}</span
+                      >
+                    </div>
+                    <hr />
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <strong>Total:</strong>
+                      <strong class="text-primary"
+                        >€{{ order.totalPrice.toFixed(2) }}</strong
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Order timeline -->
+              <div class="col-md-12 mb-3">
+                <div class="timeline-section">
+                  <h6 class="fw-bold mb-3">
+                    <i class="fas fa-history me-2 text-primary"></i>Histórico do
+                    Pedido
+                  </h6>
+                  <div class="timeline">
+                    <div *ngFor="let log of order.logs" class="timeline-item">
+                      <div class="timeline-marker"></div>
+                      <div class="timeline-content">
+                        <div
+                          class="d-flex justify-content-between align-items-center mb-1"
+                        >
+                          <strong>{{ log.description }}</strong>
+                          <small class="text-muted">{{
+                            formatDate(log.timestamp)
+                          }}</small>
+                        </div>
+                        <span [class]="'badge ' + getStatusClass(log.status)">
+                          {{ getStatusText(log.status) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions and Review section -->
+              <div class="col-md-12">
+                <div class="row">
+                  <!-- Actions -->
+                  <div class="col-md-6 mb-3">
+                    <div class="actions-section">
+                      <h6 class="fw-bold mb-3">
+                        <i class="fas fa-cogs me-2 text-primary"></i>Ações
+                      </h6>
+                      <button
+                        *ngIf="canCancelOrder(order)"
+                        class="btn btn-danger me-2"
+                        (click)="cancelOrder(order)"
+                      >
+                        <i class="fas fa-times-circle me-2"></i>Cancelar Pedido
+                      </button>
+                      <span *ngIf="!canCancelOrder(order)" class="text-muted">
+                        <i class="fas fa-info-circle me-2"></i>Nenhuma ação
+                        disponível
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Review section -->
+                  <div
+                    class="col-md-6 mb-3"
+                    *ngIf="order.status === 'finished'"
+                  >
+                    <div class="review-section-expandable">
+                      <h6 class="fw-bold mb-3">
+                        <i class="fas fa-star me-2 text-primary"></i>Avaliação
+                      </h6>
+                      <!-- Existing review -->
+                      <div *ngIf="order.review" class="existing-review">
+                        <div
+                          class="d-flex justify-content-between align-items-start mb-2"
+                        >
+                          <div>
+                            <div class="stars mb-1">
+                              <i
+                                *ngFor="let star of [1, 2, 3, 4, 5]"
+                                [class]="
+                                  star <= order.review.rating
+                                    ? 'fas fa-star text-warning'
+                                    : 'far fa-star text-muted'
+                                "
+                              >
+                              </i>
+                            </div>
+                            <small class="text-muted">{{
+                              formatDate(order.review.created_at)
+                            }}</small>
+                          </div>
+                          <button
+                            *ngIf="canDeleteReview(order)"
+                            class="btn btn-sm btn-outline-danger"
+                            (click)="deleteReview(order)"
+                            title="Apagar avaliação"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                        <p class="mb-2 p-2 bg-light rounded">
+                          {{ order.review.comment }}
+                        </p>
+
+                        <!-- Review image -->
+                        <div *ngIf="order.review.image" class="mb-3">
+                          <img
+                            [src]="getImageUrl(order.review.image)"
+                            alt="Imagem da avaliação"
+                            class="img-thumbnail"
+                            style="
+                              max-width: 300px;
+                              max-height: 300px;
+                              cursor: pointer;
+                            "
+                            (click)="
+                              openImageModal(getImageUrl(order.review.image))
+                            "
+                          />
+                        </div>
+
+                        <!-- Restaurant response -->
+                        <div
+                          *ngIf="order.review.response"
+                          class="restaurant-response p-2 bg-success-subtle rounded"
+                        >
+                          <small class="text-muted d-block mb-1"
+                            >Resposta do restaurante:</small
+                          >
+                          <p class="mb-1">{{ order.review.response.text }}</p>
+                          <small class="text-muted">{{
+                            formatDate(order.review.response.created_at)
+                          }}</small>
+                        </div>
+                      </div>
+                      <!-- Review form -->
+                      <div *ngIf="canReview(order)" class="review-form">
+                        <div class="rating mb-3">
+                          <div class="stars">
+                            <i
+                              *ngFor="let star of [1, 2, 3, 4, 5]"
+                              [class]="
+                                star <= reviewRating
+                                  ? 'fas fa-star'
+                                  : 'far fa-star'
+                              "
+                              [style.color]="
+                                star <= reviewRating ? '#ffc107' : '#ccc'
+                              "
+                              (click)="reviewRating = star"
+                              style="
+                                cursor: pointer;
+                                font-size: 1.2rem;
+                                margin-right: 2px;
+                              "
+                            >
+                            </i>
+                          </div>
+                        </div>
+                        <div class="form-group mb-3">
+                          <textarea
+                            class="form-control"
+                            rows="3"
+                            placeholder="Escreva sua avaliação..."
+                            [(ngModel)]="reviewComment"
+                          ></textarea>
+                        </div>
+
+                        <!-- Image upload section -->
+                        <div class="form-group mb-3">
+                          <label class="form-label">
+                            <i class="fas fa-camera me-2"></i>Adicionar foto
+                            (opcional)
+                          </label>
+                          <input
+                            type="file"
+                            class="form-control"
+                            accept="image/*"
+                            (change)="onImageSelected($event)"
+                          />
+                          <small class="form-text text-muted">
+                            Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 5MB
+                          </small>
+
+                          <!-- Image preview -->
+                          <div *ngIf="imagePreview" class="mt-3">
+                            <div class="position-relative d-inline-block">
+                              <img
+                                [src]="imagePreview"
+                                alt="Preview"
+                                class="img-thumbnail"
+                                style="max-width: 200px; max-height: 200px"
+                              />
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-danger position-absolute top-0 end-0"
+                                (click)="removeSelectedImage()"
+                                style="transform: translate(50%, -50%)"
+                              >
+                                <i class="fas fa-times"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          class="btn btn-primary btn-sm"
+                          (click)="submitReview(order)"
+                        >
+                          <i class="fas fa-paper-plane me-2"></i>Enviar
+                          Avaliação
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-center mt-4" *ngIf="totalPages > 1">
+        <nav aria-label="Orders pagination">
+          <ul class="pagination">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <a
+                class="page-link rounded-start"
+                (click)="setPage(currentPage - 1)"
+                role="button"
+              >
+                <i class="fas fa-chevron-left"></i>
+              </a>
+            </li>
+            <li
+              class="page-item"
+              *ngFor="let page of pages"
+              [class.active]="page === currentPage"
+            >
+              <a class="page-link" (click)="setPage(page)" role="button">{{
+                page
+              }}</a>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <a
+                class="page-link rounded-end"
+                (click)="setPage(currentPage + 1)"
+                role="button"
+              >
+                <i class="fas fa-chevron-right"></i>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

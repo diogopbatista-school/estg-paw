@@ -1,0 +1,648 @@
+/* Estilos para o NutriScore */
+.nutriScore {
+  display: inline-block;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  color: white;
+  text-align: center;
+  line-height: 25px;
+  font-weight: bold;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.nutriScore-a {
+  background-color: #038141;
+}
+.nutriScore-b {
+  background-color: #85bb2f;
+}
+.nutriScore-c {
+  background-color: #fecb02;
+  color: #333;
+}
+.nutriScore-d {
+  background-color: #ee8100;
+}
+.nutriScore-e {
+  background-color: #e63e11;
+}
+
+/* Estilos para listas de nutrição e alérgenos */
+.nutrition-list,
+.allergen-list {
+  list-style: none;
+  padding-left: 0;
+  font-size: 0.85rem;
+  margin-bottom: 0;
+}
+
+.nutrition-list li,
+.allergen-list li {
+  margin-bottom: 2px;
+}
+
+.fs-small {
+  font-size: 0.9rem;
+}
+
+body {
+  background: linear-gradient(135deg, #8d6e63, #5d4037);
+  font-family: "Segoe UI", sans-serif;
+  color: #3e2723;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+.category-divider {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0 1rem;
+  position: relative;
+}
+
+.category-divider::before,
+.category-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, #a1887f, transparent);
+}
+
+.category-divider::after {
+  background: linear-gradient(to left, #a1887f, transparent);
+}
+
+.category-divider span {
+  padding: 0 1rem;
+  font-weight: bold;
+  color: #6d4c41;
+  font-size: 1.1rem;
+  white-space: nowrap;
+}
+
+.sidebar {
+  height: 100vh;
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: -250px;
+  background: linear-gradient(to bottom, #5d4037, #3e2723);
+  padding-top: 60px;
+  transition: left 0.3s ease;
+  z-index: 1030;
+  color: #f8f9fa;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar.active {
+  left: 0;
+}
+
+/* Estilos para detalhes de pedidos */
+.order-details-content {
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out;
+  max-height: 0;
+}
+
+.order-details-card {
+  border-radius: 6px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.order-items-list li {
+  padding: 5px 0;
+  border-bottom: 1px dotted rgba(0,0,0,0.1);
+}
+
+.order-items-list li:last-child {
+  border-bottom: none;
+}
+
+.order-details-toggle {
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333 !important;
+  border: 1px solid rgba(0,0,0,0.2);
+}
+
+.order-details-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+/* Estilos específicos para os botões em diferentes tipos de cards */
+.card.text-bg-info .order-details-toggle {
+  background-color: #e3f2fd;
+  color: #0277bd !important;
+  border-color: #0277bd;
+}
+
+.card.text-bg-warning .order-details-toggle {
+  background-color: #fff3e0;
+  color: #e65100 !important;
+  border-color: #e65100;
+}
+
+.card.text-bg-success .order-details-toggle {
+  background-color: #e8f5e9;
+  color: #2e7d32 !important;
+  border-color: #2e7d32;
+}
+
+/* Estilos para listas de pedidos */
+.order-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.order-item {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.order-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.order-price {
+  font-weight: bold;
+}
+
+.order-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+/* Animação do slide */
+@keyframes slideDown {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 500px;
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    max-height: 500px;
+    opacity: 1;
+  }
+  to {
+    max-height: 0;
+    opacity: 0;
+  }
+}
+
+.sidebar a {
+  padding: 12px 20px;
+  font-size: 1rem;
+  color: #efebe9;
+  display: block;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border-radius: 5px;
+  margin: 5px 10px;
+}
+
+.sidebar a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transform: translateX(5px);
+}
+
+.navbar {
+  background: linear-gradient(to right, #795548, #5d4037);
+  color: white;
+  z-index: 1031;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.navbar-brand {
+  color: white !important;
+  font-weight: bold;
+  font-size: 1.2rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+#sidebarCollapse {
+  color: white;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+#sidebarCollapse:hover {
+  transform: scale(1.1);
+}
+
+#content {
+  width: 100%;
+  padding: 20px;
+  padding-top: 80px;
+  transition: margin-left 0.3s ease;
+  margin-left: 0;
+}
+
+#content.active {
+  margin-left: 250px;
+}
+
+.container-main {
+  background: rgba(255, 248, 225, 0.95);
+  backdrop-filter: blur(6px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.container-main:hover {
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.2);
+}
+
+.top-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(121, 85, 72, 0.2);
+}
+
+.card-header {
+  font-weight: 600;
+  border-bottom: none;
+  background: rgba(121, 85, 72, 0.1);
+  padding: 1.2rem 1.5rem;
+}
+
+.dish-card {
+  border: 1px solid rgba(121, 85, 72, 0.2);
+  background-color: #fff8e1;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.dish-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(121, 85, 72, 0.2);
+}
+
+.menu-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #5d4037;
+}
+
+/* Botões estilizados */
+.btn-primary {
+  background: linear-gradient(to right, #795548, #5d4037);
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 500;
+  box-shadow: 0 4px 10px rgba(121, 85, 72, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, #6d4c41, #5d4037);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(121, 85, 72, 0.4);
+}
+
+.btn-success {
+  background: linear-gradient(to right, #66bb6a, #43a047);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(102, 187, 106, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+  background: linear-gradient(to right, #43a047, #388e3c);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(102, 187, 106, 0.4);
+}
+
+.btn-warning {
+  background: linear-gradient(to right, #ffb74d, #ff9800);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(255, 152, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background: linear-gradient(to right, #ff9800, #f57c00);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4);
+  color: #fff;
+}
+
+.btn-danger {
+  background: linear-gradient(to right, #ef5350, #e53935);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(239, 83, 80, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  background: linear-gradient(to right, #e53935, #d32f2f);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(239, 83, 80, 0.4);
+}
+
+.btn-info {
+  background: linear-gradient(to right, #4fc3f7, #29b6f6);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(79, 195, 247, 0.3);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.btn-info:hover {
+  background: linear-gradient(to right, #29b6f6, #039be5);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(79, 195, 247, 0.4);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: linear-gradient(to right, #90a4ae, #78909c);
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(144, 164, 174, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(to right, #78909c, #607d8b);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(144, 164, 174, 0.4);
+}
+
+.btn {
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.alert {
+  border-radius: 12px;
+  padding: 1rem;
+  border: none;
+}
+
+.alert-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+  color: #ff8f00;
+  border-left: 4px solid #ffb74d;
+}
+
+.logout-link {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Estilo para os cards de pedidos */
+.card.text-bg-info {
+  background-color: rgba(79, 195, 247, 0.1) !important;
+  color: #0288d1 !important;
+  border-left: 4px solid #29b6f6;
+}
+
+.card.text-bg-warning {
+  background-color: rgba(255, 183, 77, 0.1) !important;
+  color: #f57c00 !important;
+  border-left: 4px solid #ffb74d;
+}
+
+.card.text-bg-success {
+  background-color: rgba(102, 187, 106, 0.1) !important;
+  color: #388e3c !important;
+  border-left: 4px solid #66bb6a;
+}
+
+/* Estilo para as imagens */
+.rounded-circle {
+  border: 4px solid #a1887f;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.rounded-circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Shapes flutuantes para decoração */
+.shape {
+  position: fixed;
+  z-index: -1;
+  opacity: 0.4;
+  animation: float 8s ease-in-out infinite;
+}
+
+.shape-1 {
+  top: 15%;
+  left: 5%;
+  width: 100px;
+  height: 100px;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+  animation-delay: 0s;
+}
+
+.shape-2 {
+  top: 55%;
+  right: 8%;
+  width: 150px;
+  height: 150px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50% 50% 70% 30% / 30% 50% 50% 70%;
+  animation-delay: 1s;
+}
+
+.shape-3 {
+  bottom: 10%;
+  left: 10%;
+  width: 80px;
+  height: 80px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 30% 70% 50% 50% / 50%;
+  animation-delay: 2s;
+}
+
+/* Seção de título */
+.section-title {
+  position: relative;
+  font-weight: 600;
+  color: #5d4037;
+  margin-bottom: 1.5rem;
+  padding-left: 0.5rem;
+  border-left: 4px solid #a1887f;
+}
+
+/* Estatísticas do menu */
+.menu-stats {
+  margin: 1rem 0;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  background-color: rgba(161, 136, 127, 0.1);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  background-color: rgba(161, 136, 127, 0.2);
+  transform: translateY(-3px);
+}
+
+.stat-item i {
+  font-size: 1.2rem;
+  color: #795548;
+}
+
+/* Menu card específico */
+.menu-card {
+  border-left: 4px solid #795548;
+  transition: all 0.3s ease;
+}
+
+.menu-card:hover {
+  border-left: 4px solid #a1887f;
+}
+
+/* Estilização da lista de preços */
+.price-list {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 0;
+}
+
+.price-list li {
+  display: flex;
+  justify-content: space-between;
+  max-width: 150px;
+  padding: 0.2rem 0;
+}
+
+.dose-name {
+  font-weight: 600;
+  color: #5d4037;
+}
+
+.price-value {
+  font-weight: 600;
+  color: #795548;
+}
+
+/* Card de filtros */
+.filter-card {
+  background-color: rgba(255, 248, 225, 0.5);
+  border-radius: 15px;
+  padding: 1.5rem;
+  border: 1px solid rgba(161, 136, 127, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilo para informações do cliente */
+.customer-info {
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  padding: 10px 15px;
+  border-left: 3px solid #26a69a;
+}
+
+.customer-info h6 {
+  color: #26a69a;
+  font-weight: 600;
+}
+
+.customer-info p {
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.customer-info p strong {
+  color: #555;
+  min-width: 80px;
+  display: inline-block;
+}
+
+/* Estilo de hora de pedidos */
+.order-time {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-top: 5px;
+}
+
+/* Ajuste de HR */
+hr.my-4 {
+  border-color: rgba(161, 136, 127, 0.2);
+  margin: 2rem 0;
+}

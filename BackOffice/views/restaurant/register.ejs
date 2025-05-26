@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Criar Restaurante</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet" />
+    <link
+      href="/stylesheets/restaurant/register.css"
+      rel="stylesheet" />
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a
+          class="navbar-brand"
+          href="#">
+          <i class="fas fa-store me-2"></i>Criar Restaurante
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse"
+          id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="/user/dashboard">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="/user/logout">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5">
+      <div class="form-container">
+        <h1><i class="fas fa-plus-circle me-2"></i>Criar Novo Restaurante</h1>
+
+        <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i><%= error %></div>
+        <% } %>
+
+        <form
+          action="/restaurants/submitRegister?managerId=<%= managerId %>"
+          method="POST"
+          enctype="multipart/form-data">
+          <!-- Nome do Restaurante -->
+          <div class="mb-4">
+            <label class="form-label">Nome do Restaurante</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-utensils"></i></span>
+              <input
+                type="text"
+                name="name"
+                class="form-control"
+                required
+                placeholder="Digite o nome do restaurante" />
+            </div>
+          </div>
+
+          <!-- Descrição -->
+          <div class="mb-4">
+            <label class="form-label">Descrição</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+              <textarea
+                name="description"
+                class="form-control"
+                rows="3"
+                placeholder="Descrição do restaurante"></textarea>
+            </div>
+          </div>
+
+          <!-- Localização -->
+          <div class="location-group mb-4">
+            <h5 class="location-title"><i class="fas fa-map-marker-alt me-2"></i>Localização</h5>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Latitude</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-compass"></i></span>
+                  <input
+                    type="number"
+                    step="any"
+                    name="latitude"
+                    class="form-control"
+                    required
+                    placeholder="Ex: -23.550520" />
+                </div>
+              </div>
+
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Longitude</label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="fas fa-compass"></i></span>
+                  <input
+                    type="number"
+                    step="any"
+                    name="longitude"
+                    class="form-control"
+                    required
+                    placeholder="Ex: -46.633308" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Telefone -->
+          <div class="mb-4">
+            <label class="form-label">Telefone</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-phone"></i></span>
+              <input
+                type="text"
+                name="phone"
+                class="form-control"
+                required
+                placeholder="Digite o telefone" />
+            </div>
+          </div>
+
+          <!-- Imagem do Restaurante -->
+          <div class="mb-4">
+            <label class="form-label">Imagem do Restaurante</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-image"></i></span>
+              <input
+                type="file"
+                name="image"
+                class="form-control"
+                accept="image/*"
+                required />
+            </div>
+          </div>
+
+          <!-- Botões -->
+          <div class="d-flex justify-content-between mt-4">
+            <a
+              href="/user/dashboard"
+              class="btn btn-secondary">
+              <i class="fas fa-times me-2"></i>Cancelar
+            </a>
+            <button
+              type="submit"
+              class="btn btn-success">
+              <i class="fas fa-save me-2"></i>Criar Restaurante
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

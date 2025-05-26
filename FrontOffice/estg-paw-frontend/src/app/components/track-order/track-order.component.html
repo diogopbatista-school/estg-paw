@@ -1,0 +1,231 @@
+<div class="track-order-container">
+  <!-- Background shapes -->
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+  <div class="container mt-4">
+    <!-- Back to Dashboard Button -->
+    <div class="d-flex justify-content-end align-items-center mb-2">
+      <a
+        class="btn fw-bold rounded-pill px-4 py-2 shadow-sm"
+        [routerLink]="['/dashboard']"
+        style="
+          background: linear-gradient(90deg, #42a5f5, #26c6da 90%);
+          color: #fff;
+          border: none;
+          box-shadow: 0 2px 12px #26c6da40;
+        "
+      >
+        <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+      </a>
+    </div>
+
+    <!-- Loading State -->
+    <div class="text-center py-5" *ngIf="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <p class="mt-2">Carregando seus pedidos...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="alert alert-danger" *ngIf="error">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      {{ error }}
+    </div>
+
+    <!-- Orders List -->
+    <div class="orders-section" *ngIf="!loading && !error">
+      <!-- No Orders Message -->
+      <div class="text-center py-5" *ngIf="filteredOrders.length === 0">
+        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+        <h3>Nenhum pedido encontrado</h3>
+        <p class="text-muted">Você ainda não realizou nenhum pedido.</p>
+        <a [routerLink]="['/restaurants']" class="btn btn-primary mt-3">
+          <i class="fas fa-utensils me-2"></i>Explorar Restaurantes
+        </a>
+      </div>
+
+      <!-- Orders List View -->
+      <div class="list-group" *ngIf="filteredOrders.length > 0">
+        <div class="list-group-item" *ngFor="let order of pagedOrders">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="d-flex align-items-center mb-2">
+                <span class="badge bg-secondary me-2"
+                  >#{{ order._id.slice(-6).toUpperCase() }}</span
+                >
+                <button
+                  [routerLink]="['/restaurant', order.restaurant._id]"
+                  class="btn btn-link p-0"
+                >
+                  <h5 class="mb-0">{{ order.restaurant.name }}</h5>
+                </button>
+              </div>
+
+              <div class="order-details">
+                <p class="mb-1">
+                  <i class="far fa-calendar-alt me-2"></i>
+                  {{ formatDate(order.createdAt) }}
+                  <span class="mx-2">|</span>
+                  <i class="fas fa-shopping-bag me-2"></i>
+                  {{ getTypeText(order.type) }}
+                </p>
+
+                <div class="mt-2">
+                  <strong>Itens:</strong>
+                  <ul class="list-unstyled ms-3">
+                    <li *ngFor="let item of order.items">
+                      {{ item.dish.name }} (x{{ item.quantity }}) - €{{
+                        (item.price * item.quantity).toFixed(2)
+                      }}
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-end">
+              <span [class]="'badge ' + getStatusClass(order.status)">
+                {{ getStatusText(order.status) }}
+              </span>
+              <div class="mt-2">
+                <strong>Total: €{{ order.totalPrice.toFixed(2) }}</strong>
+              </div>
+              <button
+                *ngIf="canCancelOrder(order)"
+                class="btn btn-sm btn-danger mt-2"
+                (click)="cancelOrder(order._id)"
+              >
+                <i class="fas fa-times-circle me-1"></i>
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <!-- Warnings -->
+          <div class="mt-2">
+            <small
+              *ngIf="order.cancellation_blocked_until"
+              class="text-danger d-block"
+            >
+              <i class="fas fa-exclamation-triangle me-1"></i>
+              Cancelamento bloqueado até
+              {{ formatBlockDate(order.cancellation_blocked_until) }}
+            </small>
+            <small
+              *ngIf="order.cancelled_count && order.cancelled_count >= 4"
+              class="text-warning d-block"
+            >
+              <i class="fas fa-exclamation-circle me-1"></i>
+              Você utilizou {{ order.cancelled_count }}/5 cancelamentos este mês
+            </small>
+          </div>
+
+          <!-- Order Logs Section -->
+          <div class="order-logs mt-3">
+            <div class="d-flex align-items-center mb-2">
+              <i class="fas fa-history me-2"></i>
+              <h6 class="mb-0">Histórico do Pedido</h6>
+            </div>
+            <div class="timeline">
+              <div class="timeline-item" *ngFor="let log of order.logs">
+                <div class="timeline-marker">
+                  <span [class]="'badge ' + getStatusClass(log.status)"></span>
+                </div>
+                <div class="timeline-content">
+                  <div class="d-flex justify-content-between">
+                    <small class="text-muted">{{
+                      formatDate(log.timestamp)
+                    }}</small>
+                    <span [class]="'badge ' + getStatusClass(log.status)">
+                      {{ getStatusText(log.status) }}
+                    </span>
+                  </div>
+                  <p class="mb-0">{{ log.description }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div
+        class="d-flex justify-content-center mt-4"
+        *ngIf="filteredOrders.length > itemsPerPage"
+      >
+        <nav aria-label="Orders pagination">
+          <ul class="pagination">
+            <li class="page-item" [class.disabled]="currentPage === 1">
+              <button
+                class="page-link"
+                (click)="setPage(currentPage - 1)"
+                [disabled]="currentPage === 1"
+              >
+                <i class="fas fa-chevron-left"></i>
+              </button>
+            </li>
+            <li
+              class="page-item"
+              *ngFor="let page of pages"
+              [class.active]="currentPage === page"
+            >
+              <button class="page-link" (click)="setPage(page)">
+                {{ page }}
+              </button>
+            </li>
+            <li class="page-item" [class.disabled]="currentPage === totalPages">
+              <button
+                class="page-link"
+                (click)="setPage(currentPage + 1)"
+                [disabled]="currentPage === totalPages"
+              >
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .timeline {
+    position: relative;
+    padding-left: 1.5rem;
+  }
+
+  .timeline::before {
+    content: "";
+    position: absolute;
+    left: 0.5rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+  }
+
+  .timeline-item {
+    position: relative;
+    padding-bottom: 1.5rem;
+  }
+
+  .timeline-marker {
+    position: absolute;
+    left: -1.5rem;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #e9ecef;
+  }
+
+  .timeline-content {
+    background-color: #f8f9fa;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+    margin-left: 0.5rem;
+  }
+</style>

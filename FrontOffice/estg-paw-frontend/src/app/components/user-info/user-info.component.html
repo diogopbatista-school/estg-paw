@@ -1,0 +1,39 @@
+<div class="card shadow-sm mx-auto" style="max-width: 500px">
+  <div class="card-header bg-warning text-white">
+    <h4 class="mb-0">
+      <i class="fas fa-user me-2"></i>Informações do Utilizador
+    </h4>
+  </div>
+  <div class="card-body" *ngIf="user$ | async as user">
+    <div class="text-center mb-3">
+      <img
+        *ngIf="user.profileImage"
+        [src]="getProfileImageUrl(user.profileImage)"
+        alt="Foto de Perfil"
+        class="rounded-circle mb-2"
+        style="width: 60px; height: 60px; object-fit: cover"
+      />
+      <div
+        *ngIf="!user.profileImage"
+        class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2"
+        style="width: 60px; height: 60px; font-size: 1.5rem"
+      >
+        <i class="fas fa-user"></i>
+      </div>
+      <h5 class="fw-bold">{{ user.name }}</h5>
+      <span class="badge bg-info text-dark">{{ user.role | titlecase }}</span>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+      <li class="list-group-item"><strong>NIF:</strong> {{ user.nif }}</li>
+      <li class="list-group-item">
+        <strong>Telefone:</strong> {{ user.phone }}
+      </li>
+    </ul>
+  </div>
+  <div class="card-footer text-end">
+    <button class="btn btn-secondary" routerLink="/dashboard">
+      <i class="fas fa-arrow-left me-1"></i> Voltar
+    </button>
+  </div>
+</div>

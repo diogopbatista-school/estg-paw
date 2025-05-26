@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Editar Prato</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet" />
+    <link
+      rel="stylesheet"
+      href="/stylesheets/dish/edit.css" />
+    <script
+      src="/javascripts/dish/editDish.js"
+      defer></script>
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a
+          class="navbar-brand"
+          href="#">
+          <i class="fas fa-utensils me-2"></i>Editar Prato
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse"
+          id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="/restaurants/dashboard/<%= restaurantId %>">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="/user/logout">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Formulário de Edição de Prato -->
+    <div class="container mt-5">
+      <div class="form-container">
+        <h2><i class="fas fa-edit me-2"></i>Editar Prato</h2>
+
+        <% if (error) { %>
+        <div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i><%= error %></div>
+        <% } %>
+
+        <form
+          action="/dish/submitEdit/<%= dish._id %>"
+          method="POST"
+          enctype="multipart/form-data">
+          <!-- Nome -->
+          <div class="mb-4">
+            <label
+              for="name"
+              class="form-label"
+              >Nome do Prato</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-tag"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                value="<%= dish.name %>"
+                required />
+            </div>
+          </div>
+
+          <!-- Descrição -->
+          <div class="mb-4">
+            <label
+              for="description"
+              class="form-label"
+              >Descrição</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-align-left"></i></span>
+              <textarea
+                class="form-control"
+                id="description"
+                name="description"
+                rows="3"
+                required>
+<%= dish.description %></textarea
+              >
+            </div>
+            <small class="form-text text-muted mt-1">Detalhe os principais ingredientes e características do prato.</small>
+          </div>
+
+          <!-- Categoria -->
+          <div class="mb-4" id="category-select-container">
+            <label
+              for="category"
+              class="form-label"
+              >Categoria</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-list"></i></span>
+              <select
+                id="category"
+                name="category"
+                class="form-select"
+                required>
+                <% if (categories && categories.length > 0) { %>
+                  <% categories.forEach(category => { %>
+                    <option value="<%= category %>" <%= dish.category === category ? 'selected' : '' %>><%= category %></option>
+                  <% }); %>
+                <% } %>
+              </select>
+            </div>
+            <button
+              type="button"
+              class="btn btn-link p-0 mt-2"
+              onclick="showNewCategoryField()">
+              <i class="fas fa-plus-circle me-1"></i>Outra categoria
+            </button>
+          </div>
+
+          <div
+            id="new-category-container"
+            class="mb-4"
+            style="display: none">
+            <label
+              for="newCategory"
+              class="form-label"
+              >Nova Categoria</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-folder-plus"></i></span>
+              <input
+                type="text"
+                id="newCategory"
+                name="newCategory"
+                class="form-control"
+                placeholder="Digite a nova categoria" />
+            </div>
+            <button
+              type="button"
+              class="btn btn-link p-0 mt-2"
+              onclick="hideNewCategoryField()">
+              <i class="fas fa-arrow-left me-1"></i>Voltar para lista de categorias
+            </button>
+          </div>
+
+          <!-- Preços -->
+          <div class="mb-4">
+            <label class="form-label">Preços e Doses</label>
+            <div id="price-container">
+              <% if (dish.prices && dish.prices.length > 0) { %> <% dish.prices.forEach((price) => { %>
+              <div class="price-row">
+                <div class="row">
+                  <div class="col-md-5">
+                    <label class="form-label">Dose</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-balance-scale"></i></span>
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="doses[]"
+                        value="<%= price.dose %>"
+                        required />
+                    </div>
+                  </div>
+
+                  <div class="col-md-5">
+                    <label class="form-label">Preço</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        class="form-control"
+                        name="prices[]"
+                        value="<%= price.price %>"
+                        required />
+                    </div>
+                  </div>
+
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      onclick="removePriceField(this)">
+                      <i class="fas fa-trash me-1"></i>Remover
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <% }); %> <% } else { %>
+              <div class="price-row">
+                <div class="row">
+                  <div class="col-md-5">
+                    <label class="form-label">Dose</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-balance-scale"></i></span>
+                      <input
+                        type="text"
+                        class="form-control"
+                        name="doses[]"
+                        placeholder="Ex.: Pequena, Média, Grande"
+                        required />
+                    </div>
+                  </div>
+
+                  <div class="col-md-5">
+                    <label class="form-label">Preço</label>
+                    <div class="input-group">
+                      <span class="input-group-text"><i class="fas fa-euro-sign"></i></span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        class="form-control"
+                        name="prices[]"
+                        placeholder="Digite o preço"
+                        required />
+                    </div>
+                  </div>
+
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      onclick="removePriceField(this)">
+                      <i class="fas fa-trash me-1"></i>Remover
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <% } %>
+            </div>
+            <button
+              type="button"
+              class="btn btn-outline-secondary mt-2"
+              onclick="addPriceField()">
+              <i class="fas fa-plus-circle me-1"></i>Adicionar Preço
+            </button>
+          </div>
+
+          <!-- Informações Nutricionais -->
+          <div class="mb-4">
+            <h4 class="mb-3"><i class="fas fa-apple-alt me-2"></i>Informações Nutricionais</h4>
+            <div class="card">
+              <div class="card-body">
+                <p class="text-muted small mb-3">
+                  Estas informações são obtidas automaticamente através da API Spoonacular com base no nome do prato. 
+                  Você também pode editar manualmente os valores utilizando os campos abaixo.
+                </p>
+                
+                <div class="mb-3">
+                  <button type="button" class="btn btn-outline-primary" id="edit-nutrition-btn" onclick="toggleNutritionEdit()">
+                    <i class="fas fa-edit me-1"></i> Editar Valores Nutricionais
+                  </button>
+                </div>
+                
+                <!-- Campos de edição (inicialmente ocultos) -->
+                <div id="nutrition-edit-form" style="display: none;" class="card bg-light p-3 mb-3">
+                  <h5 class="mb-3">Editar Valores Nutricionais</h5>
+                  
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="calories" class="form-label">Calorias (kcal)</label>
+                      <input type="number" class="form-control" id="calories" name="nutritionalInfo[calories]" min="0" step="1" 
+                        value="<%= dish.nutritionalInfo && dish.nutritionalInfo.calories ? dish.nutritionalInfo.calories : '' %>">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="carbs" class="form-label">Carboidratos (g)</label>
+                      <input type="number" class="form-control" id="carbs" name="nutritionalInfo[carbs]" min="0" step="0.1" 
+                        value="<%= dish.nutritionalInfo && dish.nutritionalInfo.carbs ? dish.nutritionalInfo.carbs : '' %>">
+                    </div>
+                  </div>
+                  
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="protein" class="form-label">Proteínas (g)</label>
+                      <input type="number" class="form-control" id="protein" name="nutritionalInfo[protein]" min="0" step="0.1" 
+                        value="<%= dish.nutritionalInfo && dish.nutritionalInfo.protein ? dish.nutritionalInfo.protein : '' %>">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="fat" class="form-label">Gorduras (g)</label>
+                      <input type="number" class="form-control" id="fat" name="nutritionalInfo[fat]" min="0" step="0.1" 
+                        value="<%= dish.nutritionalInfo && dish.nutritionalInfo.fat ? dish.nutritionalInfo.fat : '' %>">
+                    </div>
+                  </div>
+                  
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="fiber" class="form-label">Fibras (g)</label>
+                      <input type="number" class="form-control" id="fiber" name="nutritionalInfo[fiber]" min="0" step="0.1" 
+                        value="<%= dish.nutritionalInfo && dish.nutritionalInfo.fiber ? dish.nutritionalInfo.fiber : '' %>">
+                    </div>
+                    <div class="col-md-6">
+                      <label for="sugar" class="form-label">Açúcares (g)</label>
+                      <input type="number" class="form-control" id="sugar" name="nutritionalInfo[sugar]" min="0" step="0.1" 
+                        value="<%= dish.nutritionalInfo && dish.nutritionalInfo.sugar ? dish.nutritionalInfo.sugar : '' %>">
+                    </div>
+                  </div>
+                  
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label for="nutriScore" class="form-label">NutriScore</label>
+                      <select class="form-select" id="nutriScore" name="nutriScore">
+                        <option value="" <%= !dish.nutriScore ? 'selected' : '' %>>Selecionar...</option>
+                        <option value="A" <%= dish.nutriScore === 'A' ? 'selected' : '' %>>A - Excelente valor nutricional</option>
+                        <option value="B" <%= dish.nutriScore === 'B' ? 'selected' : '' %>>B - Bom valor nutricional</option>
+                        <option value="C" <%= dish.nutriScore === 'C' ? 'selected' : '' %>>C - Valor nutricional médio</option>
+                        <option value="D" <%= dish.nutriScore === 'D' ? 'selected' : '' %>>D - Valor nutricional baixo</option>
+                        <option value="E" <%= dish.nutriScore === 'E' ? 'selected' : '' %>>E - Valor nutricional muito baixo</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="allergens" class="form-label">Alérgenos (separe por vírgula)</label>
+                      <input type="text" class="form-control" id="allergens" name="allergens" 
+                        value="<%= dish.allergens ? dish.allergens.join(', ') : '' %>" 
+                        placeholder="Ex.: gluten, leite, soja">
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Visualização de informações nutricionais (visible by default) -->
+                <div id="nutrition-info-display">
+                  <% if (dish.nutriScore) { %>
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">NutriScore</label>
+                    <div class="d-flex align-items-center">
+                      <div class="nutriScore nutriScore-<%= dish.nutriScore.toLowerCase() %> me-2">
+                        <%= dish.nutriScore %>
+                      </div>
+                      <span class="text-muted small">
+                        (A = Excelente valor nutricional, E = Baixo valor nutricional)
+                      </span>
+                    </div>
+                  </div>
+                  <% } %>
+                  
+                  <div class="row">
+                    <div class="col-md-6">
+                      <h5 class="mb-2">Valores Nutricionais</h5>
+                      <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Calorias
+                          <span class="badge bg-primary rounded-pill">
+                            <%= dish.nutritionalInfo && dish.nutritionalInfo.calories ? dish.nutritionalInfo.calories + ' kcal' : 'N/A' %>
+                          </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Carboidratos
+                          <span class="badge bg-primary rounded-pill">
+                            <%= dish.nutritionalInfo && dish.nutritionalInfo.carbs ? dish.nutritionalInfo.carbs + ' g' : 'N/A' %>
+                          </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Proteínas
+                          <span class="badge bg-primary rounded-pill">
+                            <%= dish.nutritionalInfo && dish.nutritionalInfo.protein ? dish.nutritionalInfo.protein + ' g' : 'N/A' %>
+                          </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Gorduras
+                          <span class="badge bg-primary rounded-pill">
+                            <%= dish.nutritionalInfo && dish.nutritionalInfo.fat ? dish.nutritionalInfo.fat + ' g' : 'N/A' %>
+                          </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Fibras
+                          <span class="badge bg-primary rounded-pill">
+                            <%= dish.nutritionalInfo && dish.nutritionalInfo.fiber ? dish.nutritionalInfo.fiber + ' g' : 'N/A' %>
+                          </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                          Açúcares
+                          <span class="badge bg-primary rounded-pill">
+                            <%= dish.nutritionalInfo && dish.nutritionalInfo.sugar ? dish.nutritionalInfo.sugar + ' g' : 'N/A' %>
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
+                    
+                    <div class="col-md-6">
+                      <h5 class="mb-2">Alérgenos</h5>
+                      <% if (dish.allergens && dish.allergens.length > 0) { %>
+                        <ul class="list-group list-group-flush">
+                          <% dish.allergens.forEach(allergen => { %>
+                            <li class="list-group-item">
+                              <i class="fas fa-exclamation-triangle text-warning me-2"></i><%= allergen %>
+                            </li>
+                          <% }); %>
+                        </ul>
+                      <% } else { %>
+                        <p class="text-muted">Nenhum alérgeno identificado ou informação não disponível.</p>
+                      <% } %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Imagem atual (se existir) -->
+          <% if (dish.image) { %>
+          <div class="mb-4">
+            <label class="form-label">Imagem Atual</label>
+            <div class="d-flex justify-content-center mb-3">
+              <img
+                src="<%= dish.image %>"
+                alt="<%= dish.name %>"
+                class="img-thumbnail"
+                style="max-height: 200px" />
+            </div>
+          </div>
+          <% } %>
+
+          <!-- Imagem -->
+          <div class="mb-4">
+            <label
+              for="image"
+              class="form-label"
+              >Nova Imagem do Prato</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-image"></i></span>
+              <input
+                type="file"
+                class="form-control"
+                id="image"
+                name="image"
+                accept="image/*" />
+            </div>
+            <small class="form-text text-muted mt-1">Deixe em branco para manter a imagem atual.</small>
+          </div>
+
+          <!-- Botões -->
+          <div class="d-flex justify-content-between mt-4">
+            <a
+              href="/restaurants/dashboard/<%= restaurantId %>"
+              class="btn btn-secondary">
+              <i class="fas fa-times me-2"></i>Cancelar
+            </a>
+            <button
+              type="submit"
+              class="btn btn-primary">
+              <i class="fas fa-save me-2"></i>Salvar Alterações
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <style>
+      /* Estilos para o NutriScore */
+      .nutriScore {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        color: white;
+        text-align: center;
+        line-height: 40px;
+        font-weight: bold;
+        font-size: 20px;
+      }
+      .nutriScore-a { background-color: #038141; }
+      .nutriScore-b { background-color: #85BB2F; }
+      .nutriScore-c { background-color: #FECB02; }
+      .nutriScore-d { background-color: #EE8100; }
+      .nutriScore-e { background-color: #E63E11; }
+    </style>
+    
+    <style>
+      /* Estilos para o NutriScore */
+      .nutriScore {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        color: white;
+        text-align: center;
+        line-height: 40px;
+        font-weight: bold;
+        font-size: 20px;
+      }
+      .nutriScore-a { background-color: #038141; }
+      .nutriScore-b { background-color: #85BB2F; }
+      .nutriScore-c { background-color: #FECB02; }
+      .nutriScore-d { background-color: #EE8100; }
+      .nutriScore-e { background-color: #E63E11; }
+    </style>
+  </body>
+</html>

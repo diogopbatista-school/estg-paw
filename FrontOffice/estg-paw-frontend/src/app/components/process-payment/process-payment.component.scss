@@ -1,0 +1,82 @@
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  .card-body {
+    padding: 2rem;
+  }
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.processing-state,
+.success-state,
+.error-state {
+  padding: 1rem 0;
+
+  h4 {
+    margin: 1rem 0;
+    font-weight: 600;
+  }
+
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+  }
+
+  i {
+    font-size: 3rem;
+    display: block;
+  }
+}
+
+.success-state {
+  i {
+    color: #28a745 !important;
+  }
+}
+
+.error-state {
+  i {
+    color: #dc3545 !important;
+  }
+
+  .btn {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+
+  .card-body {
+    padding: 1.5rem !important;
+  }
+
+  .processing-state,
+  .success-state,
+  .error-state {
+    i {
+      font-size: 2.5rem;
+    }
+
+    h4 {
+      font-size: 1.2rem;
+    }
+  }
+}

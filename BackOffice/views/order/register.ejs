@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Registar Pedido</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet" />
+    <link
+      href="/stylesheets/order/register.css"
+      rel="stylesheet" />
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a
+          class="navbar-brand"
+          href="#">
+          <i class="fas fa-utensils me-2"></i>Registar Pedido
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse"
+          id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="/restaurants/dashboard/<%= restaurant._id %>">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="/user/logout">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5">
+      <div class="form-container">
+        <h1><i class="fas fa-shopping-cart me-2"></i>Registar Pedido</h1>
+
+        <form
+          action="/order/submitRegister/<%= restaurant._id %>"
+          method="POST"
+          id="orderForm">          <!-- NIF do Cliente -->
+          <div class="mb-4">
+            <label
+              for="customerId"
+              class="form-label"
+              >NIF do Cliente</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-user"></i></span>
+              <input
+                type="text"
+                class="form-control"
+                id="customerId"
+                name="customerId"
+                placeholder="Digite o NIF do cliente"
+                pattern="[0-9]{9}"
+                title="O NIF deve ter 9 dígitos"
+                required />
+            </div>
+            <small class="form-text text-muted mt-1">Digite o NIF do cliente (9 dígitos)</small>
+          </div>
+
+          <!-- Tipo de Pedido -->
+          <div class="mb-4">
+            <label class="form-label">Tipo de Pedido</label>
+            <div class="ms-2">
+              <div class="form-check mb-2">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="type"
+                  id="homeDelivery"
+                  value="homeDelivery"
+                  required />
+                <label
+                  class="form-check-label"
+                  for="homeDelivery">
+                  <i class="fas fa-home me-2"></i>Entrega em Casa
+                </label>
+              </div>
+              <div class="form-check mb-2">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="type"
+                  id="takeAway"
+                  value="takeAway" />
+                <label
+                  class="form-check-label"
+                  for="takeAway">
+                  <i class="fas fa-box me-2"></i>Takeaway
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="type"
+                  id="eatIn"
+                  value="eatIn" />
+                <label
+                  class="form-check-label"
+                  for="eatIn">
+                  <i class="fas fa-utensils me-2"></i>Comer no Local
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Filtro de pratos -->
+          <div class="mb-4">
+            <label
+              for="dishFilter"
+              class="form-label"
+              >Procurar Pratos</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input
+                type="text"
+                id="dishFilter"
+                class="form-control"
+                placeholder="Filtrar pratos por nome..." />
+            </div>
+          </div>
+
+          <!-- Container principal com pratos e carrinho lado a lado -->
+          <div class="main-section">
+            <!-- Lista de pratos -->
+            <div class="dish-section">
+              <h4 class="mb-3"><i class="fas fa-list me-2"></i>Menu Disponível</h4>
+              <div
+                class="row"
+                id="dishList">
+                <% dishes.forEach((dish) => { %>
+                <div class="col-md-6 col-lg-4 mb-4 dish-card-wrapper">
+                  <div class="card dish-card p-3 shadow-sm h-100">
+                    <h5><i class="fas fa-hamburger me-2"></i><%= dish.name %></h5>
+                    <p class="text-muted small mb-3"><%= dish.description %></p>
+                    <div class="mb-3">
+                      <label
+                        for="dose-<%= dish._id %>"
+                        class="form-label"
+                        >Dose</label
+                      >
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-balance-scale"></i></span>
+                        <select
+                          class="form-select"
+                          id="dose-<%= dish._id %>">
+                          <% dish.prices.forEach((price) => { %>
+                          <option
+                            value="<%= price.dose %>"
+                            data-price="<%= price.price %>">
+                            <%= price.dose %> - €<%= price.price %>
+                          </option>
+                          <% }) %>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label
+                        for="qty-<%= dish._id %>"
+                        class="form-label"
+                        >Quantidade</label
+                      >
+                      <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-hashtag"></i></span>
+                        <input
+                          type="number"
+                          class="form-control"
+                          id="qty-<%= dish._id %>"
+                          min="1"
+                          value="1" />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-primary w-100 mt-auto"
+                      onclick="addToCart('<%= dish._id %>', '<%= dish.name %>')">
+                      <i class="fas fa-plus-circle me-1"></i>Adicionar ao Carrinho
+                    </button>
+                  </div>
+                </div>
+                <% }) %>
+              </div>
+            </div>
+
+            <!-- Carrinho -->
+            <div class="cart-section">
+              <div class="cart">
+                <h4><i class="fas fa-shopping-basket me-2"></i>Carrinho de Compras</h4>
+                <ul
+                  class="list-group mb-3"
+                  id="cartList">
+                  <!-- Os itens do carrinho serão adicionados aqui via JavaScript -->
+                </ul>
+                <div
+                  id="cartEmpty"
+                  class="text-center text-muted mb-3">
+                  <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                  <p>Seu carrinho está vazio</p>
+                </div>
+                <div
+                  id="cartTotal"
+                  class="d-flex justify-content-between fw-bold mb-3"
+                  style="display: none !important">
+                  <span>Total:</span>
+                  <span id="totalAmount">€0.00</span>
+                </div>
+                <input
+                  type="hidden"
+                  name="cart"
+                  id="cartInput" />
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between mt-4">
+            <a
+              href="/restaurants/dashboard/<%= restaurant._id %>"
+              class="btn btn-secondary">
+              <i class="fas fa-times me-2"></i>Cancelar
+            </a>
+            <button
+              type="submit"
+              class="btn btn-success">
+              <i class="fas fa-check-circle me-2"></i>Registar Pedido
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/javascripts/order/registerOrder.js"></script>
+  </body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Erro</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet" />
+    <link
+      href="/stylesheets/error.css"
+      rel="stylesheet" />
+  </head>
+
+  <body>
+    <div class="error-container">
+      <!-- Icon representing the error -->
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+
+      <!-- Error Title -->
+      <h1 class="error-title"><%= message %></h1>
+
+      <!-- Fun subtitle with a bit of humor -->
+      <p class="error-subtitle">Parece que algo não correu como esperado...</p>
+
+      <!-- Animated food-related elements -->
+      <div class="animated-elements">
+        <% const errorMessages = [ "O nosso chef de cozinha está ocupado a resolver este problema.", "Os nossos servidores estão em pausa para almoço, tente mais tarde", "Pedimos desculpa pela confusão na cozinha digital!" ]; const randomMessage = errorMessages[Math.floor(Math.random() * errorMessages.length)]; %>
+        <p><%= randomMessage %></p>
+      </div>
+
+      <% if (typeof error !== "undefined") { %>
+      <div class="error-details">
+        <h2><i class="fas fa-info-circle me-2"></i>Status: <%= error.status || "N/A" %></h2>
+        <% if (process.env.NODE_ENV !== 'production') { %>
+        <pre class="error-stack"><%= error.stack || "No stack trace available" %></pre>
+        <% } %>
+      </div>
+      <% } else { %>
+      <p class="error-details">Detalhes do erro não estão disponíveis.</p>
+      <% } %> <% if (typeof redirectUrl !== "undefined" && redirectUrl) { %>
+      <a
+        href="<%= redirectUrl %>"
+        class="btn-home">
+        <i class="fas fa-home me-2"></i>Voltar
+      </a>
+      <% } else { %>
+      <a
+        href="/user/dashboard"
+        class="btn-home">
+        <i class="fas fa-home me-2"></i>Voltar para Dashboard
+      </a>
+      <% } %>
+    </div>
+
+    <script>
+      // Simple animation for page elements
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add a little extra interactivity
+        const errorIcon = document.querySelector(".error-icon");
+
+        errorIcon.addEventListener("click", function () {
+          this.style.animation = "none";
+          void this.offsetWidth; // Trigger reflow
+          this.style.animation = "bounce 1s ease";
+        });
+      });
+    </script>
+  </body>
+</html>

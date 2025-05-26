@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0" />
+    <title>Cancelar Pedido</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet" />
+    <link
+      href="/stylesheets/order/cancel.css"
+      rel="stylesheet" />
+  </head>
+
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a
+          class="navbar-brand"
+          href="#">
+          <i class="fas fa-ban me-2"></i>Cancelar Pedido
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div
+          class="collapse navbar-collapse"
+          id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="/restaurants/dashboard/<%= order.restaurantId %>">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                href="/user/logout">
+                <i class="fas fa-sign-out-alt me-1"></i> Logout
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5">
+      <div class="cancel-form">
+        <h1><i class="fas fa-times-circle me-2"></i>Cancelar Pedido</h1>
+
+        <!-- Detalhes do Pedido a Cancelar -->
+        <div class="order-details">
+          <h3><i class="fas fa-info-circle me-2"></i>Detalhes do Pedido</h3>
+          <div class="row mb-2">
+            <div class="col-md-6"><strong>ID do Pedido:</strong> <%= order._id %></div>
+            <div class="col-md-6"><strong>Cliente:</strong> <%= order.customerId %></div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-md-6"><strong>Data:</strong> <%= order.orderDate ? new Date(order.orderDate).toLocaleString() : 'N/A' %></div>
+            <div class="col-md-6"><strong>Estado Atual:</strong> <%= order.status %></div>
+          </div>
+        </div>
+
+        <form
+          action="/order/submitCancel/<%= order._id %>"
+          method="POST">
+          <div class="mb-4">
+            <label
+              for="cancelReason"
+              class="form-label"
+              ><i class="fas fa-question-circle me-2"></i>Motivo do Cancelamento</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-list"></i></span>
+              <select
+                id="cancelReason"
+                name="cancelReason"
+                class="form-select"
+                onchange="toggleCustomReason()"
+                required>
+                <option value="">Selecione o motivo</option>
+                <option value="customer">Cancelamento pelo Cliente</option>
+                <option value="restaurant">Cancelamento pelo Restaurante</option>
+                <option value="other">Outro</option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            class="mb-4"
+            id="customReasonContainer"
+            style="display: none">
+            <label
+              for="customReason"
+              class="form-label"
+              ><i class="fas fa-comment-alt me-2"></i>Descreva o motivo</label
+            >
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-pen"></i></span>
+              <textarea
+                id="customReason"
+                name="customReason"
+                class="form-control"
+                rows="3"
+                placeholder="Escreva o motivo do cancelamento..."></textarea>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between mt-4">
+            <a
+              href="/restaurants/dashboard/<%= order.restaurantId %>"
+              class="btn btn-secondary">
+              <i class="fas fa-arrow-left me-2"></i>Voltar
+            </a>
+            <button
+              type="submit"
+              class="btn btn-danger">
+              <i class="fas fa-times-circle me-2"></i>Confirmar Cancelamento
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      function toggleCustomReason() {
+        const reason = document.getElementById("cancelReason").value;
+        const customContainer = document.getElementById("customReasonContainer");
+        customContainer.style.display = reason === "other" ? "block" : "none";
+      }
+    </script>
+  </body>
+</html>

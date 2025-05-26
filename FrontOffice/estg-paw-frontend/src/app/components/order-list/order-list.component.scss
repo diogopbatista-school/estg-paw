@@ -1,0 +1,534 @@
+// Expandable order cards styles
+.order-card-expandable {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-header-expandable {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #e9ecef;
+    }
+
+    .toggle-btn {
+      border: none;
+      background: none;
+      color: #6c757d;
+      padding: 0;
+      font-size: 1rem;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        color: #495057;
+      }
+    }
+
+    .status-badge {
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+
+      &.status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+      }
+
+      &.status-preparing {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #b8daff;
+      }
+
+      &.status-delivered {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+      }
+
+      &.status-finished {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #b8daff;
+      }
+
+      &.status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+      }
+    }
+
+    .restaurant-name {
+      font-size: 0.9rem;
+    }
+
+    .date-time {
+      font-size: 0.9rem;
+      color: #6c757d;
+    }
+
+    .price-tag {
+      font-size: 1.1rem;
+      color: #495057;
+    }
+  }
+
+  .card-body-expandable {
+    padding: 1.5rem;
+    background-color: #fff;
+    border-top: 1px solid #dee2e6;
+    animation: slideDown 0.3s ease-out;
+
+    .info-section,
+    .items-section,
+    .timeline-section,
+    .actions-section,
+    .review-section-expandable {
+      background-color: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-radius: 6px;
+      padding: 1rem;
+
+      h6 {
+        color: #495057;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        padding-bottom: 0.5rem;
+      }
+    }
+
+    .items-list {
+      .item-row {
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e9ecef;
+
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+
+      hr {
+        margin: 1rem 0;
+        border-color: #dee2e6;
+      }
+    }
+
+    .timeline {
+      .timeline-item {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+
+        &:not(:last-child) {
+          border-left: 2px solid #dee2e6;
+          padding-bottom: 1rem;
+        }
+
+        .timeline-marker {
+          position: absolute;
+          left: -6px;
+          top: 0.5rem;
+          width: 12px;
+          height: 12px;
+          background-color: #007bff;
+          border-radius: 50%;
+          border: 2px solid #fff;
+        }
+
+        .timeline-content {
+          background-color: #fff;
+          padding: 0.75rem;
+          border-radius: 4px;
+          border: 1px solid #e9ecef;
+        }
+      }
+    }
+
+    .review-section-expandable {
+      .existing-review {
+        .stars {
+          font-size: 1rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .restaurant-response {
+          margin-top: 1rem;
+          border-left: 3px solid #28a745;
+        }
+      }
+
+      .review-form {
+        .stars {
+          font-size: 1.2rem;
+          margin-bottom: 1rem;
+
+          i {
+            cursor: pointer;
+            transition: all 0.2s ease;
+
+            &:hover {
+              transform: scale(1.1);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Animation for expandable content
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .order-card-expandable {
+    .card-header-expandable {
+      .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+
+        .d-flex:last-child {
+          flex-direction: row;
+          flex-wrap: wrap;
+          width: 100%;
+        }
+      }
+
+      .restaurant-name,
+      .date-time {
+        font-size: 0.8rem;
+      }
+    }
+
+    .card-body-expandable {
+      padding: 1rem;
+
+      .row > div {
+        margin-bottom: 1rem;
+      }
+    }
+  }
+}
+
+// Legacy styles (keeping existing ones for backward compatibility)
+.order-card {
+  border: 4px solid #000;
+  border-left: 6px solid;
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  position: relative;
+
+  &:not(:last-child) {
+    margin-bottom: 2rem;
+  }
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  &:not(:last-child) {
+    margin-bottom: 3rem;
+    border-bottom: 3px solid #000;
+    padding-bottom: 2rem;
+  }
+
+  .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 1.25rem;
+  }
+  .card-body {
+    padding: 1.5rem;
+
+    .col-md-8 {
+      border-right: 1px solid #000;
+      padding-right: 2rem;
+    }
+
+    .table-responsive {
+      border: 1px solid #000;
+      border-radius: 8px;
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .timeline {
+      border: 1px solid #000;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+
+    .col-md-4 {
+      .card {
+        border: 1px solid #000;
+      }
+    }
+  }
+}
+
+// Status-specific styles
+.order-pending {
+  border-left-color: var(--bs-warning);
+  background-color: rgba(255, 193, 7, 0.02);
+}
+
+.order-preparing {
+  border-left-color: var(--bs-info);
+  background-color: rgba(13, 202, 240, 0.02);
+}
+
+.order-delivered {
+  border-left-color: var(--bs-success);
+  background-color: rgba(25, 135, 84, 0.02);
+}
+
+.order-finished {
+  border-left-color: var(--bs-primary);
+  background-color: rgba(13, 110, 253, 0.02);
+}
+
+.order-canceled {
+  border-left-color: var(--bs-danger);
+  background-color: rgba(220, 53, 69, 0.02);
+}
+
+// Badge styles with enhanced visibility
+.badge {
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border: 2px solid transparent;
+
+  &.bg-pending {
+    background-color: #ffc107 !important;
+    color: #000;
+    border-color: #e6ac00;
+  }
+
+  &.bg-preparing {
+    background-color: #0dcaf0 !important;
+    color: #000;
+    border-color: #0bb5d9;
+  }
+
+  &.bg-delivered {
+    background-color: #198754 !important;
+    color: #fff;
+    border-color: #146c43;
+  }
+
+  &.bg-finished {
+    background-color: #0d6efd !important;
+    color: #fff;
+    border-color: #0a58ca;
+  }
+
+  &.bg-canceled {
+    background-color: #dc3545 !important;
+    color: #fff;
+    border-color: #b02a37;
+  }
+}
+
+// Timeline styles
+.timeline {
+  .position-relative {
+    &:not(:last-child) {
+      border-bottom: 1px solid #dee2e6;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+    }
+  }
+}
+
+// Table styles
+.table {
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+
+  th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 1rem;
+  }
+
+  td {
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem;
+    vertical-align: middle;
+  }
+}
+
+// Resumo card styles
+.bg-light {
+  background-color: #f8f9fa !important;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+
+  .card-body {
+    padding: 1.5rem;
+  }
+}
+
+// Review section styles
+.review-section {
+  border: 1px solid #000;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+
+  .stars {
+    font-size: 1.2rem;
+    .fa-star {
+      margin-right: 2px;
+      &:hover {
+        transform: scale(1.1);
+        transition: transform 0.2s ease;
+      }
+    }
+  }
+
+  .response-section {
+    background-color: rgba(0, 123, 255, 0.05);
+    border: 1px solid #000;
+    border-radius: 4px;
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  textarea.form-control {
+    resize: none;
+    &:focus {
+      box-shadow: none;
+      border-color: #80bdff;
+    }
+  }
+}
+
+// Review image styles
+.review-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.02);
+    cursor: pointer;
+  }
+}
+
+.image-preview {
+  .position-relative {
+    .btn-danger {
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Image modal styles
+.image-modal {
+  backdrop-filter: blur(5px);
+
+  img {
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: opacity 0.3s ease;
+  }
+}
+
+// Status colors
+.bg-pending {
+  background-color: #ffc107;
+  color: #000;
+}
+
+.bg-preparing {
+  background-color: #17a2b8;
+  color: #fff;
+}
+
+.bg-delivered {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.bg-finished {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.bg-canceled {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+// Order cards
+.order-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+.timeline {
+  .border-2 {
+    border-width: 2px !important;
+  }
+}
+
+.col-12 {
+  &:not(:last-child) {
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: 1rem;
+      left: 15px;
+      right: 15px;
+      height: 3px;
+      background-color: #26a69a;
+      border-radius: 1.5px;
+    }
+  }
+}

@@ -1,0 +1,416 @@
+<!-- Hero Section com efeito de paralaxe e destaque -->
+<section class="hero-section">
+  <div class="hero-overlay"></div>
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+  <div class="hero-content container">
+    <div class="hero-info">
+      <h1 class="animated-text">
+        Descubra Sabores <span class="accent-text">Incríveis</span>
+      </h1>
+      <p class="hero-subtitle">
+        Encontre os melhores restaurantes, faça seus pedidos e receba sem sair
+        de casa.
+      </p>
+      <div class="hero-cta">
+        <button
+          class="btn btn-primary btn-lg pulse-effect"
+          routerLink="/restaurants"
+        >
+          <i class="fa fa-utensils"></i> Explorar Restaurantes
+        </button>
+        <button class="btn btn-outline" routerLink="/menu">
+          <i class="fa fa-book-open"></i> Ver Cardápios
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-icon">🍽️</div>
+          <span class="stat-number counter">500+</span>
+          <span class="stat-label">Restaurantes</span>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">😊</div>
+          <span class="stat-number counter">15k+</span>
+          <span class="stat-label">Clientes Felizes</span>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">🚚</div>
+          <span class="stat-number counter">30min</span>
+          <span class="stat-label">Entrega Média</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-login glass-effect">
+      <app-login></app-login>
+    </div>
+  </div>
+</section>
+
+<!-- Section de Benefícios -->
+<section class="features-section">
+  <div class="container">
+    <div class="section-header animated">
+      <h2>Por que escolher o ESTG-PAW?</h2>
+      <p class="section-subtitle">
+        Oferecemos a melhor experiência gastronômica digital para nossos
+        clientes
+      </p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card glass-card">
+        <div class="feature-icon">
+          <i class="feature-icon-quality"></i>
+        </div>
+        <h3>Qualidade Garantida</h3>
+        <p>
+          Todos os restaurantes passam por um rigoroso processo de seleção,
+          garantindo a melhor experiência gastronômica.
+        </p>
+      </div>
+
+      <div class="feature-card glass-card">
+        <div class="feature-icon">
+          <i class="feature-icon-delivery"></i>
+        </div>
+        <h3>Entrega Express</h3>
+        <p>
+          Nossa rede de entregadores garante que sua comida chegue quente e no
+          tempo estimado.
+        </p>
+      </div>
+
+      <div class="feature-card glass-card">
+        <div class="feature-icon">
+          <i class="feature-icon-payment"></i>
+        </div>
+        <h3>Pagamento Seguro</h3>
+        <p>
+          Diversas formas de pagamento com total segurança para suas compras
+          online.
+        </p>
+      </div>
+
+      <div class="feature-card glass-card">
+        <div class="feature-icon">
+          <i class="feature-icon-support"></i>
+        </div>
+        <h3>Suporte 24/7</h3>
+        <p>
+          Equipe de atendimento disponível a qualquer hora para resolver
+          qualquer problema com seu pedido.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Como Funciona -->
+<section class="how-it-works">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-3"></div>
+  <div class="container">
+    <div class="section-header animated">
+      <h2>Como Funciona</h2>
+      <p class="section-subtitle">Peça sua comida em apenas 3 passos simples</p>
+    </div>
+
+    <div class="steps-container">
+      <div class="step-item">
+        <div class="step-number bounce-effect">1</div>
+        <div class="step-content glass-card">
+          <h3>Escolha um Restaurante</h3>
+          <p>Escolha um Restaurante Parceiro</p>
+        </div>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step-item">
+        <div class="step-number bounce-effect">2</div>
+        <div class="step-content glass-card">
+          <h3>Selecione os Pratos</h3>
+          <p>
+            Explore o cardápio e adicione seus itens preferidos ao carrinho.
+          </p>
+        </div>
+      </div>
+
+      <div class="step-connector"></div>
+
+      <div class="step-item">
+        <div class="step-number bounce-effect">3</div>
+        <div class="step-content glass-card">
+          <h3>Receba em Casa</h3>
+          <p>Confirme seu pedido e acompanhe a entrega em tempo real.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Restaurantes em Destaque -->
+<section class="featured-restaurants">
+  <div class="shape shape-4"></div>
+  <div class="container">
+    <div class="section-header animated">
+      <h2>Restaurantes em Destaque</h2>
+      <p class="section-subtitle">Descubra os favoritos de nossos clientes</p>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <p class="mt-2">Carregando restaurantes em destaque...</p>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-container" *ngIf="error && !loading">
+      <div class="alert alert-danger">
+        {{ error }}
+      </div>
+    </div>
+
+    <!-- Featured restaurants -->
+    <div
+      class="restaurant-carousel"
+      *ngIf="!loading && !error && featuredRestaurants.length > 0"
+    >
+      <div
+        class="restaurant-card glass-card"
+        *ngFor="let restaurant of featuredRestaurants"
+      >
+        <div class="restaurant-badge" *ngIf="restaurant.featured">Destaque</div>
+        <div
+          class="restaurant-image"
+          [style.background-image]="
+            restaurant.image
+              ? 'url(' + getImageUrl(restaurant.image) + ')'
+              : 'url(/assets/images/default-restaurant.jpg)'
+          "
+        >
+          <div class="restaurant-overlay">
+            <button
+              class="btn btn-sm btn-light"
+              [routerLink]="['/restaurant', restaurant._id]"
+            >
+              Ver Menu
+            </button>
+          </div>
+        </div>
+        <div class="restaurant-info">
+          <div class="restaurant-header">
+            <h3>{{ restaurant.name }}</h3>
+            <div class="restaurant-rating" *ngIf="restaurant.rating">
+              <span class="rating-stars">
+                <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
+                  <span *ngIf="star <= restaurant.rating">★</span>
+                  <span *ngIf="star > restaurant.rating">☆</span>
+                </ng-container>
+              </span>
+              <span class="rating-number">{{
+                restaurant.rating | number : "1.1-1"
+              }}</span>
+            </div>
+          </div>
+          <p class="restaurant-category">
+            {{ restaurant.description || "Variada" }} •
+            {{ restaurant.priceRange || "€€" }}
+          </p>
+          <div class="restaurant-meta">
+            <span class="restaurant-time">
+              <i class="icon-time"></i>
+              {{ restaurant.deliveryTime || "30-45" }} min
+            </span>
+            <span class="restaurant-delivery-fee">
+              <i class="icon-delivery"></i>
+              {{
+                restaurant.deliveryFee
+                  ? (restaurant.deliveryFee
+                    | currency : "EUR" : "symbol" : "1.2-2")
+                  : "Grátis"
+              }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- No restaurants found -->
+    <div
+      class="no-data-container"
+      *ngIf="!loading && !error && featuredRestaurants.length === 0"
+    >
+      <p>Nenhum restaurante em destaque disponível no momento.</p>
+    </div>
+    <div class="view-all-container">
+      <button
+        class="btn btn-outline-primary pulse-effect"
+        routerLink="/restaurants"
+      >
+        Ver Todos os Restaurantes
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Seção de Categorias Populares -->
+<section class="categories-section">
+  <div class="container">
+    <div class="section-header animated">
+      <h2>Explore por Categoria</h2>
+      <p class="section-subtitle">Descubra pratos por categoria</p>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading-container" *ngIf="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Carregando...</span>
+      </div>
+      <p class="mt-2">Carregando categorias...</p>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-container" *ngIf="error && !loading">
+      <div class="alert alert-danger">
+        {{ error }}
+      </div>
+    </div>
+
+    <!-- Dynamic categories grid -->
+    <div class="categories-grid" *ngIf="!loading && dishCategories.length > 0">
+      <div
+        class="category-card"
+        *ngFor="let category of dishCategories"
+        [routerLink]="['/category', category.toLowerCase()]"
+      >
+        <!-- Use an emoji based on category name -->
+        <div class="category-icon">
+          <ng-container [ngSwitch]="category.toLowerCase()">
+            <ng-container *ngSwitchCase="'pizza'">🍕</ng-container>
+            <ng-container *ngSwitchCase="'sushi'">🍣</ng-container>
+            <ng-container *ngSwitchCase="'burger'">🍔</ng-container>
+            <ng-container *ngSwitchCase="'pasta'">🍝</ng-container>
+            <ng-container *ngSwitchCase="'dessert'">🍰</ng-container>
+            <ng-container *ngSwitchCase="'salad'">🥗</ng-container>
+            <ng-container *ngSwitchCase="'seafood'">🦐</ng-container>
+            <ng-container *ngSwitchCase="'coffee'">☕</ng-container>
+            <ng-container *ngSwitchCase="'breakfast'">🍳</ng-container>
+            <ng-container *ngSwitchCase="'soup'">🥣</ng-container>
+            <ng-container *ngSwitchCase="'steak'">🥩</ng-container>
+            <ng-container *ngSwitchCase="'sandwich'">🥪</ng-container>
+            <ng-container *ngSwitchCase="'chicken'">🍗</ng-container>
+            <ng-container *ngSwitchDefault>🍽️</ng-container>
+          </ng-container>
+        </div>
+        <h3>{{ formatCategoryName(category) }}</h3>
+      </div>
+    </div>
+
+    <!-- No categories found -->
+    <div
+      class="no-data-container"
+      *ngIf="!loading && !error && dishCategories.length === 0"
+    >
+      <p>Nenhuma categoria disponível no momento.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Seção de Depoimentos -->
+<section class="testimonials-section">
+  <div class="shape shape-5"></div>
+  <div class="container">
+    <div class="section-header animated">
+      <h2>O que nossos clientes dizem</h2>
+      <p class="section-subtitle">
+        Confira as experiências de quem já utilizou nossa plataforma
+      </p>
+    </div>
+
+    <div class="testimonials-container">
+      <div class="testimonial-card">
+        <div class="testimonial-rating">★★★★★</div>
+        <p class="testimonial-text">
+          "A melhor experiência de delivery que já tive! A comida chegou quente
+          e no prazo prometido. Recomendo a todos."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar"></div>
+          <div class="testimonial-info">
+            <h4>Ana Silva</h4>
+            <p>Cliente desde 2023</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-rating">★★★★★</div>
+        <p class="testimonial-text">
+          "Interface super intuitiva e fácil de usar. Consegui fazer meu pedido
+          em menos de 2 minutos. Fantástico!"
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar"></div>
+          <div class="testimonial-info">
+            <h4>Carlos Oliveira</h4>
+            <p>Cliente desde 2024</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-rating">★★★★☆</div>
+        <p class="testimonial-text">
+          "Ótimas opções de restaurantes e promoções exclusivas. Uso sempre para
+          pedir meu almoço durante a semana."
+        </p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar"></div>
+          <div class="testimonial-info">
+            <h4>Márcia Santos</h4>
+            <p>Cliente desde 2022</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Final -->
+
+<!-- Newsletter Signup -->
+<section class="newsletter-section">
+  <div class="shape shape-3"></div>
+  <div class="shape shape-5"></div>
+  <div class="container">
+    <div class="newsletter-content glass-card">
+      <div class="newsletter-text animated">
+        <h2>Inscreva-se para receber ofertas exclusivas</h2>
+        <p>
+          Seja o primeiro a receber promoções especiais e novidades sobre seus
+          restaurantes favoritos
+        </p>
+      </div>
+      <div class="newsletter-form">
+        <form
+          (ngSubmit)="onNewsletterSubmit()"
+          class="newsletter-form-container"
+        >
+          <input
+            type="email"
+            placeholder="Seu e-mail"
+            [(ngModel)]="newsletterEmail"
+            name="email"
+            required
+          />
+          <button type="submit" class="btn btn-primary pulse-effect">
+            Inscrever-se
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>

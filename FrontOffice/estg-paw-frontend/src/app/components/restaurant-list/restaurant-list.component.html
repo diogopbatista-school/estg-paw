@@ -1,0 +1,274 @@
+<div
+  class="dashboard-container"
+  style="
+    min-height: 100vh;
+    background: linear-gradient(120deg, #e3f2fd 0%, #b3e5fc 40%, #b2dfdb 100%);
+  "
+>
+  <!-- Floating shape elements -->
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+
+  <div class="wrapper d-flex align-items-stretch">
+    <!-- SIDEBAR -->
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <div id="content" [class.active]="sidebarActive">
+      <div class="container-main">
+        <!-- Botão Voltar ao Dashboard -->
+        <div class="d-flex justify-content-end align-items-center mb-2">
+          <a
+            class="btn fw-bold rounded-pill px-4 py-2 shadow-sm"
+            [routerLink]="['/dashboard']"
+            style="
+              background: linear-gradient(90deg, #42a5f5, #26c6da 90%);
+              color: #fff;
+              border: none;
+              box-shadow: 0 2px 12px #26c6da40;
+            "
+          >
+            <i class="fas fa-arrow-left me-2"></i> Voltar ao Dashboard
+          </a>
+        </div>
+
+        <!-- NAVBAR DE FILTROS DA PÁGINA DE RESTAURANTES -->
+        <div
+          class="filter-navbar mb-4 px-3 py-3 shadow rounded-4 bg-white border-0 d-flex flex-wrap align-items-center justify-content-between gap-3 position-relative"
+          style="
+            background: linear-gradient(90deg, #b3e5fc 60%, #80cbc4 100%);
+            box-shadow: 0 4px 24px rgba(38, 198, 218, 0.13);
+          "
+        >
+          <!-- Categorias em horizontal, visual colorido -->
+          <div
+            class="category-scroll d-flex align-items-center gap-2 flex-nowrap w-100 pb-1 overflow-auto"
+          >
+            <ng-container *ngFor="let cat of dishCategories">
+              <button
+                class="btn d-flex align-items-center gap-2 px-3 py-2 rounded-pill shadow-sm fw-semibold border-0"
+                [ngClass]="{ active: filters.category === cat.value }"
+                (click)="filterByCategory(cat.value)"
+                [style.background]="
+                  filters.category === cat.value
+                    ? 'linear-gradient(90deg, #ffb74d, #ff9800 80%)'
+                    : 'linear-gradient(90deg, #fff8e1, #ffe0b2 80%)'
+                "
+                [style.color]="
+                  filters.category === cat.value ? '#fff' : '#6d4c41'
+                "
+                [style.transform]="
+                  filters.category === cat.value ? 'scale(1.07)' : 'none'
+                "
+                style="
+                  min-width: 90px;
+                  min-height: 40px;
+                  font-size: 1.05rem;
+                  transition: background 0.2s, color 0.2s, transform 0.15s;
+                  outline: none;
+                "
+              >
+                <span
+                  class="d-flex align-items-center justify-content-center bg-light rounded-circle"
+                  style="width: 32px; height: 32px; font-size: 1.3rem"
+                >
+                  <ng-container [ngSwitch]="cat.value.toLowerCase()">
+                    <ng-container *ngSwitchCase="'pizza'">🍕</ng-container>
+                    <ng-container *ngSwitchCase="'sushi'">🍣</ng-container>
+                    <ng-container *ngSwitchCase="'burger'">🍔</ng-container>
+                    <ng-container *ngSwitchCase="'pasta'">🍝</ng-container>
+                    <ng-container *ngSwitchCase="'dessert'">🍰</ng-container>
+                    <ng-container *ngSwitchCase="'salad'">🥗</ng-container>
+                    <ng-container *ngSwitchCase="'seafood'">🦐</ng-container>
+                    <ng-container *ngSwitchCase="'coffee'">☕</ng-container>
+                    <ng-container *ngSwitchCase="'breakfast'">🍳</ng-container>
+                    <ng-container *ngSwitchCase="'soup'">🥣</ng-container>
+                    <ng-container *ngSwitchCase="'steak'">🥩</ng-container>
+                    <ng-container *ngSwitchCase="'sandwich'">🥪</ng-container>
+                    <ng-container *ngSwitchCase="'chicken'">🍗</ng-container>
+                    <ng-container *ngSwitchDefault>🍽️</ng-container>
+                  </ng-container>
+                </span>
+                <span>{{ cat.label }}</span>
+              </button>
+            </ng-container>
+            <button
+              *ngIf="filters.category"
+              class="btn ms-2 py-1 px-3 fw-bold d-flex align-items-center gap-1 rounded-pill border-0"
+              style="
+                background: #e0f7fa;
+                color: #00838f;
+                border: 2px solid #26c6da;
+              "
+              (click)="clearCategoryFilter()"
+            >
+              <i class="fas fa-times"></i>
+              <span>Limpar filtro</span>
+            </button>
+          </div>
+          <!-- Pesquisa -->
+          <form
+            class="d-flex align-items-center gap-2 flex-grow-1 justify-content-end"
+            (submit)="$event.preventDefault(); searchRestaurants()"
+            style="max-width: 350px"
+          >
+            <input
+              type="text"
+              class="form-control shadow-sm rounded-pill border-0"
+              [(ngModel)]="filters.name"
+              name="search"
+              placeholder="Pesquisar restaurante..."
+              style="
+                min-width: 140px;
+                font-size: 1.05rem;
+                background: #e0f7fa;
+                color: #006064;
+              "
+            />
+            <button
+              class="btn px-4 py-2 fw-bold shadow-sm rounded-pill border-0"
+              type="submit"
+              style="
+                background: linear-gradient(90deg, #42a5f5, #26c6da 90%);
+                color: #fff;
+                font-size: 1.05rem;
+                min-height: 40px;
+              "
+            >
+              <i class="fas fa-search me-1"></i> Aplicar
+            </button>
+          </form>
+        </div>
+
+        <!-- Estado de carregamento -->
+        <div class="loading-container" *ngIf="loading">
+          <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">Carregando...</span>
+          </div>
+          <p>Carregando restaurantes...</p>
+        </div>
+
+        <!-- Mensagem de erro -->
+        <div class="error-container" *ngIf="error && !loading">
+          <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+          </div>
+        </div>
+
+        <!-- Lista de restaurantes -->
+        <div class="restaurant-grid" *ngIf="!loading && !error">
+          <div class="row g-3">
+            <div
+              class="col-12 col-sm-6 col-md-4"
+              *ngFor="let restaurant of filteredRestaurants"
+            >
+              <div
+                class="restaurant-card p-1 p-md-2 shadow-sm rounded bg-white h-100 d-flex flex-column justify-content-between"
+                style="min-height: 210px; max-width: 210px; margin: 0 auto"
+              >
+                <div
+                  class="restaurant-image mb-2"
+                  [routerLink]="['/restaurant', restaurant._id]"
+                  style="cursor: pointer"
+                >
+                  <img
+                    [src]="
+                      restaurant.image
+                        ? getImageUrl(restaurant.image)
+                        : 'assets/images/restaurant-placeholder.jpg'
+                    "
+                    [alt]="restaurant.name"
+                    loading="lazy"
+                    class="img-fluid rounded"
+                    style="height: 180px; object-fit: cover; width: 100%"
+                  />
+                  <div class="restaurant-badge" *ngIf="restaurant.verified">
+                    <i class="fas fa-check-circle"></i> Verificado
+                  </div>
+                </div>
+                <div
+                  class="restaurant-content flex-grow-1 d-flex flex-column justify-content-between"
+                >
+                  <div>
+                    <h3
+                      class="restaurant-name mb-1"
+                      [routerLink]="['/restaurant', restaurant._id]"
+                      style="
+                        cursor: pointer;
+                        font-size: 1.25rem;
+                        font-weight: 600;
+                        color: #00897b;
+                      "
+                    >
+                      {{ restaurant.name }}
+                    </h3>
+                    <p
+                      class="restaurant-description text-muted mb-2"
+                      style="font-size: 0.98rem"
+                    >
+                      {{
+                        restaurant.description || "Sem descrição disponível"
+                          | slice : 0 : 100
+                      }}{{
+                        restaurant.description &&
+                        restaurant.description.length > 100
+                          ? "..."
+                          : ""
+                      }}
+                    </p>
+                  </div>
+                  <div class="restaurant-meta mb-2">
+                    <span class="restaurant-location me-3">
+                      <i class="fas fa-map-marker-alt"></i>
+                      <span *ngIf="userLocation && filters.location.enabled">
+                        {{
+                          calculateDistance(
+                            userLocation.latitude,
+                            userLocation.longitude,
+                            restaurant.location.latitude,
+                            restaurant.location.longitude
+                          ) | number : "1.1-1"
+                        }}
+                        km
+                      </span>
+                      <span *ngIf="!userLocation || !filters.location.enabled">
+                        Localização disponível
+                      </span>
+                    </span>
+                    <span class="restaurant-phone">
+                      <i class="fas fa-phone"></i> {{ restaurant.phone }}
+                    </span>
+                  </div>
+                  <div class="restaurant-actions mt-2">
+                    <button
+                      class="btn btn-primary w-100"
+                      [routerLink]="['/restaurant', restaurant._id]"
+                    >
+                      <i class="fas fa-door-open me-1"></i> Abrir Restaurante
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensagem quando não há restaurantes -->
+        <div
+          class="no-restaurants"
+          *ngIf="!loading && !error && filteredRestaurants.length === 0"
+        >
+          <div class="no-data-container">
+            <i class="fas fa-utensils fa-3x mb-3 text-muted"></i>
+            <h3>Nenhum restaurante encontrado</h3>
+            <p>Tente ajustar seus filtros de busca ou volte mais tarde.</p>
+            <button class="btn btn-primary mt-3" (click)="clearFilters()">
+              <i class="fas fa-undo-alt me-2"></i> Limpar filtros
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

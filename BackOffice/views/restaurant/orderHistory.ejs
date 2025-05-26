@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Histórico de Pedidos</title>    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link rel="stylesheet" href="/stylesheets/restaurant/orderHistory.css" />
+    <link rel="stylesheet" href="/stylesheets/restaurant/image-modal.css" />
+    <!-- Preload JavaScript -->
+    <link rel="preload" href="/javascripts/voucherExport.js" as="script" />
+  </head>
+  
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <i class="fas fa-history me-2"></i>Histórico de Pedidos
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <!-- Alerta de reviews pendentes -->
+            <% if (locals.pendingReviewsCount && pendingReviewsCount > 0) { %>
+              <li class="nav-item">
+                <a href="/restaurants/<%= restaurant._id %>/orderHistory?pendingReviews=true" class="nav-link position-relative">
+                  <span class="badge bg-danger pending-reviews-badge">
+                    <i class="fas fa-comment-dots me-1"></i>
+                    <%= pendingReviewsCount %> reviews pendentes
+                  </span>
+                </a>
+              </li>
+            <% } %>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+      <div class="content-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h2 class="mb-0"><i class="fas fa-list-alt me-2"></i>Histórico de Pedidos</h2>
+        </div>
+
+        <!-- Search and filter controls -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <form method="GET" action="/restaurants/<%= restaurant._id %>/orderHistory" class="row g-3">
+              <div class="col-md-3">
+                <label for="orderNumber" class="form-label">
+                  <i class="fas fa-search me-2"></i>Pesquisar por Nº
+                </label>
+                <input type="text" id="orderNumber" name="orderNumber" class="form-control" 
+                       placeholder="Número do pedido..." value="<%= filters && filters.orderNumber || '' %>">
+              </div>
+
+              <div class="col-md-3">
+                <label for="status" class="form-label">
+                  <i class="fas fa-filter me-2"></i>Status
+                </label>
+                <select id="status" name="status" class="form-select">
+                  <option value="">Todos os estados</option>
+                  <option value="pending" <%= filters && filters.status === 'pending' ? 'selected' : '' %>>Pendente</option>
+                  <option value="preparing" <%= filters && filters.status === 'preparing' ? 'selected' : '' %>>Em Preparação</option>
+                  <option value="delivered" <%= filters && filters.status === 'delivered' ? 'selected' : '' %>>Pronto para Entrega</option>
+                  <option value="finished" <%= filters && filters.status === 'finished' ? 'selected' : '' %>>Finalizado</option>
+                  <option value="cancelled" <%= filters && filters.status === 'cancelled' ? 'selected' : '' %>>Cancelado</option>
+                </select>
+              </div>
+
+              <div class="col-md-3">
+                <label for="startDate" class="form-label">
+                  <i class="fas fa-calendar-alt me-2"></i>Data Inicial
+                </label>
+                <input type="date" id="startDate" name="startDate" class="form-control" 
+                       value="<%= filters && filters.startDate || '' %>">
+              </div>
+
+              <div class="col-md-3">
+                <label for="endDate" class="form-label">
+                  <i class="fas fa-calendar-alt me-2"></i>Data Final
+                </label>
+                <input type="date" id="endDate" name="endDate" class="form-control" 
+                       value="<%= filters && filters.endDate || '' %>">
+              </div>
+              
+              <!-- Checkbox para filtrar avaliações sem resposta -->
+              <div class="col-md-6 mt-3">
+                <div class="form-check">
+                  <input type="checkbox" id="pendingReviews" name="pendingReviews" value="true" class="form-check-input" 
+                         <%= filters && filters.pendingReviews ? 'checked' : '' %>>
+                  <label for="pendingReviews" class="form-check-label">
+                    <i class="fas fa-comment-dots me-2 text-warning"></i>Mostrar apenas pedidos com avaliações sem resposta
+                  </label>
+                </div>
+              </div>
+
+              <div class="col-12 text-end mt-3">
+                <a href="/restaurants/<%= restaurant._id %>/orderHistory" class="btn btn-secondary me-2">
+                  <i class="fas fa-redo-alt me-2"></i>Limpar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fas fa-filter me-2"></i>Filtrar
+                </button>
+              </div>            </form>
+          </div>
+        </div>
+
+        <!-- Voucher Summary Section -->
+        <% if (voucherSummary && voucherSummary.totalOrdersWithVouchers > 0) { %>
+          <div class="card mb-4 voucher-summary-card <%= filters && (filters.startDate || filters.endDate) ? 'border-info' : '' %>">
+            <div class="card-header <%= filters && (filters.startDate || filters.endDate) ? 'bg-info' : 'bg-primary' %> text-white d-flex justify-content-between align-items-center">              <h5 class="mb-0">
+                <i class="fas fa-ticket-alt me-2"></i>Resumo de Vouchers
+                <span class="badge bg-light text-primary ms-2"><%= voucherSummary.totalOrdersWithVouchers %> pedidos</span>
+                <% if (filters && (filters.startDate || filters.endDate)) { %>
+                  <span class="badge bg-info ms-2">
+                    <%= filters.startDate ? filters.startDate : 'Início' %> a <%= filters.endDate ? filters.endDate : 'Hoje' %>
+                  </span>
+                <% } %>
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <!-- Total Summary -->
+                <div class="col-md-6 mb-3">
+                  <div class="bg-light p-3 rounded">                    <h6 class="text-muted mb-3">
+                      <i class="fas fa-calculator me-2"></i>Resumo Financeiro
+                      <% if (filters && (filters.startDate || filters.endDate)) { %>
+                        <small class="d-block text-info mt-1">
+                          <i class="fas fa-calendar-alt me-1"></i> Valores filtrados: 
+                          <%= filters.startDate ? filters.startDate : 'início' %> até <%= filters.endDate ? filters.endDate : 'hoje' %>
+                          <span class="badge rounded-pill bg-light text-primary ms-2" data-bs-toggle="tooltip" 
+                               title="O valor do reembolso está baseado nos pedidos do período selecionado">
+                            <i class="fas fa-filter me-1"></i>Filtrado
+                          </span>
+                        </small>
+                      <% } %>
+                    </h6>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Valor Original (sem desconto):</span>
+                      <strong class="text-muted"><%= voucherSummary.totalOriginalAmount.toFixed(2) %> €</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <span>Desconto Total de Vouchers:</span>
+                      <strong class="text-danger">-<%= voucherSummary.totalVoucherDiscount.toFixed(2) %> €</strong>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                      <span>Valor Final Recebido:</span>
+                      <strong class="text-success"><%= voucherSummary.totalFinalAmount.toFixed(2) %> €</strong>
+                    </div>                    <div class="mt-3 p-2 bg-warning-subtle rounded">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-dark">
+                          <i class="fas fa-info-circle me-1"></i>
+                          <strong>Reembolso necessário da plataforma:</strong> <%= voucherSummary.totalVoucherDiscount.toFixed(2) %> €
+                        </small>
+                        <span class="ms-2" data-bs-toggle="tooltip" data-bs-placement="top" 
+                              title="Este valor representa o total de descontos aplicados pelos vouchers nos pedidos filtrados. A plataforma deverá reembolsar este valor ao restaurante.">
+                          <i class="fas fa-question-circle text-primary"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Voucher Breakdown -->
+                <div class="col-md-6 mb-3">
+                  <div class="bg-light p-3 rounded">
+                    <h6 class="text-muted mb-3">
+                      <i class="fas fa-list me-2"></i>Breakdown por Voucher
+                    </h6>
+                    <% if (voucherSummary.voucherBreakdown && Object.keys(voucherSummary.voucherBreakdown).length > 0) { %>                      <% Object.entries(voucherSummary.voucherBreakdown).forEach(([code, data]) => { %>                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 bg-white rounded border">
+                          <div>
+                            <span class="badge bg-secondary" title="<%= data.description %>"><%= code %></span>
+                            <small class="text-muted ms-2">(<%= data.count %> usos)</small>
+                            <% if (data.description) { %>
+                              <span class="ms-1" data-bs-toggle="tooltip" data-bs-placement="top" title="<%= data.description %>">
+                                <i class="fas fa-info-circle text-muted"></i>
+                              </span>
+                            <% } %>
+                            <% if (data.orderNumbers && data.orderNumbers.length > 0) { %>
+                              <span class="ms-1" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                   title="Pedidos: #<%= data.orderNumbers.join(', #') %>">
+                                <i class="fas fa-receipt text-primary"></i>
+                              </span>
+                            <% } %>
+                          </div>
+                          <div class="text-end">
+                            <div class="text-danger small">-<%= data.totalDiscount.toFixed(2) %> €</div>
+                          </div>
+                        </div>
+                      <% }); %>
+                    <% } else { %>
+                      <p class="text-muted mb-0">Nenhum voucher utilizado no período filtrado.</p>
+                    <% } %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% } %>
+
+        <% if (orderRecords && orderRecords.length > 0) { %>
+          <div class="row">
+            <% orderRecords.forEach(order => { %>
+              <div class="col-md-12 mb-4">
+                <!-- Card de pedido expansível -->
+                <div class="card order-card <%= 'order-' + order.status %>" data-order-id="<%= order._id %>">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                      <button class="btn btn-sm btn-link toggle-card-details me-2">
+                        <i class="fas fa-chevron-down"></i>
+                      </button>                      <span class="badge bg-secondary me-2">#<%= order.order_number %></span>
+                      <!-- Voucher Badge -->
+                      <% if (order.appliedVoucher) { %>
+                        <span class="badge bg-warning text-dark me-2">
+                          <i class="fas fa-ticket-alt me-1"></i><%= order.appliedVoucher.code %>
+                        </span>
+                      <% } %>
+                      <span class="status-badge <%= 'status-' + order.status %>">
+                        <i class="fas <%= 
+                          order.status === 'pending' ? 'fa-clock' : 
+                          order.status === 'preparing' ? 'fa-blender' : 
+                          order.status === 'delivered' ? 'fa-check-circle' : 
+                          order.status === 'finished' ? 'fa-flag-checkered' : 
+                          'fa-times-circle'
+                        %> me-1"></i>
+                        <%= order.status === 'pending' ? 'Pendente' : 
+                           order.status === 'preparing' ? 'Em Preparação' : 
+                           order.status === 'delivered' ? 'Pronto para Entrega' : 
+                           order.status === 'finished' ? 'Finalizado' : 
+                           'Cancelado' %>
+                      </span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                      <% if (order.review) { %>
+                        <div class="d-flex align-items-center me-3">
+                          <div class="stars me-2">
+                            <% for(let i = 1; i <= 5; i++) { %>
+                              <i class="fas fa-star <%= i <= order.review.rating ? 'text-warning' : 'text-muted' %>" style="font-size: 0.8rem;"></i>
+                            <% } %>
+                          </div>
+                          <% if (!order.review.response || !order.review.response.text) { %>
+                            <span class="badge bg-warning">Pendente</span>
+                          <% } else { %>
+                            <span class="badge bg-success">Respondida</span>
+                          <% } %>
+                        </div>
+                      <% } %>
+                      <div class="date-time">
+                        <i class="far fa-calendar-alt me-1"></i>
+                        <%= new Date(order.created_at).toLocaleDateString('pt-PT') %>
+                      </div>                      <div class="price-tag ms-3">
+                        <% if (order.appliedVoucher) { %>
+                          <%
+                            // Calcular o total dos itens sem desconto
+                            let headerItemsTotal = 0;
+                            if (Array.isArray(order.items) && order.items.length > 0) {
+                              order.items.forEach(item => {
+                                headerItemsTotal += (item.price * item.quantity);
+                              });
+                            }
+                            // Garantir que o desconto não ultrapasse o valor total do pedido
+                            const headerAppliedDiscount = Math.min(order.appliedVoucher.discount, headerItemsTotal);
+                          %>
+                          <div class="d-flex align-items-center">
+                            <span class="text-decoration-line-through text-muted me-2">
+                              <%= headerItemsTotal.toFixed(2) %> €
+                            </span>
+                            <strong class="text-success"><%= order.totalPrice ? order.totalPrice.toFixed(2) : "0.00" %> €</strong>
+                          </div>
+                        <% } else { %>
+                          <strong><%= order.totalPrice ? order.totalPrice.toFixed(2) : "0.00" %> €</strong>
+                        <% } %>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <!-- Conteúdo expansível -->
+                  <div class="card-body order-card-details" style="display: none;">
+                    <div class="row">
+                      <!-- Coluna de informações do cliente -->
+                      <div class="col-md-4 mb-3">
+                        <div class="customer-info p-3 border rounded">
+                          <h6 class="fw-bold"><i class="fas fa-user me-2"></i>Informações do Cliente</h6>
+                          <% if (order.customer) { %>
+                            <div class="customer-details mt-2">
+                              <p class="mb-1">
+                                <strong>Nome:</strong> <%= order.customer.name %>
+                              </p>
+                              <p class="mb-1">
+                                <strong>Email:</strong> <%= order.customer.email %>
+                              </p>
+                              <% if (order.customer.phone) { %>
+                                <p class="mb-1">
+                                  <strong>Telefone:</strong> <%= order.customer.phone %>
+                                </p>
+                              <% } %>
+                            </div>
+                          <% } else { %>
+                            <p class="text-muted">Informações do cliente não disponíveis</p>
+                          <% } %>
+                        </div>
+                      </div>
+                      
+                      <!-- Coluna dos itens do pedido -->
+                      <div class="col-md-8 mb-3">
+                        <div class="order-items p-3 border rounded">
+                          <h6 class="fw-bold"><i class="fas fa-utensils me-2"></i>Itens do Pedido</h6>
+                          <% if (Array.isArray(order.items) && order.items.length > 0) { %>
+                            <ul class="list-unstyled items-list mt-2">
+                              <% order.items.forEach(item => { %>
+                                <li class="item-row">
+                                  <div class="d-flex justify-content-between align-items-center">
+                                    <span>
+                                      <i class="fas fa-utensils me-2"></i>
+                                      <%= item.dish ? item.dish.name : "Prato não encontrado" %>
+                                      <span class="badge bg-info ms-1">x<%= item.quantity %></span>
+                                    </span>
+                                    <span class="price"><%= (item.price * item.quantity).toFixed(2) %> €</span>
+                                  </div>
+                                </li>
+                              <% }); %>
+                            </ul>
+                          <% } else { %>
+                            <p class="text-muted mb-0">
+                              <i class="fas fa-exclamation-circle me-2"></i>Nenhum item encontrado
+                            </p>
+                          <% } %>                        </div>
+                      </div>
+                      
+                      <!-- Voucher Information Section -->
+                      <% if (order.appliedVoucher) { %>
+                        <div class="col-md-12 mb-3">
+                          <div class="voucher-info p-3 border rounded border-warning bg-light">
+                            <h6 class="fw-bold text-warning">
+                              <i class="fas fa-ticket-alt me-2"></i>Informações do Voucher
+                            </h6>                            <div class="row mt-2">
+                              <div class="col-md-4">
+                                <div class="bg-white p-2 rounded border">
+                                  <small class="text-muted">Código do Voucher</small>
+                                  <div class="fw-bold"><%= order.appliedVoucher.code %></div>
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="bg-white p-2 rounded border">
+                                  <small class="text-muted">Desconto Aplicado</small>
+                                  <% 
+                                    // Calcular o total dos itens sem desconto
+                                    let itemsTotal = 0;
+                                    if (Array.isArray(order.items) && order.items.length > 0) {
+                                      order.items.forEach(item => {
+                                        itemsTotal += (item.price * item.quantity);
+                                      });
+                                    }
+                                    // Garantir que o desconto não ultrapasse o valor total do pedido
+                                    const appliedDiscount = Math.min(order.appliedVoucher.discount, itemsTotal);
+                                  %>
+                                  <div class="fw-bold text-danger">-<%= appliedDiscount.toFixed(2) %> €</div>
+                                </div>
+                              </div>
+                              <div class="col-md-4">
+                                <div class="bg-white p-2 rounded border">
+                                  <small class="text-muted">Descrição</small>
+                                  <div class="fw-bold"><%= order.appliedVoucher.description || 'Sem descrição' %></div>
+                                </div>
+                              </div>
+                            </div>
+                            <!-- Financial breakdown for this order -->
+                            <div class="mt-3 p-2 bg-warning-subtle rounded">
+                              <div class="row text-center">
+                                <div class="col-md-4">
+                                  <small class="text-muted d-block">Valor Original</small>
+                                  <strong><%= itemsTotal.toFixed(2) %> €</strong>
+                                </div>
+                                <div class="col-md-4">
+                                  <small class="text-muted d-block">Desconto</small>
+                                  <strong class="text-danger">-<%= appliedDiscount.toFixed(2) %> €</strong>
+                                </div>
+                                <div class="col-md-4">
+                                  <small class="text-muted d-block">Valor Final</small>
+                                  <strong class="text-success"><%= order.totalPrice.toFixed(2) %> €</strong>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      <% } %>
+                      
+                      <!-- Linha de histórico -->
+                      <div class="col-md-12 mb-3">
+                        <div class="order-history p-3 border rounded">
+                          <h6 class="fw-bold"><i class="fas fa-history me-2"></i>Histórico do Pedido</h6>
+                          <div class="timeline mt-2">
+                            <% if (order.logs && order.logs.length > 0) { %>
+                              <% order.logs.forEach(log => { %>
+                                <div class="timeline-item">
+                                  <div class="timeline-marker"></div>
+                                  <div class="timeline-content">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                      <strong><%= log.description %></strong>
+                                      <small class="text-muted">
+                                        <%= new Date(log.timestamp).toLocaleString('pt-PT', { 
+                                          day: '2-digit',
+                                          month: '2-digit',
+                                          year: 'numeric',
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        }) %>
+                                      </small>
+                                    </div>
+                                    <div class="mt-1">
+                                      <span class="badge <%= log.status === 'pending' ? 'bg-warning' :
+                                                          log.status === 'preparing' ? 'bg-info' :
+                                                          log.status === 'delivered' ? 'bg-primary' :
+                                                          log.status === 'finished' ? 'bg-success' :
+                                                          'bg-danger' %>">
+                                        <%= log.status %>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% }); %>
+                            <% } else { %>
+                              <p class="text-muted">Nenhum histórico disponível</p>
+                            <% } %>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <!-- Seção de avaliação do cliente e resposta -->
+                      <% if (order.review) { %>
+                      <div class="col-md-12">
+                        <div class="review-section p-3 border rounded <%= !order.review.response || !order.review.response.text ? 'border-warning' : 'border-success' %>">
+                          <h6 class="fw-bold">
+                            <i class="fas fa-star me-2 text-warning"></i>Avaliação do Cliente
+                            <% if (!order.review.response || !order.review.response.text) { %>
+                              <span class="badge bg-warning ms-2">Pendente</span>
+                            <% } %>
+                          </h6>
+                          
+                          <div class="review-content mt-2">
+                            <div class="stars mb-2">
+                              <% for(let i = 1; i <= 5; i++) { %>
+                                <i class="fas fa-star <%= i <= order.review.rating ? 'text-warning' : 'text-muted' %>"></i>
+                              <% } %>
+                              <span class="ms-2 fw-bold"><%= order.review.rating %>/5</span>
+                            </div>
+                            
+                            <div class="customer-comment p-3 bg-light rounded mb-3">                              <p class="mb-1">
+                                <strong><%= order.review.user ? order.review.user.name : 'Cliente' %> disse:</strong>
+                              </p>
+                              <p class="mb-0"><%= order.review.comment %></p>
+                            </div>
+                              <!-- Review image -->
+                            <% if (order.review.image) { %>
+                              <div class="review-image mb-3">
+                                <img 
+                                  src="<%= order.review.image %>" 
+                                  alt="Imagem da avaliação" 
+                                  class="img-thumbnail" 
+                                  style="max-width: 300px; max-height: 300px; cursor: pointer;"
+                                  onclick="openImageModal('<%= order.review.image %>')"
+                                />
+                              </div>
+                            <% } %>
+                            
+                            <% if (order.review.response && order.review.response.text) { %>
+                              <div class="restaurant-response p-3 bg-success-subtle rounded">
+                                <p class="mb-1">
+                                  <strong>Nossa resposta:</strong>
+                                </p>
+                                <p class="mb-0"><%= order.review.response.text %></p>
+                              </div>
+                            <% } else { %>
+                              <form action="/restaurants/<%= restaurant._id %>/reviews/<%= order.review._id %>/respond" method="POST">
+                                <div class="mb-3">
+                                  <label for="response-<%= order.review._id %>" class="form-label">Responder ao cliente:</label>
+                                  <textarea class="form-control" id="response-<%= order.review._id %>" name="response" rows="3" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                  <i class="fas fa-reply me-2"></i>Enviar Resposta
+                                </button>
+                              </form>
+                            <% } %>
+                          </div>
+                        </div>
+                      </div>
+                      <% } %>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+          
+          <!-- Paginação -->
+          <% if (paginacao && paginacao.total > 1) { %>
+            <nav aria-label="Paginação de pedidos" class="mt-4">
+              <ul class="pagination justify-content-center">
+                <li class="page-item <%= paginacao.atual === 1 ? 'disabled' : '' %>">
+                  <a class="page-link" href="/restaurants/<%= restaurant._id %>/orderHistory?page=<%= paginacao.atual - 1 %><%= filters.status ? '&status=' + filters.status : '' %><%= filters.startDate ? '&startDate=' + filters.startDate : '' %><%= filters.endDate ? '&endDate=' + filters.endDate : '' %><%= filters.orderNumber ? '&orderNumber=' + filters.orderNumber : '' %><%= filters.pendingReviews ? '&pendingReviews=' + filters.pendingReviews : '' %>">
+                    <i class="fas fa-chevron-left"></i>
+                  </a>
+                </li>
+                <% for (let i = 1; i <= paginacao.total; i++) { %>
+                  <li class="page-item <%= paginacao.atual === i ? 'active' : '' %>">
+                    <a class="page-link" href="/restaurants/<%= restaurant._id %>/orderHistory?page=<%= i %><%= filters.status ? '&status=' + filters.status : '' %><%= filters.startDate ? '&startDate=' + filters.startDate : '' %><%= filters.endDate ? '&endDate=' + filters.endDate : '' %><%= filters.orderNumber ? '&orderNumber=' + filters.orderNumber : '' %><%= filters.pendingReviews ? '&pendingReviews=' + filters.pendingReviews : '' %>"><%= i %></a>
+                  </li>
+                <% } %>
+                <li class="page-item <%= paginacao.atual === paginacao.total ? 'disabled' : '' %>">
+                  <a class="page-link" href="/restaurants/<%= restaurant._id %>/orderHistory?page=<%= paginacao.atual + 1 %><%= filters.status ? '&status=' + filters.status : '' %><%= filters.startDate ? '&startDate=' + filters.startDate : '' %><%= filters.endDate ? '&endDate=' + filters.endDate : '' %><%= filters.orderNumber ? '&orderNumber=' + filters.orderNumber : '' %><%= filters.pendingReviews ? '&pendingReviews=' + filters.pendingReviews : '' %>">
+                    <i class="fas fa-chevron-right"></i>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          <% } %>
+        <% } else { %>
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>Nenhum pedido encontrado.
+          </div>
+        <% } %>
+      </div>    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/javascripts/orderHistory.js"></script>
+    <script>
+      // Initialize Bootstrap tooltips
+      document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+          return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+      });
+    </script>
+    <script src="/javascripts/voucherExport.js"></script>
+  </body>
+</html>

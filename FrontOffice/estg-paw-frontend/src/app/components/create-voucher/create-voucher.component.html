@@ -1,0 +1,185 @@
+<p>create-voucher works!</p>
+
+<!-- Botão de navegação para voltar ao dashboard -->
+<div class="d-flex justify-content-start mb-3">
+  <button
+    type="button"
+    class="btn btn-outline-secondary"
+    routerLink="/dashboard"
+    title="Voltar ao Dashboard"
+  >
+    <i class="fas fa-arrow-left me-2"></i>
+    Voltar ao Dashboard
+  </button>
+</div>
+
+<div class="voucher-section">
+  <h4>🎁 Comprar Voucher</h4>
+  <form (ngSubmit)="buyVoucher()" #voucherForm="ngForm">
+    <div class="row voucher-form-row align-items-end">
+      <div class="col-md-4 voucher-amount-col">
+        <label for="voucherAmount" class="form-label"
+          >💰 Valor do Voucher</label
+        >
+        <select
+          id="voucherAmount"
+          class="form-select"
+          required
+          [(ngModel)]="selectedAmount"
+          name="amount"
+        >
+          <option [ngValue]="null" disabled selected>
+            Selecione o valor...
+          </option>
+          <option *ngFor="let value of voucherValues" [ngValue]="value">
+            {{ value | currency : "EUR" : "symbol" : "1.0-0" }}
+          </option>
+        </select>
+      </div>
+
+      <div class="col-md-4 recipient-email-col">
+        <label for="recipientEmail" class="form-label"
+          >📧 Email do Destinatário</label
+        >
+        <div class="input-group">
+          <input
+            id="recipientEmail"
+            type="email"
+            class="form-control"
+            [class.is-valid]="emailValidationStatus === 'valid'"
+            [class.is-invalid]="emailValidationStatus === 'invalid'"
+            [(ngModel)]="recipientEmail"
+            (ngModelChange)="onEmailChange()"
+            name="recipientEmail"
+            placeholder="Opcional: envie como presente"
+          />
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="validateEmail()"
+            [disabled]="
+              !recipientEmail ||
+              recipientEmail.trim() === '' ||
+              emailValidationLoading
+            "
+            [class.loading]="emailValidationLoading"
+          >
+            <span
+              *ngIf="emailValidationLoading"
+              class="spinner-border spinner-border-sm me-1"
+              role="status"
+            >
+              <span class="visually-hidden">Validando...</span>
+            </span>
+            <span *ngIf="!emailValidationLoading">Validar</span>
+            <span *ngIf="emailValidationLoading">Validando...</span>
+          </button>
+        </div>
+        <div
+          *ngIf="emailValidationMessage"
+          class="form-text"
+          [class.text-success]="emailValidationStatus === 'valid'"
+          [class.text-danger]="emailValidationStatus === 'invalid'"
+        >
+          {{ emailValidationMessage }}
+        </div>
+      </div>
+
+      <div class="col-md-4 purchase-btn-col d-grid">
+        <button
+          type="submit"
+          class="btn btn-success btn-lg"
+          [disabled]="!selectedAmount || loading"
+          [class.loading]="loading"
+        >
+          <i class="fab fa-cc-stripe"></i>
+          <span *ngIf="loading">Processando...</span>
+          <span *ngIf="!loading">Comprar com Stripe</span>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ errorMessage }}
+  </div>
+</div>
+
+<!-- Seção de Vouchers do Usuário -->
+<div class="voucher-section mt-4" *ngIf="authService.isAuthenticated()">
+  <h4>🎟️ Meus Vouchers</h4>
+
+  <div *ngIf="loadingVouchers" class="text-center py-4">
+    <div class="spinner-border spinner-border-sm me-2" role="status">
+      <span class="visually-hidden">Carregando...</span>
+    </div>
+    Carregando vouchers...
+  </div>
+
+  <div
+    *ngIf="!loadingVouchers && userVouchers.length === 0"
+    class="alert alert-info"
+  >
+    <i class="fas fa-info-circle me-2"></i>
+    Você ainda não possui vouchers. Compre um voucher acima para começar!
+  </div>
+
+  <div *ngIf="!loadingVouchers && userVouchers.length > 0" class="row">
+    <div class="col-md-6 col-lg-4 mb-3" *ngFor="let voucher of userVouchers">
+      <div class="card voucher-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 class="card-title mb-0">
+              <i class="fas fa-ticket-alt me-2"></i>
+              {{ voucher.code }}
+            </h6>
+            <span class="badge bg-success"
+              >{{ voucher.discount | number : "1.2-2" }}€</span
+            >
+          </div>
+
+          <div class="voucher-details">
+            <p class="card-text mb-2">
+              <small [class]="getVoucherExpiryClass(voucher)">
+                <i class="fas fa-calendar-alt me-1"></i>
+                Expira em: {{ voucher.expirationDate | date : "dd/MM/yyyy" }}
+              </small>
+            </p>
+
+            <div class="voucher-actions">
+              <button
+                class="btn btn-outline-primary btn-sm"
+                (click)="copyVoucherCode(voucher.code)"
+                title="Copiar código do voucher"
+              >
+                <i class="fas fa-copy me-1"></i>
+                Copiar Código
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loadingVouchers && userVouchers.length > 0" class="mt-3">
+    <div class="alert alert-light">
+      <h6><i class="fas fa-lightbulb me-2"></i>Como usar seus vouchers:</h6>
+      <ul class="mb-0">
+        <li>
+          Copie o código do voucher que deseja usar / Ou selecione na lista no
+          carrinho
+        </li>
+        <li>
+          No momento de fazer um pedido, cole o código na seção "Vouchers"
+        </li>
+        <li>O desconto será aplicado automaticamente ao seu pedido</li>
+        <li>
+          Se o voucher valer mais que o pedido, o valor restante fica disponível
+          para próximas compras
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
