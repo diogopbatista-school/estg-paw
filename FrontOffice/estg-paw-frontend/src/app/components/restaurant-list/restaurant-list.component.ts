@@ -31,6 +31,7 @@ export class RestaurantListComponent implements OnInit {
     verifiedOnly: true,
     category: '',
     priceRange: '',
+    sortBy: '', // Para ordenação dos restaurantes
     location: {
       enabled: false,
       latitude: 0,
@@ -199,11 +200,27 @@ export class RestaurantListComponent implements OnInit {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           };
+          console.log('Localização obtida:', this.userLocation);
+          
+          // Se o filtro de localização estiver ativado, aplicar os filtros novamente
+          if (this.filters.location.enabled) {
+            this.applyFilters();
+          }
         },
         (error) => {
           console.error('Erro ao obter localização:', error);
-        }
+          // Desabilitar o filtro de localização se o acesso for negado
+          if (error.code === error.PERMISSION_DENIED) {
+            this.filters.location.enabled = false;
+            this.error = 'Acesso à localização negado. Por favor, permita o acesso para usar este filtro.';
+            setTimeout(() => this.error = null, 5000); // Limpar a mensagem após 5 segundos
+          }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
       );
+    } else {
+      this.error = 'Seu navegador não suporta geolocalização.';
+      this.filters.location.enabled = false;
     }
   }
 
@@ -262,10 +279,38 @@ export class RestaurantListComponent implements OnInit {
       );
     }
 
+    // Aplicar ordenação se solicitada
+    this.applySorting();
+
     // Se nenhum restaurante corresponder aos filtros, recarrega todos
     if (this.filteredRestaurants.length === 0 && this.restaurants.length > 0) {
       // Manter a lista vazia, mas exibir uma mensagem de "nenhum restaurante encontrado"
     }
+  }
+  
+  // Aplica ordenação aos restaurantes filtrados
+  applySorting(): void {
+    if (this.filters.sortBy === 'rating-high') {
+      // Ordenar por avaliação (maior para menor)
+      this.filteredRestaurants.sort((a, b) => {
+        const ratingA = a.average_rating || 0;
+        const ratingB = b.average_rating || 0;
+        return ratingB - ratingA;
+      });
+    } else if (this.filters.sortBy === 'rating-low') {
+      // Ordenar por avaliação (menor para maior)
+      this.filteredRestaurants.sort((a, b) => {
+        const ratingA = a.average_rating || 0;
+        const ratingB = b.average_rating || 0;
+        return ratingA - ratingB;
+      });
+    }
+  }
+  
+  // Método para ordenar restaurantes
+  sortRestaurants(sortOption: string): void {
+    this.filters.sortBy = sortOption;
+    this.applyFilters();
   }
 
   // Calcula distância entre coordenadas (fórmula de Haversine)
@@ -287,6 +332,16 @@ export class RestaurantListComponent implements OnInit {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c; // Distância em km
     return d;
+  }
+  
+  increaseRadius(): void {
+    // Aumenta o raio de busca em 10km
+    this.filters.location.maxDistance += 10;
+    // Limita o raio máximo a 50km para evitar uma área muito grande
+    if (this.filters.location.maxDistance > 50) {
+      this.filters.location.maxDistance = 50;
+    }
+    this.applyFilters();
   }
 
   deg2rad(deg: number): number {
@@ -310,6 +365,7 @@ export class RestaurantListComponent implements OnInit {
       verifiedOnly: true,
       category: '',
       priceRange: '',
+      sortBy: '',
       location: {
         enabled: false,
         latitude: 0,

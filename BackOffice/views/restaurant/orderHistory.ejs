@@ -380,6 +380,11 @@
                                     const appliedDiscount = Math.min(order.appliedVoucher.discount, itemsTotal);
                                   %>
                                   <div class="fw-bold text-danger">-<%= appliedDiscount.toFixed(2) %> €</div>
+                                  <% if (appliedDiscount < order.appliedVoucher.discount) { %>
+                                    <small class="text-muted d-block mt-1">
+                                      <i class="fas fa-info-circle"></i> Valor do voucher: <%= order.appliedVoucher.discount.toFixed(2) %> €
+                                    </small>
+                                  <% } %>
                                 </div>
                               </div>
                               <div class="col-md-4">
@@ -399,6 +404,11 @@
                                 <div class="col-md-4">
                                   <small class="text-muted d-block">Desconto</small>
                                   <strong class="text-danger">-<%= appliedDiscount.toFixed(2) %> €</strong>
+                                  <% if (appliedDiscount < order.appliedVoucher.discount) { %>
+                                    <div class="text-muted small">
+                                      (Voucher de <%= order.appliedVoucher.discount.toFixed(2) %> €)
+                                    </div>
+                                  <% } %>
                                 </div>
                                 <div class="col-md-4">
                                   <small class="text-muted d-block">Valor Final</small>

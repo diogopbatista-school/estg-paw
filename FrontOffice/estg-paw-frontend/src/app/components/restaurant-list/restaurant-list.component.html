@@ -106,7 +106,54 @@
               <span>Limpar filtro</span>
             </button>
           </div>
-          <!-- Pesquisa -->
+          <!-- Location Filter Toggle -->
+          <div class="location-filter d-flex align-items-center gap-2 ms-auto">
+            <button 
+              class="btn rounded-pill px-3 py-1 d-flex align-items-center gap-2"
+              [class.active]="filters.location.enabled"
+              (click)="toggleLocationFilter()"
+              [style.background]="filters.location.enabled ? '#4CAF50' : '#e0f7fa'"
+              [style.color]="filters.location.enabled ? '#fff' : '#006064'"
+              style="border: none; transition: all 0.2s ease; font-weight: 500;"
+            >
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{ filters.location.enabled ? 'Local: Ativado' : 'Local: Desativado' }}</span>
+              <span *ngIf="filters.location.enabled" class="badge bg-light text-success ms-1">{{ filters.location.maxDistance }}km</span>
+            </button>
+
+            <div class="distance-slider" *ngIf="filters.location.enabled">
+              <input 
+                type="range" 
+                class="form-range" 
+                min="1" 
+                max="50" 
+                step="1"
+                [(ngModel)]="filters.location.maxDistance"
+                (input)="applyFilters()"
+                name="distanceRange"
+                style="width: 100px;"
+              >
+            </div>
+          </div>
+          <!-- Sort options -->
+          <div class="sort-options d-flex align-items-center gap-2 ms-2 me-2">
+            <label for="sortOptions" class="fw-bold mb-0 text-dark">
+              <i class="fas fa-sort me-1"></i> Ordenar por:
+            </label>
+            <select 
+              id="sortOptions" 
+              class="form-select form-select-sm rounded-pill border-0 shadow-sm"
+              [(ngModel)]="filters.sortBy"
+              (change)="sortRestaurants(filters.sortBy)"
+              name="sortBy"
+              style="background: #e0f7fa; color: #006064; min-width: 150px;"
+            >
+              <option value="">Padrão</option>
+              <option value="rating-high">Avaliação (Mais Alta)</option>
+              <option value="rating-low">Avaliação (Mais Baixa)</option>
+            </select>
+          </div>
+
           <form
             class="d-flex align-items-center gap-2 flex-grow-1 justify-content-end"
             (submit)="$event.preventDefault(); searchRestaurants()"
@@ -218,6 +265,22 @@
                       }}
                     </p>
                   </div>
+                  <!-- Star Rating Display -->
+                  <div class="restaurant-rating mb-2" *ngIf="restaurant.average_rating">
+                    <div class="stars-container d-flex align-items-center">
+                      <div class="stars me-2">
+                        <ng-container *ngFor="let star of getStarsArray(restaurant.average_rating)">
+                          <i *ngIf="star === 1" class="fas fa-star text-warning" style="font-size: 0.9rem"></i>
+                          <i *ngIf="star === 0.5" class="fas fa-star-half-alt text-warning" style="font-size: 0.9rem"></i>
+                          <i *ngIf="star === 0" class="far fa-star text-muted" style="font-size: 0.9rem"></i>
+                        </ng-container>
+                      </div>
+                      <span class="rating-badge">
+                        {{ restaurant.average_rating.toFixed(1) }}
+                        <small class="text-muted">/5</small>
+                      </span>
+                    </div>
+                  </div>
                   <div class="restaurant-meta mb-2">
                     <span class="restaurant-location me-3">
                       <i class="fas fa-map-marker-alt"></i>
@@ -262,10 +325,32 @@
           <div class="no-data-container">
             <i class="fas fa-utensils fa-3x mb-3 text-muted"></i>
             <h3>Nenhum restaurante encontrado</h3>
-            <p>Tente ajustar seus filtros de busca ou volte mais tarde.</p>
-            <button class="btn btn-primary mt-3" (click)="clearFilters()">
-              <i class="fas fa-undo-alt me-2"></i> Limpar filtros
-            </button>
+            <p *ngIf="filters.location.enabled && userLocation">
+              Nenhum restaurante encontrado num raio de {{ filters.location.maxDistance }}km.
+              Tente aumentar a distância do filtro ou desative o filtro por localização.
+            </p>
+            <p *ngIf="!filters.location.enabled || !userLocation">
+              Tente ajustar seus filtros de busca ou volte mais tarde.
+            </p>
+            <div class="d-flex gap-2 justify-content-center flex-wrap mt-3">
+              <button class="btn btn-primary" (click)="clearFilters()">
+                <i class="fas fa-undo-alt me-2"></i> Limpar filtros
+              </button>
+              <button 
+                *ngIf="filters.location.enabled"
+                class="btn btn-outline-secondary" 
+                (click)="toggleLocationFilter()"
+              >
+                <i class="fas fa-map-marker-alt me-2"></i> Desativar filtro de localização
+              </button>
+              <button 
+                *ngIf="filters.location.enabled && userLocation"
+                class="btn btn-outline-success" 
+                (click)="increaseRadius()"
+              >
+                <i class="fas fa-expand me-2"></i> Aumentar raio para {{ filters.location.maxDistance + 10 }}km
+              </button>
+            </div>
           </div>
         </div>
       </div>

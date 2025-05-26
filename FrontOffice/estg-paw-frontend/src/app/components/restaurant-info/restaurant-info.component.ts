@@ -23,6 +23,7 @@ export class RestaurantInfoComponent implements OnInit {
   showImageModal = false;
   selectedImage: string | null = null;
   modalImagePosition = { x: 0, y: 0 };
+  Math = Math; // Exposing Math object to the template
 
   constructor(
     private route: ActivatedRoute,
@@ -206,6 +207,13 @@ export class RestaurantInfoComponent implements OnInit {
     return menu.dishes?.some(
       (dish: any) => dish.category === this.selectedCategory
     );
+  }
+
+  getGoogleMapsUrl(latitude: number | undefined, longitude: number | undefined): string {
+    if (latitude === undefined || longitude === undefined) {
+      return 'https://www.google.com/maps';
+    }
+    return `https://www.google.com/maps?q=${latitude},${longitude}`;
   }
   openImageModal(event: MouseEvent, imageUrl: string): void {
     this.selectedImage = imageUrl;

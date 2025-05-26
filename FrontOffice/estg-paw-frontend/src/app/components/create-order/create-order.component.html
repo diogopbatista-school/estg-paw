@@ -225,29 +225,8 @@
 
         <!-- Show voucher controls when cart has items -->
         <div *ngIf="cartItems.length > 0">
-          <!-- Voucher Selection Buttons -->
-          <div class="btn-group w-100 mb-3" role="group">
-            <button
-              type="button"
-              class="btn btn-outline-primary"
-              [class.active]="showVoucherInput === 'select'"
-              (click)="toggleVoucherInput('select')"
-              [disabled]="appliedVoucherDiscount > 0"
-            >
-              Meus Vouchers
-            </button>
-            <button
-              type="button"
-              class="btn btn-outline-primary"
-              [class.active]="showVoucherInput === 'manual'"
-              (click)="toggleVoucherInput('manual')"
-              [disabled]="appliedVoucherDiscount > 0"
-            >
-              Código Manual
-            </button>
-          </div>
           <!-- Select from user vouchers -->
-          <div *ngIf="showVoucherInput === 'select'">
+          <div>
             <select
               class="form-select"
               [(ngModel)]="selectedVoucher"
@@ -270,28 +249,6 @@
               💡 Tip: Se o valor do voucher for maior que o total do carrinho, o
               valor restante será preservado para uso futuro
             </small>
-          </div>
-          <!-- Manual voucher code input -->
-          <div *ngIf="showVoucherInput === 'manual'" class="input-group">
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Digite o código do voucher (ex: VOUCHER123)"
-              [(ngModel)]="manualVoucherCode"
-              (keyup.enter)="validateManualVoucherCode()"
-              maxlength="20"
-              [disabled]="appliedVoucherDiscount > 0"
-            />
-            <button
-              class="btn btn-outline-secondary"
-              type="button"
-              (click)="validateManualVoucherCode()"
-              [disabled]="
-                !manualVoucherCode.trim() || appliedVoucherDiscount > 0
-              "
-            >
-              Aplicar
-            </button>
           </div>
           <!-- Applied voucher display -->
           <div

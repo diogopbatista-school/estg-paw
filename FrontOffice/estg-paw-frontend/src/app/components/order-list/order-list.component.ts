@@ -54,6 +54,7 @@ interface Order {
   order_number: number;
   cancelled_count?: number;
   cancellation_blocked_until?: string;
+  deliveryAddress?: string;
   logs: OrderLog[];
   review?: Review;
 }
@@ -63,7 +64,7 @@ interface Order {
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, MatSnackBarModule],
   templateUrl: './order-list.component.html',
-  styleUrl: './order-list.component.scss'
+  styleUrl: './order-list.component.scss',
 })
 export class OrderListComponent implements OnInit {
   // Orders and filtering
@@ -84,7 +85,7 @@ export class OrderListComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 5;
   totalPages = 1;
-  pages: number[] = [];  // Review
+  pages: number[] = []; // Review
   reviewRating = 0;
   reviewComment = '';
   selectedOrderId: string | null = null;
@@ -114,19 +115,29 @@ export class OrderListComponent implements OnInit {
     }
     this.notificationSocket.listenOrderNotifications().subscribe((data) => {
       console.log('[Socket] Order notification received:', data);
-      this.snackBar.open(`Atualização do pedido: ${data.message || 'Seu pedido foi atualizado.'}`, 'Fechar', {
-        duration: 4000,
-        panelClass: ['snackbar-info']
-      });
+      this.snackBar.open(
+        `Atualização do pedido: ${
+          data.message || 'Seu pedido foi atualizado.'
+        }`,
+        'Fechar',
+        {
+          duration: 4000,
+          panelClass: ['snackbar-info'],
+        }
+      );
       // Opcional: atualizar lista de pedidos automaticamente
       this.loadOrders();
     });
     this.notificationSocket.listenReviewNotifications().subscribe((data) => {
       console.log('[Socket] Review notification received:', data);
-      this.snackBar.open(`Nova avaliação: ${data.message || 'Sua avaliação foi atualizada.'}`, 'Fechar', {
-        duration: 4000,
-        panelClass: ['snackbar-info']
-      });
+      this.snackBar.open(
+        `Nova avaliação: ${data.message || 'Sua avaliação foi atualizada.'}`,
+        'Fechar',
+        {
+          duration: 4000,
+          panelClass: ['snackbar-info'],
+        }
+      );
     });
   }
 
@@ -149,13 +160,14 @@ export class OrderListComponent implements OnInit {
         console.error('Error loading orders:', error);
         this.error = 'Erro ao carregar pedidos';
         this.loading = false;
-      }
+      },
     });
   }
   // Review functionality
   canReview(order: Order): boolean {
-    return order.status === 'finished' && !order.review;  
-  }  canDeleteReview(order: Order): boolean {
+    return order.status === 'finished' && !order.review;
+  }
+  canDeleteReview(order: Order): boolean {
     // Customer can always delete their own review, even if restaurant has responded
     return !!order.review;
   }
@@ -163,11 +175,14 @@ export class OrderListComponent implements OnInit {
     if (!order.review) return;
 
     // Show confirmation dialog
-    const confirmed = confirm('Tem a certeza que deseja eliminar esta avaliação? Esta ação não pode ser desfeita.');
-    
+    const confirmed = confirm(
+      'Tem a certeza que deseja eliminar esta avaliação? Esta ação não pode ser desfeita.'
+    );
+
     if (!confirmed) {
       return;
-    }    this.orderService.deleteReview(order._id, order.review._id).subscribe({
+    }
+    this.orderService.deleteReview(order._id, order.review._id).subscribe({
       next: () => {
         order.review = undefined;
         this.toastr.success('Avaliação removida com sucesso!');
@@ -175,13 +190,13 @@ export class OrderListComponent implements OnInit {
       error: (error) => {
         console.error('Error deleting review:', error);
         let errorMessage = 'Erro ao remover avaliação';
-        
+
         if (error.error && error.error.message) {
           errorMessage = error.error.message;
         }
-        
+
         this.toastr.error(errorMessage);
-      }
+      },
     });
   }
   submitReview(order: Order): void {
@@ -190,20 +205,26 @@ export class OrderListComponent implements OnInit {
       return;
     }
 
-    this.orderService.addReview(order._id, {
-      rating: this.reviewRating,
-      comment: this.reviewComment
-    }, this.selectedReviewImage || undefined).subscribe({
-      next: (response) => {
-        order.review = response;
-        this.toastr.success('Avaliação enviada com sucesso!');
-        this.resetReviewForm();
-      },
-      error: (error) => {
-        console.error('Error submitting review:', error);
-        this.toastr.error('Erro ao enviar avaliação');
-      }
-    });
+    this.orderService
+      .addReview(
+        order._id,
+        {
+          rating: this.reviewRating,
+          comment: this.reviewComment,
+        },
+        this.selectedReviewImage || undefined
+      )
+      .subscribe({
+        next: (response) => {
+          order.review = response;
+          this.toastr.success('Avaliação enviada com sucesso!');
+          this.resetReviewForm();
+        },
+        error: (error) => {
+          console.error('Error submitting review:', error);
+          this.toastr.error('Erro ao enviar avaliação');
+        },
+      });
   }
   resetReviewForm(): void {
     this.reviewRating = 0;
@@ -219,26 +240,33 @@ export class OrderListComponent implements OnInit {
     // Apply search filter
     if (this.searchTerm) {
       const searchLower = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(order => 
-        order.order_number.toString().includes(searchLower) ||
-        order.restaurant.name.toLowerCase().includes(searchLower) ||
-        order.items.some(item => item.dish.name.toLowerCase().includes(searchLower))
+      filtered = filtered.filter(
+        (order) =>
+          order.order_number.toString().includes(searchLower) ||
+          order.restaurant.name.toLowerCase().includes(searchLower) ||
+          order.items.some((item) =>
+            item.dish.name.toLowerCase().includes(searchLower)
+          )
       );
     }
 
     // Apply status filter
     if (this.selectedStatus) {
-      filtered = filtered.filter(order => order.status === this.selectedStatus);
+      filtered = filtered.filter(
+        (order) => order.status === this.selectedStatus
+      );
     }
 
     // Apply date filter (YYYY-MM-DD)
     if (this.selectedDate) {
-      filtered = filtered.filter(order => {
+      filtered = filtered.filter((order) => {
         const orderDate = new Date(order.createdAt);
         const selected = new Date(this.selectedDate);
-        return orderDate.getFullYear() === selected.getFullYear() &&
-               orderDate.getMonth() === selected.getMonth() &&
-               orderDate.getDate() === selected.getDate();
+        return (
+          orderDate.getFullYear() === selected.getFullYear() &&
+          orderDate.getMonth() === selected.getMonth() &&
+          orderDate.getDate() === selected.getDate()
+        );
       });
     }
 
@@ -249,7 +277,10 @@ export class OrderListComponent implements OnInit {
       filtered = filtered.sort((a, b) => b.totalPrice - a.totalPrice);
     } else {
       // Default: sort by creation date (newest first)
-      filtered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      filtered = filtered.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     }
 
     this.filteredOrders = filtered;
@@ -258,7 +289,7 @@ export class OrderListComponent implements OnInit {
 
   updatePagination(): void {
     this.totalPages = Math.ceil(this.filteredOrders.length / this.itemsPerPage);
-    this.pages = Array.from({length: this.totalPages}, (_, i) => i + 1);
+    this.pages = Array.from({ length: this.totalPages }, (_, i) => i + 1);
     this.setPage(1);
   }
 
@@ -266,14 +297,18 @@ export class OrderListComponent implements OnInit {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
     const startIndex = (page - 1) * this.itemsPerPage;
-    this.pagedOrders = this.filteredOrders.slice(startIndex, startIndex + this.itemsPerPage);
-  }  getStatusClass(status: string): string {
+    this.pagedOrders = this.filteredOrders.slice(
+      startIndex,
+      startIndex + this.itemsPerPage
+    );
+  }
+  getStatusClass(status: string): string {
     const statusClasses: { [key: string]: string } = {
       pending: 'bg-warning',
-      preparing: 'bg-info', 
+      preparing: 'bg-info',
       delivered: 'bg-success',
       finished: 'bg-primary',
-      cancelled: 'bg-danger'
+      cancelled: 'bg-danger',
     };
     return statusClasses[status] || 'bg-secondary';
   }
@@ -284,7 +319,7 @@ export class OrderListComponent implements OnInit {
       preparing: 'Em Preparação',
       delivered: 'Pronto para Entrega',
       finished: 'Finalizado',
-      cancelled: 'Cancelado'
+      cancelled: 'Cancelado',
     };
     return statusTexts[status] || status;
   }
@@ -293,7 +328,7 @@ export class OrderListComponent implements OnInit {
     const typeTexts: { [key: string]: string } = {
       takeAway: 'Para Levar',
       homeDelivery: 'Entrega em Casa',
-      eatIn: 'Comer no Local'
+      eatIn: 'Comer no Local',
     };
     return typeTexts[type] || type;
   }
@@ -317,7 +352,7 @@ export class OrderListComponent implements OnInit {
       error: (error) => {
         console.error('Error canceling order:', error);
         this.toastr.error('Erro ao cancelar pedido');
-      }
+      },
     });
   }
   clearFilters(): void {
@@ -346,7 +381,12 @@ export class OrderListComponent implements OnInit {
     const file = event.target.files[0];
     if (file) {
       // Validate file type
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      const allowedTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+      ];
       if (!allowedTypes.includes(file.type)) {
         this.toastr.error('Formato de imagem inválido. Use JPEG, PNG ou GIF.');
         return;
@@ -360,7 +400,7 @@ export class OrderListComponent implements OnInit {
       }
 
       this.selectedReviewImage = file;
-      
+
       // Create preview
       const reader = new FileReader();
       reader.onload = (e: any) => {
@@ -378,7 +418,9 @@ export class OrderListComponent implements OnInit {
   getImageUrl(imagePath: string): string {
     if (!imagePath) return '';
     // Remove leading slash if present
-    const cleanPath = imagePath.startsWith('/') ? imagePath.substring(1) : imagePath;
+    const cleanPath = imagePath.startsWith('/')
+      ? imagePath.substring(1)
+      : imagePath;
     return `http://localhost:3000/${cleanPath}`;
   }
 

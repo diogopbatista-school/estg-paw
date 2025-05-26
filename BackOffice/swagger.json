@@ -300,6 +300,36 @@
             "type": "string",
             "format": "date-time",
             "description": "Order finish date"
+          },
+          "deliveryAddress": {
+            "type": "string",
+            "description": "Delivery address for home delivery orders"
+          },
+          "review": {
+            "type": "string",
+            "description": "Review ID associated with this order"
+          },
+          "logs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "description": "Status at this point in time"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "When the status change occurred"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Description of the status change"
+                }
+              }
+            },
+            "description": "History of order status changes"
           }
         }
       },

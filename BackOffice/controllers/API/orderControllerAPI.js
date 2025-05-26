@@ -652,6 +652,20 @@ orderControllerAPI.deleteReview = async (req, res) => {
     // Delete the review
     await Review.findByIdAndDelete(reviewId);
 
+    // Recalculate restaurant's average rating after deletion
+    const restaurant = await Restaurant.findById(review.restaurant).populate("reviews");
+    if (restaurant) {
+      if (restaurant.reviews && restaurant.reviews.length > 0) {
+        const totalRating = restaurant.reviews.reduce((sum, review) => sum + review.rating, 0);
+        const averageRating = totalRating / restaurant.reviews.length;
+        restaurant.average_rating = Math.round(averageRating * 100) / 100;
+      } else {
+        // No reviews left, reset average rating to 0
+        restaurant.average_rating = 0;
+      }
+      await restaurant.save();
+    }
+
     res.status(200).json({
       success: true,
       message: "Avaliação removida com sucesso",

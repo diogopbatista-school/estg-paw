@@ -59,13 +59,10 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
   selectedCategory: string = '';
   orderType: 'takeAway' | 'homeDelivery' | 'eatIn' = 'takeAway';
   deliveryAddress: string = '';
-  restaurantId: string = '';
-  // Voucher properties
+  restaurantId: string = '';  // Voucher properties
   userVouchers: Voucher[] = [];
   selectedVoucher: Voucher | null = null;
-  manualVoucherCode: string = '';
   appliedVoucherDiscount: number = 0;
-  showVoucherInput: 'select' | 'manual' = 'select';
 
   // Payment loading state
   loading = false;
@@ -370,12 +367,9 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
     this.orderService.createOrder(orderData).subscribe({
       next: (response) => {
         console.log('✅ Pedido criado com sucesso:', response);
-        this.toastr.success('Pedido realizado com sucesso!');
-
-        // Reset voucher state after successful order
+        this.toastr.success('Pedido realizado com sucesso!');        // Reset voucher state after successful order
         this.appliedVoucherDiscount = 0;
         this.selectedVoucher = null;
-        this.manualVoucherCode = '';
         this.router.navigate(['/track-order']);
         // Limpa o carrinho do localStorage ao finalizar o pedido
         localStorage.removeItem('cartItems');
@@ -610,46 +604,12 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
       },
     });
   }
-
   onVoucherSelectionChange(): void {
     if (this.selectedVoucher) {
       this.applyVoucher(this.selectedVoucher);
-      this.manualVoucherCode = '';
     } else {
       this.removeVoucherDiscount();
     }
-  }
-  validateManualVoucherCode(): void {
-    if (!this.manualVoucherCode.trim()) {
-      this.toastr.error('Por favor, insira um código de voucher');
-      return;
-    }
-
-    this.voucherService
-      .validateVoucherCode(this.manualVoucherCode.trim())
-      .subscribe({
-        next: (voucher) => {
-          // Check if this voucher is already in the user's vouchers list
-          const isDuplicate = this.userVouchers.some(
-            (userVoucher) => userVoucher.id === voucher.id
-          );
-
-          if (!isDuplicate) {
-            // Add to user's vouchers list for future reference
-            this.userVouchers.push(voucher);
-          }
-
-          this.applyVoucher(voucher);
-          this.selectedVoucher = null; // Reset dropdown selection
-          this.manualVoucherCode = ''; // Clear input
-        },
-        error: (error) => {
-          this.toastr.error(
-            'Código de voucher inválido, expirado ou já utilizado'
-          );
-          console.error('Erro ao validar voucher:', error);
-        },
-      });
   }
   applyVoucher(voucher: Voucher): void {
     const subtotal = this.getSubtotal();
@@ -682,21 +642,11 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
           )}€ aplicado! Desconto: ${this.appliedVoucherDiscount.toFixed(2)}€`;
 
     this.toastr.success(message);
-  }
-  removeVoucherDiscount(): void {
+  }  removeVoucherDiscount(): void {
     this.appliedVoucherDiscount = 0;
     this.selectedVoucher = null;
-    this.manualVoucherCode = '';
-
-    // Reset voucher input mode to default
-    this.showVoucherInput = 'select';
 
     this.toastr.info('Voucher removido');
-  }
-
-  toggleVoucherInput(type: 'select' | 'manual'): void {
-    this.showVoucherInput = type;
-    this.removeVoucherDiscount();
   }
   getVoucherDiscountText(): string {
     if (this.appliedVoucherDiscount > 0) {

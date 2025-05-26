@@ -35,6 +35,7 @@ interface Order {
   readyAt?: string;
   finishedAt?: string;
   type: 'takeAway' | 'homeDelivery' | 'eatIn';
+  deliveryAddress?: string;
   order_number: number;
   cancelled_count?: number;
   cancellation_blocked_until?: string;
