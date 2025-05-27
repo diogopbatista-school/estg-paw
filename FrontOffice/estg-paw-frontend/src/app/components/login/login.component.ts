@@ -25,7 +25,6 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('[LoginComponent] carregado');
     // Capturar URL de retorno dos parâmetros de consulta se existir
     this.route.queryParams.subscribe((params) => {
       this.returnUrl = params['returnUrl'] || '/dashboard';
@@ -46,9 +45,16 @@ export class LoginComponent implements OnInit {
     }
 
     this.authService.login(this.email, this.password).subscribe({
-      next: () => {
+      next: (response) => {
+        // Verifica se a role é client
+        const user = response?.user || this.authService.getCurrentUser();
+        if (user && user.role !== 'client') {
+          this.error =
+            'Apenas utilizadores com perfil de cliente podem aceder à plataforma de cliente.';
+          this.authService.logout();
+          return;
+        }
         // O AuthService já cuida do armazenamento do token e usuário
-        // Navegar para a página de retorno ou dashboard após o login bem-sucedido
         this.router.navigateByUrl(this.returnUrl);
       },
       error: (err) => {

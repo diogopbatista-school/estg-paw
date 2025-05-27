@@ -40,24 +40,20 @@ export class AuthService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
-    console.log('AuthService constructor - isBrowser:', this.isBrowser);
 
     // Initialize with stored user if available
     const initialUser = this.isBrowser ? this.getUserFromStorage() : null;
-    console.log('Initial user:', initialUser);
 
     this.currentUserSubject = new BehaviorSubject<User | null>(initialUser);
     this.currentUser$ = this.currentUserSubject.asObservable();
 
     const hasToken = this.isBrowser && !!this.getToken();
-    console.log('Has token:', hasToken);
 
     this.isAuthenticatedSubject = new BehaviorSubject<boolean>(hasToken);
     this.isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
     // If we have a token but no user, try to refresh the state
     if (hasToken && !initialUser) {
-      console.log('Has token but no user, refreshing state...');
       this.refreshUserState();
     }
   }
@@ -72,7 +68,7 @@ export class AuthService {
 
     const userStr = localStorage.getItem('user');
     console.log('User from localStorage:', userStr);
-    
+
     if (userStr) {
       try {
         const userData = JSON.parse(userStr);
@@ -169,7 +165,7 @@ export class AuthService {
             _id: response.user.id || response.user._id,
             id: response.user.id || response.user._id,
           };
-          
+
           if (this.isBrowser) {
             localStorage.setItem('token', response.token);
             localStorage.setItem('user', JSON.stringify(userData));

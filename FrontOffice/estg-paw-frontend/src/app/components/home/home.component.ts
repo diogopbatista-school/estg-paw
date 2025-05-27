@@ -38,7 +38,6 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('[HomeComponent] carregado');
     // Inicializar animações e outros efeitos quando a página carregar
     this.initAnimations();
 
@@ -94,7 +93,7 @@ export class HomeComponent implements OnInit {
       },
     });
   }
-  
+
   // Carregar categorias de pratos
   private loadDishCategories(): void {
     this.loading = true;
@@ -126,7 +125,7 @@ export class HomeComponent implements OnInit {
         },
       });
   }
-  
+
   // Método para formatar nomes de categorias
   formatCategoryName(category: string): string {
     if (!category) return '';
@@ -134,7 +133,7 @@ export class HomeComponent implements OnInit {
     // Converter primeira letra para maiúscula
     return category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
   }
-  
+
   // Método para gerar URLs corretas para imagens
   getImageUrl(imagePath: string): string {
     return this.imageService.getRestaurantImageUrl(imagePath);
