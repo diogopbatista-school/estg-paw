@@ -20,9 +20,7 @@
         >
           <i class="fa fa-utensils"></i> Explorar Restaurantes
         </button>
-        <button class="btn btn-outline" routerLink="/menu">
-          <i class="fa fa-book-open"></i> Ver Cardápios
-        </button>
+        <!-- Removido o botão Ver Cardápios -->
       </div>
       <div class="hero-stats">
         <div class="stat-item">
@@ -61,7 +59,7 @@
     <div class="features-grid">
       <div class="feature-card glass-card">
         <div class="feature-icon">
-          <i class="feature-icon-quality"></i>
+          <i class="fas fa-award fa-2x text-warning"></i>
         </div>
         <h3>Qualidade Garantida</h3>
         <p>
@@ -72,7 +70,7 @@
 
       <div class="feature-card glass-card">
         <div class="feature-icon">
-          <i class="feature-icon-delivery"></i>
+          <i class="fas fa-shipping-fast fa-2x text-primary"></i>
         </div>
         <h3>Entrega Express</h3>
         <p>
@@ -83,7 +81,7 @@
 
       <div class="feature-card glass-card">
         <div class="feature-icon">
-          <i class="feature-icon-payment"></i>
+          <i class="fas fa-lock fa-2x text-success"></i>
         </div>
         <h3>Pagamento Seguro</h3>
         <p>
@@ -94,7 +92,7 @@
 
       <div class="feature-card glass-card">
         <div class="feature-icon">
-          <i class="feature-icon-support"></i>
+          <i class="fas fa-headset fa-2x text-info"></i>
         </div>
         <h3>Suporte 24/7</h3>
         <p>
@@ -142,8 +140,11 @@
       <div class="step-item">
         <div class="step-number bounce-effect">3</div>
         <div class="step-content glass-card">
-          <h3>Receba em Casa</h3>
-          <p>Confirme seu pedido e acompanhe a entrega em tempo real.</p>
+          <h3>TakeAway/HomeDelivery /Eat In</h3>
+          <p>
+            Faça o pedido para takeaway, ou sente-se na sala e faça o pedido
+            para comer no restaurante.
+          </p>
         </div>
       </div>
     </div>
@@ -182,6 +183,8 @@
       <div
         class="restaurant-card glass-card"
         *ngFor="let restaurant of featuredRestaurants"
+        [routerLink]="['/restaurant', restaurant._id]"
+        style="cursor:pointer;"
       >
         <div class="restaurant-badge" *ngIf="restaurant.featured">Destaque</div>
         <div
@@ -195,7 +198,7 @@
           <div class="restaurant-overlay">
             <button
               class="btn btn-sm btn-light"
-              [routerLink]="['/restaurant', restaurant._id]"
+              (click)="$event.stopPropagation(); $event.preventDefault(); navigateToRestaurant(restaurant._id)"
             >
               Ver Menu
             </button>
@@ -204,35 +207,44 @@
         <div class="restaurant-info">
           <div class="restaurant-header">
             <h3>{{ restaurant.name }}</h3>
-            <div class="restaurant-rating" *ngIf="restaurant.rating">
+            <div
+              class="restaurant-rating"
+              *ngIf="
+                restaurant.average_rating !== undefined &&
+                restaurant.average_rating !== null &&
+                restaurant.average_rating > 0
+              "
+            >
               <span class="rating-stars">
                 <ng-container *ngFor="let star of [1, 2, 3, 4, 5]">
-                  <span *ngIf="star <= restaurant.rating">★</span>
-                  <span *ngIf="star > restaurant.rating">☆</span>
+                  <span *ngIf="star <= restaurant.average_rating">★</span>
+                  <span *ngIf="star > restaurant.average_rating">☆</span>
                 </ng-container>
               </span>
-              <span class="rating-number">{{
-                restaurant.rating | number : "1.1-1"
+              <span class="rating-number ms-1">{{
+                restaurant.average_rating | number : "1.1-1"
               }}</span>
             </div>
           </div>
           <p class="restaurant-category">
-            {{ restaurant.description || "Variada" }} •
-            {{ restaurant.priceRange || "€€" }}
+            {{ restaurant.description || "Variada" }}
+            <ng-container *ngIf="restaurant.priceRange"
+              >• {{ restaurant.priceRange }}</ng-container
+            >
           </p>
           <div class="restaurant-meta">
-            <span class="restaurant-time">
-              <i class="icon-time"></i>
-              {{ restaurant.deliveryTime || "30-45" }} min
-            </span>
-            <span class="restaurant-delivery-fee">
-              <i class="icon-delivery"></i>
-              {{
-                restaurant.deliveryFee
-                  ? (restaurant.deliveryFee
-                    | currency : "EUR" : "symbol" : "1.2-2")
-                  : "Grátis"
-              }}
+            <span
+              class="restaurant-meta-info d-flex flex-wrap align-items-center gap-2"
+            >
+              <span class="restaurant-time">
+                <i class="icon-time"></i>
+                <ng-container
+                  *ngIf="getDistanceKm(restaurant); else emptyDistance"
+                >
+                  {{ getDistanceKm(restaurant) }} km
+                </ng-container>
+                <ng-template #emptyDistance></ng-template>
+              </span>
             </span>
           </div>
         </div>
@@ -283,7 +295,7 @@
     <div class="categories-grid" *ngIf="!loading && dishCategories.length > 0">
       <div
         class="category-card"
-        *ngFor="let category of dishCategories"
+        *ngFor="let category of dishCategories | slice:0:7"
         [routerLink]="['/category', category.toLowerCase()]"
       >
         <!-- Use an emoji based on category name -->

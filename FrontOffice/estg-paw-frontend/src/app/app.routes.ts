@@ -11,6 +11,7 @@ import { OrderListComponent } from './components/order-list/order-list.component
 import { authGuard } from './guards/auth.guard';
 import { CreateVoucherComponent } from './components/create-voucher/create-voucher.component';
 import { ProcessPaymentComponent } from './components/process-payment/process-payment.component';
+import { NotFoundComponent } from './components/not-found/not-found.component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -47,5 +48,5 @@ export const routes: Routes = [
   },
 
   // Rota para página não encontrada (404)
-  { path: '**', redirectTo: '' },
+  { path: '**', component: NotFoundComponent },
 ];

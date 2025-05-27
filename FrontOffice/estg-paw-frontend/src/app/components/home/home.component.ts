@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { LoginComponent } from '../login/login.component';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -31,10 +31,14 @@ export class HomeComponent implements OnInit {
   loading: boolean = true;
   error: string = '';
 
+  userCoords: { latitude: number; longitude: number } | null = null;
+  showDistance: boolean = false;
+
   constructor(
     private restaurantService: RestaurantService,
     private dishService: DishService,
-    private imageService: ImageService
+    private imageService: ImageService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -46,6 +50,23 @@ export class HomeComponent implements OnInit {
 
     // Carregar categorias de pratos
     this.loadDishCategories();
+
+    // Tenta obter localização do utilizador
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.userCoords = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          this.showDistance = true;
+        },
+        () => {
+          this.userCoords = null;
+          this.showDistance = false;
+        }
+      );
+    }
   }
 
   // Método para enviar email de newsletter
@@ -80,10 +101,13 @@ export class HomeComponent implements OnInit {
   // Carregar restaurantes em destaque
   private loadFeaturedRestaurants(): void {
     this.loading = true;
-    this.restaurantService.getFeaturedRestaurants().subscribe({
+    this.restaurantService.getAllRestaurants().subscribe({
       next: (restaurants) => {
-        // Limitar para os 3 primeiros restaurantes em destaque
-        this.featuredRestaurants = restaurants.slice(0, 3);
+        // Seleciona os 3 restaurantes verificados com melhor average_rating
+        this.featuredRestaurants = [...restaurants]
+          .filter((r) => r.verified)
+          .sort((a, b) => (b.average_rating || 0) - (a.average_rating || 0))
+          .slice(0, 3);
         this.loading = false;
       },
       error: (err) => {
@@ -137,5 +161,25 @@ export class HomeComponent implements OnInit {
   // Método para gerar URLs corretas para imagens
   getImageUrl(imagePath: string): string {
     return this.imageService.getRestaurantImageUrl(imagePath);
+  }
+
+  getDistanceKm(restaurant: any): string | null {
+    if (!this.showDistance || !this.userCoords || !restaurant.location) return null;
+    const toRad = (value: number) => (value * Math.PI) / 180;
+    const R = 6371; // km
+    const dLat = toRad(restaurant.location.latitude - this.userCoords.latitude);
+    const dLon = toRad(restaurant.location.longitude - this.userCoords.longitude);
+    const lat1 = toRad(this.userCoords.latitude);
+    const lat2 = toRad(restaurant.location.latitude);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const d = R * c;
+    return d.toFixed(2);
+  }
+
+  navigateToRestaurant(id: string): void {
+    this.router.navigate(['/restaurant', id]);
   }
 }

@@ -51,8 +51,6 @@ userControllerAPI.editUser = async (req, res) => {
 };
 
 userControllerAPI.findUserByEmail = async (req, res) => {
-
-
   try {
     const email = req.params.email;
     console.log("Buscando email:", email);
@@ -88,8 +86,9 @@ userControllerAPI.getVouchers = async (req, res) => {
     if (!user) {
       console.log("Usuário não encontrado");
       return res.status(404).json({ message: "Usuário não encontrado" });
-    }    const vouchers = user.vouchers
-      .filter(voucher => voucher.isActive && new Date(voucher.expirationDate) > new Date())
+    }
+    const vouchers = user.vouchers
+      .filter((voucher) => voucher.isActive && new Date(voucher.expirationDate) > new Date())
       .map((voucher) => ({
         id: voucher._id,
         code: voucher.code,
@@ -104,8 +103,9 @@ userControllerAPI.getVouchers = async (req, res) => {
     return res.status(200).json(vouchers);
   } catch (err) {
     console.error("Erro ao buscar vouchers:", err);
-    return res.status(500).json({ error: err.message });  }
-}
+    return res.status(500).json({ error: err.message });
+  }
+};
 
 userControllerAPI.validateVoucherCode = async (req, res) => {
   try {
@@ -115,12 +115,12 @@ userControllerAPI.validateVoucherCode = async (req, res) => {
     console.log("Validando código de voucher:", code, "para usuário:", userId);
 
     const Voucher = require("../../models/Voucher");
-    
+
     // Busca voucher pelo código
-    const voucher = await Voucher.findOne({ 
+    const voucher = await Voucher.findOne({
       code: code.toUpperCase(),
       isActive: true,
-      expirationDate: { $gt: new Date() }
+      expirationDate: { $gt: new Date() },
     });
 
     if (!voucher) {
@@ -158,7 +158,7 @@ userControllerAPI.applyVoucher = async (req, res) => {
     console.log("Aplicando voucher:", voucherId, "valor pedido:", orderAmount, "usuário:", userId);
 
     const Voucher = require("../../models/Voucher");
-    
+
     const voucher = await Voucher.findById(voucherId);
 
     if (!voucher || !voucher.isActive || new Date(voucher.expirationDate) <= new Date()) {
@@ -190,14 +190,12 @@ userControllerAPI.applyVoucher = async (req, res) => {
     return res.status(200).json({
       discountApplied,
       remainingVoucherValue,
-      message: remainingVoucherValue > 0 
-        ? `Voucher parcialmente usado. Valor restante: ${remainingVoucherValue.toFixed(2)}€`
-        : "Voucher totalmente utilizado"
+      message: remainingVoucherValue > 0 ? `Voucher parcialmente usado. Valor restante: ${remainingVoucherValue.toFixed(2)}€` : "Voucher totalmente utilizado",
     });
   } catch (err) {
     console.error("Erro ao aplicar voucher:", err);
     return res.status(500).json({ error: err.message });
   }
-}
+};
 
 module.exports = userControllerAPI;

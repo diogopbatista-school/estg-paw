@@ -2,74 +2,76 @@
 <div class="shape shape-2"></div>
 <div class="shape shape-3"></div>
 
-<div class="login-container">
-  <div class="login-card">
-    <div class="header-shape"></div>
+<div class="login-outer-wrapper">
+  <div class="login-container">
+    <div class="login-card">
+      <div class="header-shape"></div>
 
-    <div class="card-header">
-      <h3>Login</h3>
-    </div>
-
-    <div class="card-body">
-      <div *ngIf="error" class="alert alert-danger">
-        <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
+      <div class="card-header">
+        <h3>Login</h3>
       </div>
 
-      <form (ngSubmit)="login()">
-        <div class="input-group">
-          <div class="position-relative">
-            <i class="fas fa-envelope input-icon"></i>
-            <input
-              type="email"
-              class="form-control input-with-icon"
-              id="email"
-              name="email"
-              [(ngModel)]="email"
-              placeholder="Digite seu email"
-              required
-            />
-          </div>
+      <div class="card-body">
+        <div *ngIf="error" class="alert alert-danger">
+          <i class="fas fa-exclamation-circle me-2"></i> {{ error }}
         </div>
 
-        <div class="input-group">
-          <div class="position-relative">
-            <i class="fas fa-lock input-icon"></i>
-            <input
-              [type]="isPasswordVisible ? 'text' : 'password'"
-              class="form-control input-with-icon"
-              id="password"
-              name="password"
-              [(ngModel)]="password"
-              placeholder="Digite sua senha"
-              required
-            />
-            <i
-              class="fas toggle-password"
-              [ngClass]="{
-                'fa-eye-slash': !isPasswordVisible,
-                'fa-eye': isPasswordVisible
-              }"
-              (click)="togglePasswordVisibility()"
-              style="
-                position: absolute;
-                right: 15px;
-                top: 50%;
-                transform: translateY(-50%);
-                cursor: pointer;
-                color: #9e9e9e;
-              "
-            ></i>
+        <form (ngSubmit)="login()">
+          <div class="input-group">
+            <div class="position-relative">
+              <i class="fas fa-envelope input-icon"></i>
+              <input
+                type="email"
+                class="form-control input-with-icon"
+                id="email"
+                name="email"
+                [(ngModel)]="email"
+                placeholder="Digite seu email"
+                required
+              />
+            </div>
           </div>
-        </div>
 
-        <button type="submit" class="btn-login">
-          <i class="fas fa-sign-in-alt me-2"></i>Entrar
-        </button>
-      </form>
-    </div>
+          <div class="input-group">
+            <div class="position-relative">
+              <i class="fas fa-lock input-icon"></i>
+              <input
+                [type]="isPasswordVisible ? 'text' : 'password'"
+                class="form-control input-with-icon"
+                id="password"
+                name="password"
+                [(ngModel)]="password"
+                placeholder="Digite sua senha"
+                required
+              />
+              <i
+                class="fas toggle-password"
+                [ngClass]="{
+                  'fa-eye-slash': !isPasswordVisible,
+                  'fa-eye': isPasswordVisible
+                }"
+                (click)="togglePasswordVisibility()"
+                style="
+                  position: absolute;
+                  right: 15px;
+                  top: 50%;
+                  transform: translateY(-50%);
+                  cursor: pointer;
+                  color: #9e9e9e;
+                "
+              ></i>
+            </div>
+          </div>
 
-    <div class="card-footer">
-      <p>Ainda não tem conta? <a routerLink="/register">Registe-se</a></p>
+          <button type="submit" class="btn-login">
+            <i class="fas fa-sign-in-alt me-2"></i>Entrar
+          </button>
+        </form>
+      </div>
+
+      <div class="card-footer">
+        <p>Ainda não tem conta? <a routerLink="/register">Registe-se</a></p>
+      </div>
     </div>
   </div>
 </div>
