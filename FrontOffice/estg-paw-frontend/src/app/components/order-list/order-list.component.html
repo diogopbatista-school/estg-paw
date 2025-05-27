@@ -226,8 +226,13 @@
                     </p>
                     <!-- Delivery Address (only shown for Home Delivery orders) -->
                     <p *ngIf="order.type === 'homeDelivery' && order.deliveryAddress" class="mb-2">
-                      <strong>Morada:</strong><br>
-                      <small class="text-muted">{{ order.deliveryAddress }}</small>
+                      <i class="fas fa-map-marker-alt me-2 text-danger"></i>
+                      <strong>Morada de entrega:</strong><br>
+                      <span class="ms-4">{{ order.deliveryAddress }}</span>
+                      <br />
+                      <a [href]="getGoogleMapsUrl(order.deliveryAddress)" target="_blank" class="btn btn-sm btn-outline-primary mt-1 ms-4">
+                        <i class="fas fa-map-marked-alt me-1"></i>Ver no Google Maps
+                      </a>
                     </p>
                     <p class="mb-0">
                       <strong>Estado:</strong>
@@ -272,6 +277,23 @@
                       <strong class="text-primary"
                         >€{{ order.totalPrice.toFixed(2) }}</strong
                       >
+                    </div>
+                    <!-- Voucher info -->
+                    <div *ngIf="order.appliedVoucher" class="mt-3 p-2 bg-warning-subtle rounded">
+                      <div class="row">
+                        <div class="col-md-4">
+                          <small class="text-muted">Código do Voucher</small><br />
+                          <span class="fw-bold">{{ order.appliedVoucher.code }}</span>
+                        </div>
+                        <div class="col-md-4">
+                          <small class="text-muted">Desconto Aplicado</small><br />
+                          <span class="fw-bold text-danger">-€{{ getVoucherDiscount(order) }}</span>
+                        </div>
+                        <div class="col-md-4">
+                          <small class="text-muted">Valor Original</small><br />
+                          <span class="fw-bold">€{{ getOrderItemsTotal(order) }}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

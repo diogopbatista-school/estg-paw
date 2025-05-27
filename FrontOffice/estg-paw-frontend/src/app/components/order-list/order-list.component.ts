@@ -57,6 +57,7 @@ interface Order {
   deliveryAddress?: string;
   logs: OrderLog[];
   review?: Review;
+  appliedVoucher?: any;
 }
 
 @Component({
@@ -457,5 +458,27 @@ export class OrderListComponent implements OnInit {
     modal.addEventListener('click', () => {
       document.body.removeChild(modal);
     });
+  }
+
+  // Calcula o desconto aplicado do voucher (valor original - valor final)
+  getVoucherDiscount(order: Order): string {
+    if (!order || !order.appliedVoucher) return '0.00';
+    const itemsTotal = Number(this.getOrderItemsTotal(order));
+    const discount = itemsTotal - order.totalPrice;
+    return discount.toFixed(2);
+  }
+
+  // Calcula o valor total dos itens do pedido
+  getOrderItemsTotal(order: Order): string {
+    if (!order || !order.items) return '0.00';
+    let total = 0;
+    order.items.forEach(item => {
+      total += item.price * item.quantity;
+    });
+    return total.toFixed(2);
+  }
+
+  getGoogleMapsUrl(address: string): string {
+    return 'https://www.google.com/maps?q=' + encodeURIComponent(address);
   }
 }

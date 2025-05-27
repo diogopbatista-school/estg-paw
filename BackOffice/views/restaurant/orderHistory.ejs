@@ -316,6 +316,10 @@
                                   <strong><i class="fas fa-map-marker-alt me-2"></i>Morada de Entrega:</strong>
                                   <div class="text-muted small mt-1">
                                     <%= order.deliveryAddress %>
+                                    <br />
+                                    <a href="https://www.google.com/maps?q=<%= encodeURIComponent(order.deliveryAddress) %>" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                                      <i class="fas fa-map-marked-alt me-1"></i>Ver no Google Maps
+                                    </a>
                                   </div>
                                 </div>
                               <% } %>
@@ -358,7 +362,8 @@
                           <div class="voucher-info p-3 border rounded border-warning bg-light">
                             <h6 class="fw-bold text-warning">
                               <i class="fas fa-ticket-alt me-2"></i>Informações do Voucher
-                            </h6>                            <div class="row mt-2">
+                            </h6>
+                            <div class="row mt-2">
                               <div class="col-md-4">
                                 <div class="bg-white p-2 rounded border">
                                   <small class="text-muted">Código do Voucher</small>
@@ -369,28 +374,21 @@
                                 <div class="bg-white p-2 rounded border">
                                   <small class="text-muted">Desconto Aplicado</small>
                                   <% 
-                                    // Calcular o total dos itens sem desconto
                                     let itemsTotal = 0;
                                     if (Array.isArray(order.items) && order.items.length > 0) {
                                       order.items.forEach(item => {
                                         itemsTotal += (item.price * item.quantity);
                                       });
                                     }
-                                    // Garantir que o desconto não ultrapasse o valor total do pedido
-                                    const appliedDiscount = Math.min(order.appliedVoucher.discount, itemsTotal);
+                                    const descontoAplicado = itemsTotal - order.totalPrice;
                                   %>
-                                  <div class="fw-bold text-danger">-<%= appliedDiscount.toFixed(2) %> €</div>
-                                  <% if (appliedDiscount < order.appliedVoucher.discount) { %>
-                                    <small class="text-muted d-block mt-1">
-                                      <i class="fas fa-info-circle"></i> Valor do voucher: <%= order.appliedVoucher.discount.toFixed(2) %> €
-                                    </small>
-                                  <% } %>
+                                  <div class="fw-bold text-danger">-<%= descontoAplicado.toFixed(2) %> €</div>
                                 </div>
                               </div>
                               <div class="col-md-4">
                                 <div class="bg-white p-2 rounded border">
-                                  <small class="text-muted">Descrição</small>
-                                  <div class="fw-bold"><%= order.appliedVoucher.description || 'Sem descrição' %></div>
+                                  <small class="text-muted">Valor Original</small>
+                                  <div class="fw-bold"><%= itemsTotal.toFixed(2) %> €</div>
                                 </div>
                               </div>
                             </div>
@@ -403,12 +401,7 @@
                                 </div>
                                 <div class="col-md-4">
                                   <small class="text-muted d-block">Desconto</small>
-                                  <strong class="text-danger">-<%= appliedDiscount.toFixed(2) %> €</strong>
-                                  <% if (appliedDiscount < order.appliedVoucher.discount) { %>
-                                    <div class="text-muted small">
-                                      (Voucher de <%= order.appliedVoucher.discount.toFixed(2) %> €)
-                                    </div>
-                                  <% } %>
+                                  <strong class="text-danger">-<%= descontoAplicado.toFixed(2) %> €</strong>
                                 </div>
                                 <div class="col-md-4">
                                   <small class="text-muted d-block">Valor Final</small>

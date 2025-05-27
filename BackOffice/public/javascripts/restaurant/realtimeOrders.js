@@ -26,7 +26,7 @@ function initializeRealTimeOrders(restaurantId) {
 
 function initializeNotificationSound() {
   try {
-    orderUpdateSound = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYeAzKG0fPTgjMGHm+58+GWRwsSUsLl7q1bGAg+ltryxnkpBSl+zPLaizsIGGS57OWYTgwNVKXh8bdkHgU2jdT00YU2Bx5qtvXgmEcLEE/A5O6wXBoGO5PY8s96LAQmecnw25E+CRZiturqpVITC0ml4PK8aB4GM4nU8tGAOAcfaqz14JdGCw9Lv+Xsq1waBjmM2fLNeTEEJHfH8N+PQAoUXrPq66hWEwlEnOHwwGkgAzSH0/PNeSsFJHfH8N2QQAoUXrTp66hVFApGnt/yvmcdAzOG0fPNeSsFJHfH8N+PQAoUXrPq66hWEwlEnOHwwGkgAzSH0/PNeSsFJHfH8N2QQAoUXrTp66hVFApGnt/yvmcdAzOG0fPNeSsFJHfH8N+PQAoUXrPq66hWEwlEnOHwwGkgAzSH0/PNeSsFJHfH8N2QQAoUXrTp66hVFApGnt/yvmcdAzOG0fPNeSsFJHfH8N+PQAoUXrPq66hWEwlEnOHwwGkgAzSH0/PN");
+    orderUpdateSound = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmYeAzKG0fPTgjMGHm+58+GWRwsSUsLl7q1bGAg+ltryxnkpBSl+zPLaizsIGGS57OWYTgwNVKXh8bdkHgU2jdT00YU2Bx5qtvXgmEcLEE/A5O6wXBoGO5PY8s96LAQmecnw25E+CRZiturqpVITC0ml4PK8aB4GM4nU8tGAOAcfaqz14JdGCw9Lv+Xsq1waBjmM2fLNeTEEJHfH8N+PQAoUXrPq66hWEwlEnOHwwGkgAzSH0/PNeSsFJHfH8N2QQAoUXrTp66hVFApGnt/yvmcdAzOG0fPNeSsFJHfH8N+PQAoUXrPq66hWEwlEnOHwwGkgAzSH0/PNeSsFJHfH8N2QQAoUXrTp66hVFApGnt/yvmcdAzOG0fPNeSsFJHfH8N+PQAoUXrPq66hWEwlEnOHwwGkgAzSH0/PN");
     orderUpdateSound.volume = 0.3;
   } catch (error) {
     console.warn("🔇 Could not initialize notification sound:", error);
@@ -385,7 +385,12 @@ function populateOrderModal(order) {
                 ${
                   order.type === "homeDelivery" && order.deliveryAddress
                     ? `<p><strong><i class="fas fa-map-marker-alt me-1"></i>Morada de Entrega:</strong><br>
-                     <span class="text-muted">${order.deliveryAddress}</span></p>`
+                     <span class="text-muted">${order.deliveryAddress}</span>
+                     <br>
+                     <a href="https://www.google.com/maps?q=${encodeURIComponent(order.deliveryAddress)}" target="_blank" class="btn btn-sm btn-outline-primary mt-1">
+                       <i class="fas fa-map-marked-alt me-1"></i>Ver no Google Maps
+                     </a>
+                     </p>`
                     : ""
                 }
             </div>

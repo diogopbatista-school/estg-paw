@@ -99,6 +99,7 @@ orderControllerAPI.createOrder = async (req, res) => {
     console.log("Transformed items for Order model:", transformedItems);
 
     // Process voucher if applied
+    let voucherSnapshot = null;
     if (appliedVoucher && voucherDiscount > 0) {
       console.log("🎫 Processando voucher:", {
         appliedVoucher,
@@ -151,37 +152,20 @@ orderControllerAPI.createOrder = async (req, res) => {
 
       // Update voucher values
       if (remainingVoucherValue <= 0) {
-        // Voucher completely used
         voucher.discount = 0;
         voucher.isActive = false;
-        console.log("🎫 Voucher totalmente utilizado - desativando e zerando valor");
       } else {
-        // Partial use - update voucher value
         voucher.discount = remainingVoucherValue;
-        console.log("🎫 Voucher parcialmente utilizado - novo valor:", remainingVoucherValue);
       }
-
-      console.log("📝 Antes de salvar:", {
-        id: voucher._id,
-        discount: voucher.discount,
-        isActive: voucher.isActive,
-      });
-
-      const savedVoucher = await voucher.save();
-
-      console.log("✅ Voucher salvo com sucesso:", {
-        id: savedVoucher._id,
-        newDiscount: savedVoucher.discount,
-        isActive: savedVoucher.isActive,
-      });
-
-      // Verificar se realmente foi salvo
-      const verifyVoucher = await Voucher.findById(appliedVoucher);
-      console.log("🔍 Verificação pós-salvamento:", {
-        id: verifyVoucher._id,
-        discount: verifyVoucher.discount,
-        isActive: verifyVoucher.isActive,
-      });
+      await voucher.save();
+      // Guardar snapshot do voucher original
+      voucherSnapshot = {
+        code: voucher.code,
+        discount: voucher.discount + voucherDiscount, // valor original ANTES de descontar
+        description: voucher.description,
+        expirationDate: voucher.expirationDate,
+        _id: voucher._id,
+      };
     }
     const orderData = {
       customer: customerId,
@@ -191,7 +175,7 @@ orderControllerAPI.createOrder = async (req, res) => {
       deliveryAddress: deliveryAddress || null,
       totalPrice: totalPrice,
       voucherDiscount: voucherDiscount || 0,
-      appliedVoucher: appliedVoucher || null,
+      appliedVoucher: voucherSnapshot || null,
       status: "pending",
       logs: [
         {
