@@ -1,5 +1,14 @@
 <div class="not-found-container">
-  <h1>404</h1>
-  <p>Página não encontrada.</p>
-  <a routerLink="/" class="home-link">Voltar para a Home</a>
+  <div class="not-found-graphic mb-4">
+    <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="60" cy="60" r="58" stroke="#dc3545" stroke-width="4" fill="#fff6f6"/>
+      <text x="50%" y="54%" text-anchor="middle" fill="#dc3545" font-size="48" font-weight="bold" dy=".3em">404</text>
+      <circle cx="45" cy="80" r="5" fill="#dc3545"/>
+      <circle cx="75" cy="80" r="5" fill="#dc3545"/>
+      <path d="M45 95 Q60 105 75 95" stroke="#dc3545" stroke-width="3" fill="none"/>
+    </svg>
+  </div>
+  <h1 class="mb-2">Oops!</h1>
+  <p class="lead mb-4">A página que procura não foi encontrada.<br>Verifique o endereço ou volte para a página inicial.</p>
+  <a routerLink="/" class="home-link btn btn-primary btn-lg"><i class="fas fa-home me-2"></i>Voltar para a Home</a>
 </div>
