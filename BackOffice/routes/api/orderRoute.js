@@ -30,7 +30,8 @@ router.get("/:orderId", hybridAuth, orderControllerAPI.getOrder);
 router.put("/:orderId/status", hybridAuth, orderControllerAPI.updateOrderStatus);
 
 // PUT /api/orders/:orderId/cancel - Cancel an order
-router.put("/:orderId/cancel", verifyToken, orderControllerAPI.cancelOrder);
+// Using hybridAuth to support both web dashboard and mobile app requests
+router.put("/:orderId/cancel", hybridAuth, orderControllerAPI.cancelOrder);
 
 // Review routes
 router.post("/:orderId/review", verifyToken, upload.single("image"), orderControllerAPI.addReview);

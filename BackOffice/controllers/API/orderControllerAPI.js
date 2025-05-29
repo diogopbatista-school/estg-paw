@@ -366,7 +366,7 @@ orderControllerAPI.getAllOrders = async (req, res) => {
 orderControllerAPI.cancelOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const { motive } = req.body;
+    const { motive, cancelReason } = req.body;
 
     // Validate and get order
     const order = await validationsController.validateAndFetchById(orderId, Order, "Pedido não encontrado");
@@ -374,9 +374,23 @@ orderControllerAPI.cancelOrder = async (req, res) => {
     // Get customer information
     const customer = await validationsController.validateAndFetchById(order.customer, User, "Cliente não encontrado");
 
-    // Check if customer is currently blocked
-    if (customer.isBlocked && customer.blockedUntil && new Date() < customer.blockedUntil) {
-      throw new Error("Não é possível cancelar pedidos. Sua conta está temporariamente bloqueada devido a cancelamentos excessivos.");
+    // Determine if cancellation is by customer or restaurant
+    let isCancellationByRestaurant = false;
+    
+    // If user has restaurant role or is admin, or cancelReason is explicitly set to "restaurant"
+    if (
+      (req.user && (req.user.role === 'restaurant' || req.user.role === 'admin' || req.user.role === 'superAdmin')) ||
+      cancelReason === 'restaurant'
+    ) {
+      isCancellationByRestaurant = true;
+    }
+
+    // Only check for customer blocks if customer is cancelling
+    if (!isCancellationByRestaurant) {
+      // Check if customer is currently blocked
+      if (customer.isBlocked && customer.blockedUntil && new Date() < customer.blockedUntil) {
+        throw new Error("Não é possível cancelar pedidos. Sua conta está temporariamente bloqueada devido a cancelamentos excessivos.");
+      }
     }
 
     // Check if order can be cancelled
@@ -392,8 +406,16 @@ orderControllerAPI.cancelOrder = async (req, res) => {
 
     // Update order status
     order.status = "canceled";
-    order.typeOfcancelation = "customer";
-    order.motive = motive || "Cancelado pelo cliente";
+    
+    // Set cancellation type based on who's cancelling
+    order.typeOfcancelation = isCancellationByRestaurant ? "restaurant" : "customer";
+    
+    // Set appropriate cancellation message
+    if (isCancellationByRestaurant) {
+      order.motive = motive || "Cancelado pelo restaurante";
+    } else {
+      order.motive = motive || "Cancelado pelo cliente";
+    }
     await addOrderLog(order, "canceled", `Pedido cancelado pelo cliente${motive ? ` - Motivo: ${motive}` : ""}`);
 
     // Process voucher refund if applicable
@@ -466,38 +488,50 @@ orderControllerAPI.cancelOrder = async (req, res) => {
 
     await order.save();
 
-    // Update customer cancellation tracking
-    const currentDate = new Date();
-    const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
+    // Only apply customer cancellation penalties if it's a customer-initiated cancellation
+    if (order.typeOfcancelation === "customer") {
+      console.log(`Processing customer cancellation penalties for order #${order.order_number}`);
+      
+      // Update customer cancellation tracking
+      const currentDate = new Date();
+      const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
 
-    // Reset counter if it's a new month
-    if (customer.lastCancellationMonth !== currentMonth) {
-      customer.monthlyCancellations = 0;
-      customer.lastCancellationMonth = currentMonth;
+      // Reset counter if it's a new month
+      if (customer.lastCancellationMonth !== currentMonth) {
+        customer.monthlyCancellations = 0;
+        customer.lastCancellationMonth = currentMonth;
+      }
+
+      // Increment cancellation counter
+      customer.monthlyCancellations += 1;
+
+      // Check if customer should be blocked (5 cancellations in a month)
+      if (customer.monthlyCancellations >= 5) {
+        customer.isBlocked = true;
+        customer.blockedUntil = new Date(Date.now() + 2 * 30 * 24 * 60 * 60 * 1000); // 2 months from now
+
+        console.log(`Customer ${customer.name} (${customer.email}) has been blocked until ${customer.blockedUntil} for excessive cancellations (${customer.monthlyCancellations} cancellations this month)`);
+
+        // Notify customer about the block
+        notifyCustomer(order.customer.toString(), `Sua conta foi temporariamente bloqueada por 2 meses devido a cancelamentos excessivos (${customer.monthlyCancellations} cancelamentos este mês). Você poderá fazer novos pedidos após ${customer.blockedUntil.toLocaleDateString("pt-BR")}.`, null);
+      }
+
+      await customer.save();
+    } else {
+      console.log(`Restaurant cancellation for order #${order.order_number}. Customer will not be penalized.`);
     }
-
-    // Increment cancellation counter
-    customer.monthlyCancellations += 1;
-
-    // Check if customer should be blocked (5 cancellations in a month)
-    if (customer.monthlyCancellations >= 5) {
-      customer.isBlocked = true;
-      customer.blockedUntil = new Date(Date.now() + 2 * 30 * 24 * 60 * 60 * 1000); // 2 months from now
-
-      console.log(`Customer ${customer.name} (${customer.email}) has been blocked until ${customer.blockedUntil} for excessive cancellations (${customer.monthlyCancellations} cancellations this month)`);
-
-      // Notify customer about the block
-      notifyCustomer(order.customer.toString(), `Sua conta foi temporariamente bloqueada por 2 meses devido a cancelamentos excessivos (${customer.monthlyCancellations} cancelamentos este mês). Você poderá fazer novos pedidos após ${customer.blockedUntil.toLocaleDateString("pt-BR")}.`, null);
-    }
-
-    await customer.save();
 
     // Emit socket notification to customer after log/status change
     await emitOrderNotificationToCustomer(req, order._id);
 
-    // Send real-time notifications
-    notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi cancelado com sucesso.`, order);
-    notifyRestaurant(order.restaurant.toString(), `Pedido #${order.order_number} foi cancelado pelo cliente${motive ? ` - Motivo: ${motive}` : ""}`, order);
+    // Send appropriate real-time notifications based on who cancelled
+    if (order.typeOfcancelation === "restaurant") {
+      notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi cancelado pelo restaurante. Motivo: ${order.motive}`, order);
+      notifyRestaurant(order.restaurant.toString(), `Pedido #${order.order_number} foi cancelado pelo restaurante. Motivo: ${order.motive}`, order);
+    } else {
+      notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi cancelado com sucesso.`, order);
+      notifyRestaurant(order.restaurant.toString(), `Pedido #${order.order_number} foi cancelado pelo cliente${motive ? ` - Motivo: ${motive}` : ""}`, order);
+    }
 
     res.status(200).json({
       success: true,
