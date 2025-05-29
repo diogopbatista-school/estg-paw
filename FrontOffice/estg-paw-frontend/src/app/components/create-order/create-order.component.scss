@@ -137,3 +137,28 @@
     height: 1rem;
   }
 }
+
+// Botão de voltar à lista de restaurantes
+.btn-outline-secondary {
+  border-width: 2px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  margin-bottom: 0.5rem;
+
+  &:hover, &:focus {
+    background: #f0f0f0;
+    color: #222;
+    border-color: #6c757d;
+  }
+}
+
+// Espaçamento extra para separar do topo
+.mb-3 > .btn-outline-secondary {
+  margin-top: 0.5rem;
+}
+
+// Ícone alinhado
+.btn-outline-secondary i {
+  margin-right: 0.5rem;
+}

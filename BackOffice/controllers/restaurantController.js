@@ -539,7 +539,12 @@ restaurantController.renderOrderHistory = async (req, res) => {
     const skip = (page - 1) * itensPorPagina;
     let query = { restaurant: restaurantId };
     if (filters.status) {
-      query.status = filters.status;
+      if (filters.status === "cancelled") {
+        // Corrigir: buscar ambos os status "cancelled" e "canceled"
+        query.status = { $in: ["cancelled", "canceled"] };
+      } else {
+        query.status = filters.status;
+      }
     }
     if (filters.startDate) {
       query.created_at = { $gte: new Date(filters.startDate) };

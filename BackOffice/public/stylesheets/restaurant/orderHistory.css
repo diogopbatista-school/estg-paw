@@ -305,6 +305,32 @@ body {
   }
 }
 
+.btn-back-dashboard {
+  background: linear-gradient(to right, #1976d2, #2196f3);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-back-dashboard:hover {
+  background: linear-gradient(to right, #1565c0, #1976d2);
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+.btn-back-dashboard i {
+  transition: transform 0.3s ease;
+}
+
+.btn-back-dashboard:hover i {
+  transform: translateX(-3px);
+}
+
 .order-number {
   font-size: 1.1rem;
   padding: 0.5rem 1rem;
