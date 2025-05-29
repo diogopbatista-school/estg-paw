@@ -82,13 +82,17 @@ export class ProcessVoucherPaymentComponent implements OnInit {
             next: (response) => {
               this.processing = false;
               this.success = true;
-              
-              if (this.isRecipient && response.recipientName) {
+                if (this.isRecipient && response.recipientName) {
                 this.recipientName = response.recipientName;
                 this.toastr.success(`Voucher enviado para ${response.recipientName} com sucesso!`);
               } else {
                 this.toastr.success('Voucher criado com sucesso!');
               }
+              
+              // Add a delay before redirecting to ensure styling is applied properly
+              setTimeout(() => {
+                this.router.navigate(['/vouchers']);
+              }, 3500);
             },
             error: (error) => {
               this.processing = false;

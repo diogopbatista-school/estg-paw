@@ -66,11 +66,11 @@ export class ProcessPaymentComponent implements OnInit {
               this.success = true;
               localStorage.removeItem('pendingOrder');
               localStorage.removeItem('cartItems');
-              localStorage.removeItem('cartTimeRemaining');
-              this.toastr.success('Pedido realizado com sucesso!');
+              localStorage.removeItem('cartTimeRemaining');              this.toastr.success('Pedido realizado com sucesso!');
+              // Longer delay to ensure the styling has time to apply and user sees the success message
               setTimeout(() => {
                 this.router.navigate(['/orders/track']);
-              }, 2000);
+              }, 3500);
             },
             error: (error) => {
               this.processing = false;
