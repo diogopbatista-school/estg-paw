@@ -88,12 +88,6 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
     }
     this.initializeSocketConnection();
     this.loadOrders();
-    
-    // Force a layout recalculation after component initialization
-    // This helps ensure styles apply correctly, especially when redirected from another page
-    setTimeout(() => {
-      this.cdr.detectChanges();
-    }, 100);
   }
 
   ngOnDestroy(): void {
