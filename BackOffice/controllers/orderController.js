@@ -278,7 +278,11 @@ orderController.postRegisterOrder = async (req, res) => {
     // Salvar o pedido no banco de dados
     const newOrder = await orderController.createOrder(newOrderData);
 
-    costumer.orders.push(newOrder._id);
+    // Corrigido: usar order_records em vez de orders
+    if (!Array.isArray(costumer.order_records)) {
+      costumer.order_records = [];
+    }
+    costumer.order_records.push(newOrder._id);
     await costumer.save();
     console.log("Pedido registrado com sucesso:", costumer);
 

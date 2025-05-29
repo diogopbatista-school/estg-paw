@@ -69,7 +69,7 @@ export class ProcessPaymentComponent implements OnInit {
               localStorage.removeItem('cartTimeRemaining');
               this.toastr.success('Pedido realizado com sucesso!');
               setTimeout(() => {
-                this.router.navigate(['/track-order']);
+                this.router.navigate(['/orders/track']);
               }, 2000);
             },
             error: (error) => {

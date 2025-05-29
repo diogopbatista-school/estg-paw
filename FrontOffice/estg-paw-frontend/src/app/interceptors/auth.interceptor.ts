@@ -24,7 +24,6 @@ export const authInterceptor: HttpInterceptorFn = (
   // Só tenta obter o token se estiver no navegador
   if (isPlatformBrowser(platformId)) {
     const token = localStorage.getItem('token');
-    console.log('Token from localStorage:', token);
 
     // Se o token existir, adiciona ao cabeçalho da requisição
     if (token) {

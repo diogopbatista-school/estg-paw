@@ -370,7 +370,7 @@ export class CreateOrderComponent implements OnInit, OnDestroy {
         this.toastr.success('Pedido realizado com sucesso!');        // Reset voucher state after successful order
         this.appliedVoucherDiscount = 0;
         this.selectedVoucher = null;
-        this.router.navigate(['/track-order']);
+        this.router.navigate(['/orders/track']);
         // Limpa o carrinho do localStorage ao finalizar o pedido
         localStorage.removeItem('cartItems');
         localStorage.removeItem('cartTimeRemaining');

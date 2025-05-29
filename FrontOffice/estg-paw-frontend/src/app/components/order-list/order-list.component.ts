@@ -32,7 +32,7 @@ interface OrderLog {
 
 interface Order {
   _id: string;
-  status: 'pending' | 'preparing' | 'delivered' | 'finished' | 'cancelled';
+  status: 'pending' | 'preparing' | 'delivered' | 'finished' | 'cancelled' | 'canceled';
   items: Array<{
     dish: {
       name: string;
@@ -251,12 +251,19 @@ export class OrderListComponent implements OnInit {
       );
     }
 
-    // Apply status filter
+    // Apply status filter (corrigido para considerar 'cancelled' e 'canceled')
     if (this.selectedStatus) {
-      filtered = filtered.filter(
-        (order) => order.status === this.selectedStatus
-      );
+      if (this.selectedStatus === 'cancelled') {
+        filtered = filtered.filter(
+          (order) => order.status === 'cancelled' || order.status === 'canceled'
+        );
+      } else {
+        filtered = filtered.filter(
+          (order) => order.status === this.selectedStatus
+        );
+      }
     }
+    // Se selectedStatus for vazio, não filtra por status (mostra todos)
 
     // Apply date filter (YYYY-MM-DD)
     if (this.selectedDate) {
