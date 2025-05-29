@@ -642,6 +642,40 @@ orderController.cancelOrder = async (req, res) => {
       }
     }
     
+    // If the cancellation is by the customer (not by the restaurant), update customer's cancellation counter
+    if (cancelReason === 'customer') {
+      // Get customer information
+      const customer = await validationsController.validateAndFetchById(order.customer, User, "Cliente não encontrado");
+      
+      // Update customer cancellation tracking
+      const currentDate = new Date();
+      const currentMonth = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
+
+      // Reset counter if it's a new month
+      if (customer.lastCancellationMonth !== currentMonth) {
+        customer.monthlyCancellations = 0;
+        customer.lastCancellationMonth = currentMonth;
+      }
+
+      // Increment cancellation counter
+      customer.monthlyCancellations += 1;
+
+      // Check if customer should be blocked (5 cancellations in a month)
+      if (customer.monthlyCancellations >= 5) {
+        customer.isBlocked = true;
+        customer.blockedUntil = new Date(Date.now() + 2 * 30 * 24 * 60 * 60 * 1000); // 2 months from now
+
+        console.log(`Customer ${customer.name} (${customer.email}) has been blocked until ${customer.blockedUntil} for excessive cancellations (${customer.monthlyCancellations} cancellations this month)`);
+
+        // Notify customer about the block
+        notifyCustomer(order.customer.toString(), `Sua conta foi temporariamente bloqueada por 2 meses devido a cancelamentos excessivos (${customer.monthlyCancellations} cancelamentos este mês). Você poderá fazer novos pedidos após ${customer.blockedUntil.toLocaleDateString("pt-BR")}.`, null);
+      }
+
+      await customer.save();
+    } else {
+      console.log(`Pedido #${order.order_number} foi cancelado pelo restaurante, cliente não será penalizado.`);
+    }
+
     await order.save();
 
     // Adiciona à lista de registros do restaurante
@@ -652,7 +686,11 @@ orderController.cancelOrder = async (req, res) => {
     await restaurant.save();
 
     // Send real-time notifications
-    notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi cancelado pelo restaurante. Motivo: ${order.motive}`, order);
+    if (cancelReason === 'restaurant') {
+      notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi cancelado pelo restaurante. Motivo: ${order.motive}`, order);
+    } else {
+      notifyCustomer(order.customer.toString(), `Seu pedido #${order.order_number} foi cancelado. Motivo: ${order.motive}`, order);
+    }
 
     notifyRestaurant(order.restaurant.toString(), `Pedido #${order.order_number} foi cancelado`, order);
 
