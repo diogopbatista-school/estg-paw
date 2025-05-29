@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../jwt_secret/config');
+const config = require('../jwt_secret/config');
 
 /**
  * Hybrid authentication middleware that supports both JWT tokens and session-based auth
@@ -13,8 +13,12 @@ const hybridAuth = (req, res, next) => {
     const token = authHeader.substring(7);
     
     try {
-      const decoded = jwt.verify(token, JWT_SECRET);
-      req.user = decoded;
+      const decoded = jwt.verify(token, config.secret);
+      // Ensure _id is available for backward compatibility
+      req.user = {
+        ...decoded,
+        _id: decoded.id // Map id to _id for consistency
+      };
       return next();
     } catch (error) {
       console.log('JWT verification failed:', error.message);
