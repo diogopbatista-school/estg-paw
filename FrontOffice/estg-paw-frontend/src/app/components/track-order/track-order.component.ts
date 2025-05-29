@@ -16,7 +16,7 @@ interface OrderLog {
 
 interface Order {
   _id: string;
-  status: 'pending' | 'preparing' | 'delivered' | 'finished' | 'cancelled';
+  status: 'pending' | 'preparing' | 'delivered' | 'finished' | 'cancelled' | 'canceled';
   items: Array<{
     dish: {
       name: string;
@@ -211,12 +211,14 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       },
     });
   }
-
   filterOrders(): void {
     // Filtra para mostrar apenas pedidos que NÃO estão finalizados ou cancelados
     this.filteredOrders = this.orders
       .filter(
-        (order) => order.status !== 'finished' && order.status !== 'cancelled'
+        (order) => 
+          order.status !== 'finished' && 
+          order.status !== 'cancelled' && 
+          order.status !== 'canceled'
       )
       .sort(
         (a, b) =>
@@ -240,7 +242,6 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       startIndex + this.itemsPerPage
     );
   }
-
   getStatusClass(status: string): string {
     const statusClasses: { [key: string]: string } = {
       pending: 'bg-warning',
@@ -248,10 +249,10 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       delivered: 'bg-success',
       finished: 'bg-primary',
       cancelled: 'bg-danger',
+      canceled: 'bg-danger',
     };
     return statusClasses[status] || 'bg-secondary';
   }
-
   getStatusText(status: string): string {
     const statusTexts: { [key: string]: string } = {
       pending: 'Pendente',
@@ -259,6 +260,7 @@ export class TrackOrderComponent implements OnInit, OnDestroy {
       delivered: 'Pronto para Entrega',
       finished: 'Finalizado',
       cancelled: 'Cancelado',
+      canceled: 'Cancelado',
     };
     return statusTexts[status] || status;
   }
