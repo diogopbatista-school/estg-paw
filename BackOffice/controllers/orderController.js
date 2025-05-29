@@ -572,6 +572,76 @@ orderController.cancelOrder = async (req, res) => {
       description += ` - ${customReason}`;
     }
     await addOrderLog(order, "canceled", description);
+    
+    // Process voucher refund if applicable
+    if (order.voucherDiscount > 0 && order.appliedVoucher) {
+      try {
+        const Voucher = require("../models/Voucher");
+        
+        // Determine voucher ID based on the format (object snapshot or ObjectId)
+        let voucherId;
+        if (typeof order.appliedVoucher === 'object' && order.appliedVoucher !== null) {
+          // It's a snapshot with _id property
+          voucherId = order.appliedVoucher._id;
+          
+          console.log("🎫 Processando reembolso de voucher (formato snapshot):", {
+            voucherId: voucherId,
+            discountToRefund: order.voucherDiscount
+          });
+        } else {
+          // It's a direct ObjectId reference
+          voucherId = order.appliedVoucher;
+          
+          console.log("🎫 Processando reembolso de voucher (formato ObjectId):", {
+            voucherId: voucherId,
+            discountToRefund: order.voucherDiscount
+          });
+        }
+
+        // Helper function to round to 2 decimal places to avoid floating point precision issues
+        const roundToTwoDecimals = (value) => Math.round(value * 100) / 100;
+
+        // Find the original voucher
+        const voucher = await Voucher.findById(voucherId);
+        if (voucher) {
+          // Calculate new discount value after refund
+          const newDiscountValue = roundToTwoDecimals(voucher.discount + order.voucherDiscount);
+          
+          console.log("💰 Cálculo do reembolso do voucher:", {
+            voucherId: voucher._id,
+            code: voucher.code,
+            currentValue: voucher.discount,
+            refundAmount: order.voucherDiscount,
+            newValue: newDiscountValue,
+            wasActive: voucher.isActive
+          });
+
+          // Update voucher values
+          voucher.discount = newDiscountValue;
+          
+          // Reactivate voucher if it was inactive
+          if (!voucher.isActive) {
+            voucher.isActive = true;
+          }
+          
+          await voucher.save();
+          
+          // Log the voucher refund
+          await addOrderLog(
+            order, 
+            "canceled",
+            `Valor do voucher ${voucher.code} reembolsado em €${order.voucherDiscount.toFixed(2)}`
+          );
+          
+          console.log(`✅ Voucher ${voucher.code} reembolsado com sucesso. Novo valor: €${newDiscountValue.toFixed(2)}`);
+        } else {
+          console.log(`❌ Voucher com ID ${voucherId} não encontrado para reembolso`);
+        }
+      } catch (voucherError) {
+        console.error("Erro ao processar reembolso do voucher:", voucherError);
+      }
+    }
+    
     await order.save();
 
     // Adiciona à lista de registros do restaurante

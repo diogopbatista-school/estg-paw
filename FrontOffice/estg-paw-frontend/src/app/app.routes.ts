@@ -11,6 +11,7 @@ import { OrderListComponent } from './components/order-list/order-list.component
 import { authGuard } from './guards/auth.guard';
 import { CreateVoucherComponent } from './components/create-voucher/create-voucher.component';
 import { ProcessPaymentComponent } from './components/process-payment/process-payment.component';
+import { ProcessVoucherPaymentComponent } from './components/process-voucher-payment/process-voucher-payment.component';
 import { NotFoundComponent } from './components/not-found/not-found.component';
 
 export const routes: Routes = [
@@ -23,8 +24,10 @@ export const routes: Routes = [
   { path: 'orders', component: OrderListComponent, canActivate: [authGuard] },
   { path: 'restaurant/:id/order', component: CreateOrderComponent, canActivate: [authGuard] },
   { path: 'orders/track', component: TrackOrderComponent, canActivate: [authGuard] },
+  { path: 'vouchers', component: CreateVoucherComponent, canActivate: [authGuard] },
   { path: 'create-voucher', component: CreateVoucherComponent, canActivate: [authGuard] },
   { path: 'process-payment', component: ProcessPaymentComponent, canActivate: [authGuard] },
+  { path: 'process-voucher-payment', component: ProcessVoucherPaymentComponent, canActivate: [authGuard] },
 
   // Rotas protegidas
   {

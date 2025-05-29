@@ -1,0 +1,106 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body text-center p-5">
+          <!-- Loading state -->
+          <div *ngIf="processing" class="py-5">
+            <div
+              class="spinner-border text-primary mb-3"
+              style="width: 3rem; height: 3rem"
+              role="status"
+            >
+              <span class="visually-hidden">Processando...</span>
+            </div>
+            <h4 class="mb-3">Processando o seu pagamento</h4>
+            <p class="text-muted">
+              Aguarde enquanto confirmamos o seu pagamento e preparamos o seu
+              voucher...
+            </p>
+          </div>
+
+          <!-- Success state -->
+          <div *ngIf="success" class="py-3">
+            <div class="success-checkmark mb-4">
+              <div class="check-icon">
+                <span class="icon-line line-tip"></span>
+                <span class="icon-line line-long"></span>
+                <div class="icon-circle"></div>
+                <div class="icon-fix"></div>
+              </div>
+            </div>
+
+            <h3 class="text-success mb-4">Pagamento Confirmado!</h3>
+
+            <div class="voucher-confirmation mb-4">
+              <div class="voucher-icon mb-3">
+                <i class="fas fa-ticket-alt fa-3x"></i>
+              </div>
+
+              <h4 *ngIf="!isRecipient" class="mb-3">
+                O Seu voucher foi criado com sucesso!
+              </h4>
+              <h4 *ngIf="isRecipient" class="mb-3">
+                Voucher enviado com sucesso!
+              </h4>
+
+              <div class="alert alert-success py-3">
+                <div *ngIf="!isRecipient">
+                  <p>O Seu voucher já está disponível na sua conta.</p>
+                  <p class="mb-0">
+                    Agora pode utilizar este voucher em qualquer pedido.
+                  </p>
+                </div>
+                <div *ngIf="isRecipient">
+                  <p>
+                    O voucher foi enviado para
+                    <strong>{{ recipientName }}</strong
+                    >.
+                  </p>
+                  <p class="mb-0">
+                    O destinatário receberá uma notificação para aceder ao
+                    voucher.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary" (click)="goToVouchers()">
+                <i class="fas fa-ticket-alt me-2"></i>Ver Meus Vouchers
+              </button>
+              <button
+                class="btn btn-outline-secondary"
+                (click)="goToDashboard()"
+              >
+                <i class="fas fa-tachometer-alt me-2"></i>Voltar ao Dashboard
+              </button>
+            </div>
+          </div>
+
+          <!-- Error state -->
+          <div *ngIf="error" class="py-3">
+            <div class="error-circle mb-4">
+              <i class="fas fa-exclamation-triangle fa-3x text-danger"></i>
+            </div>
+
+            <h3 class="text-danger mb-3">Ocorreu um problema!</h3>
+            <p class="text-muted mb-4">{{ errorMessage }}</p>
+
+            <div class="d-grid gap-2">
+              <button class="btn btn-primary" (click)="goToVouchers()">
+                <i class="fas fa-ticket-alt me-2"></i>Ver Meus Vouchers
+              </button>
+              <button
+                class="btn btn-outline-secondary"
+                (click)="goToDashboard()"
+              >
+                <i class="fas fa-tachometer-alt me-2"></i>Voltar ao Dashboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

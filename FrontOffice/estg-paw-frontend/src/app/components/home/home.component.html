@@ -296,7 +296,8 @@
       <div
         class="category-card"
         *ngFor="let category of dishCategories | slice:0:7"
-        [routerLink]="['/category', category.toLowerCase()]"
+        [routerLink]="['/restaurants']"
+        [queryParams]="{category: category.toLowerCase()}"
       >
         <!-- Use an emoji based on category name -->
         <div class="category-icon">

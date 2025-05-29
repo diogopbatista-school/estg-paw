@@ -42,4 +42,14 @@ export class VoucherService {
       orderAmount
     });
   }
+  
+  // Obter detalhes da sessão Stripe
+  getStripeSessionDetails(sessionId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/session/${sessionId}`);
+  }
+  
+  // Criar voucher após pagamento confirmado
+  createVoucher(payload: { userId: string; amount: number; recipientEmail?: string }): Observable<any> {
+    return this.http.post<any>(`${this.userApiUrl}/create-voucher`, payload);
+  }
 }

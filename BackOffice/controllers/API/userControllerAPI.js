@@ -198,4 +198,94 @@ userControllerAPI.applyVoucher = async (req, res) => {
   }
 };
 
+userControllerAPI.createVoucher = async (req, res) => {
+  try {
+    const { userId, amount, recipientEmail } = req.body;
+    
+    console.log("🎫 Criando voucher após pagamento confirmado:");
+    console.log("- userId:", userId);
+    console.log("- amount:", amount);
+    console.log("- recipientEmail:", recipientEmail);
+
+    // Validate required fields
+    if (!userId || !amount) {
+      return res.status(400).json({ 
+        error: "userId e amount são obrigatórios" 
+      });
+    }
+
+    // Validate amount
+    if (amount <= 0) {
+      return res.status(400).json({ 
+        error: "O valor do voucher deve ser maior que 0" 
+      });
+    }
+
+    // Normalize recipient email
+    const normalizedRecipientEmail = recipientEmail?.trim() || "";
+    
+    // Determine who will receive the voucher
+    let recipientId = userId; // Default to buyer
+    let recipientName = null;
+
+    if (normalizedRecipientEmail !== "") {
+      // If there's a recipient email, find the user
+      const recipient = await User.findOne({ email: normalizedRecipientEmail });
+      if (!recipient) {
+        return res.status(400).json({ 
+          error: "Email do destinatário não encontrado" 
+        });
+      }
+      
+      if (recipient.role !== "client") {
+        return res.status(400).json({ 
+          error: "O destinatário deve ser um cliente" 
+        });
+      }
+      
+      recipientId = recipient._id;
+      recipientName = recipient.name;
+      console.log("✅ Voucher será dado para:", recipient.name, "(", recipient.email, ")");
+    } else {
+      console.log("✅ Voucher será dado para o próprio comprador");
+    }
+
+    // Create voucher valid for 1 year
+    const expiration = new Date();
+    expiration.setFullYear(expiration.getFullYear() + 1);
+    
+    const Voucher = require("../../models/Voucher");
+    
+    const voucher = await Voucher.create({
+      discount: amount,
+      expirationDate: expiration,
+      createdBy: userId, // Who bought it
+      assignedTo: recipientId, // Who will receive it
+    });
+
+    console.log("✅ Voucher criado:", voucher._id);
+
+    // Add voucher to recipient user
+    await User.findByIdAndUpdate(recipientId, {
+      $push: { vouchers: voucher._id },
+    });
+
+    return res.status(201).json({
+      success: true,
+      voucherId: voucher._id,
+      code: voucher.code,
+      discount: voucher.discount,
+      expirationDate: voucher.expirationDate,
+      recipientName: recipientName
+    });
+
+  } catch (error) {
+    console.error("❌ Erro ao criar voucher:", error);
+    res.status(500).json({ 
+      success: false,
+      error: error.message || "Erro ao criar voucher"
+    });
+  }
+};
+
 module.exports = userControllerAPI;

@@ -19,4 +19,7 @@ router.get("/voucher/validate/:code", verifyToken, userControllerAPI.validateVou
 // Aplicar voucher
 router.post("/voucher/apply", verifyToken, userControllerAPI.applyVoucher);
 
+// Criar voucher após pagamento confirmado
+router.post("/create-voucher", verifyToken, userControllerAPI.createVoucher);
+
 module.exports = router;

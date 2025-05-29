@@ -6,6 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link rel="stylesheet" href="/stylesheets/restaurant/restaurantDashboard.css" />
+    <link rel="stylesheet" href="/stylesheets/restaurant/rating.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
 
@@ -86,6 +87,62 @@
                 </div>
                 <div>
                   <h1 class="mb-1"><%= restaurant.name %></h1>
+
+                  <!-- Star Rating Display -->
+                  <% if (restaurant.average_rating && restaurant.average_rating > 0) { %>
+                  <div class="d-flex align-items-center mb-2">
+                    <div class="stars me-2">
+                      <% 
+                      const fullStars = Math.floor(restaurant.average_rating);
+                      const hasHalfStar = restaurant.average_rating - fullStars >= 0.5;
+                      const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+                      %>
+                      
+                      <% for (let i = 0; i < fullStars; i++) { %>
+                        <i class="fas fa-star text-warning" style="font-size: 0.9rem"></i>
+                      <% } %>
+                      
+                      <% if (hasHalfStar) { %>
+                        <i class="fas fa-star-half-alt text-warning" style="font-size: 0.9rem"></i>
+                      <% } %>
+                      
+                      <% for (let i = 0; i < emptyStars; i++) { %>
+                        <i class="far fa-star text-muted" style="font-size: 0.9rem"></i>
+                      <% } %>
+                    </div>
+                    <span class="text-muted small">(<%= restaurant.average_rating.toFixed(1) %>/5)</span>
+                  </div>
+
+                  <!-- Rating Badge and Review Count -->
+                  <div class="d-flex align-items-center mb-3">
+                    <span class="rating-badge me-2">
+                      <i class="fas fa-star me-1"></i>
+                      <strong><%= restaurant.average_rating.toFixed(1) %></strong>
+                    </span>
+                    <small class="text-muted">
+                      <%= restaurant.reviews?.length || 0 %> avaliações
+                    </small>
+                  </div>
+                  <% } else { %>
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="stars me-2">
+                      <% for (let i = 0; i < 5; i++) { %>
+                        <i class="far fa-star text-muted" style="font-size: 0.9rem"></i>
+                      <% } %>
+                    </div>
+                    <span class="text-muted small">(0.0/5)</span>
+                  </div>
+                  <div class="d-flex align-items-center mb-3">
+                    <span class="rating-badge me-2" style="background-color: rgba(108, 117, 125, 0.2); border-color: rgba(108, 117, 125, 0.5);">
+                      <i class="fas fa-star me-1" style="color: #6c757d;"></i>
+                      <strong>0.0</strong>
+                    </span>
+                    <small class="text-muted">
+                      0 avaliações
+                    </small>
+                  </div>
+                  <% } %>
+
                   <p><strong><i class="fas fa-info-circle me-2"></i> Descrição:</strong> <%= restaurant.description || "Sem descrição" %></p>
                   <p><strong><i class="fas fa-phone me-2"></i> Telefone:</strong> <%= restaurant.phone %></p>
                   <p><strong><i class="fas fa-map-marker-alt me-2"></i> Localização:</strong> Latitude: <%= restaurant.location.latitude %>, Longitude: <%= restaurant.location.longitude %></p>

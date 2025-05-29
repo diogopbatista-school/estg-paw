@@ -114,8 +114,7 @@ stripeControllerAPI.createCheckoutSession = async (req, res) => {
  * @param {Object} req - Request object containing voucher data
  * @param {Object} res - Response object
  */
-stripeControllerAPI.createVoucherSession = async (req, res) => {
-  try {
+stripeControllerAPI.createVoucherSession = async (req, res) => {  try {
     const { userId, amount, recipientEmail } = req.body;
     
     console.log("🎫 RECEBIDO - Criar sessão voucher:");
@@ -187,8 +186,8 @@ stripeControllerAPI.createVoucherSession = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: "http://localhost:4200/dashboard?success=voucher",
-      cancel_url: "http://localhost:4200/dashboard?canceled=voucher",
+      success_url: "http://localhost:4200/process-voucher-payment?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "http://localhost:4200/vouchers?canceled=true",
       metadata: {
         buyerId: userId,
         voucherAmount: amount,
@@ -199,20 +198,13 @@ stripeControllerAPI.createVoucherSession = async (req, res) => {
 
     console.log("✅ Sessão Stripe criada:", session.id);
 
-    // Create voucher immediately (assuming payment will be successful)
-    const voucherResult = await stripeControllerAPI.createVoucher(userId, amount, normalizedRecipientEmail);
-    
-    if (!voucherResult.success) {
-      console.error("❌ Erro ao criar voucher:", voucherResult.error);
-      return res.status(500).json({ 
-        error: "Erro ao criar voucher: " + voucherResult.error 
-      });
-    }
+    // Não criar o voucher agora - esperar confirmação do pagamento
+    // O voucher será criado quando o usuário for redirecionado para a URL de sucesso
+    // e o componente process-voucher-payment verificar o status do pagamento
 
     res.status(200).json({ 
       success: true,
-      sessionId: session.id,
-      voucherId: voucherResult.voucherId
+      sessionId: session.id
     });
 
   } catch (error) {

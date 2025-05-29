@@ -34,6 +34,18 @@ a {
   }
 }
 
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 60px); /* Adjust for any header/footer */
+  width: 100%;
+  padding: 2rem 1rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
 .container {
   width: 100%;
   max-width: 1200px;
