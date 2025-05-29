@@ -65,14 +65,11 @@
           <h3><i class="fas fa-info-circle me-2"></i>Detalhes do Pedido</h3>
           <div class="row mb-2">
             <div class="col-md-6"><strong>ID do Pedido:</strong> <%= order._id %></div>
-            <div class="col-md-6"><strong>Número do Pedido:</strong> #<%= order.order_number || 'N/A' %></div>
+            <div class="col-md-6"><strong>Cliente:</strong> <%= order.customerId %></div>
           </div>
           <div class="row mb-2">
-            <div class="col-md-6"><strong>Data:</strong> <%= order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A' %></div>
+            <div class="col-md-6"><strong>Data:</strong> <%= order.orderDate ? new Date(order.orderDate).toLocaleString() : 'N/A' %></div>
             <div class="col-md-6"><strong>Estado Atual:</strong> <%= order.status %></div>
-          </div>
-          <div class="row mb-2">
-            <div class="col-md-12"><strong>Total:</strong> €<%= order.totalPrice ? order.totalPrice.toFixed(2) : '0.00' %></div>
           </div>
         </div>
 
@@ -94,9 +91,9 @@
                 onchange="toggleCustomReason()"
                 required>
                 <option value="">Selecione o motivo</option>
-                <option value="customer">Cancelamento pelo Cliente (cliente será penalizado)</option>
-                <option value="restaurant">Cancelamento pelo Restaurante (cliente não será penalizado)</option>
-                <option value="other">Outro motivo</option>
+                <option value="customer">Cancelamento pelo Cliente</option>
+                <option value="restaurant">Cancelamento pelo Restaurante</option>
+                <option value="other">Outro</option>
               </select>
             </div>
           </div>
@@ -123,7 +120,7 @@
 
           <div class="d-flex justify-content-between mt-4">
             <a
-              href="/restaurants/dashboard/<%= order.restaurant %>"
+              href="/restaurants/dashboard/<%= order.restaurantId %>"
               class="btn btn-secondary">
               <i class="fas fa-arrow-left me-2"></i>Voltar
             </a>
@@ -142,29 +139,7 @@
       function toggleCustomReason() {
         const reason = document.getElementById("cancelReason").value;
         const customContainer = document.getElementById("customReasonContainer");
-        
-        // Show custom reason field for "other" option or if a reason is specified
         customContainer.style.display = reason === "other" ? "block" : "none";
-        
-        // If customer option is selected, show a warning about penalties
-        if (reason === "customer") {
-          if (!document.getElementById("customerWarning")) {
-            const warningDiv = document.createElement("div");
-            warningDiv.id = "customerWarning";
-            warningDiv.className = "alert alert-warning mt-3";
-            warningDiv.innerHTML = `
-              <i class="fas fa-exclamation-triangle me-2"></i>
-              <strong>Atenção:</strong> Cancelamentos iniciados pelo cliente são contabilizados.
-              Após 5 cancelamentos em um mês, a conta do cliente poderá ser bloqueada por 2 meses.
-            `;
-            document.querySelector("form").insertBefore(warningDiv, document.querySelector("form .d-flex"));
-          }
-        } else {
-          const warningDiv = document.getElementById("customerWarning");
-          if (warningDiv) {
-            warningDiv.remove();
-          }
-        }
       }
     </script>
   </body>

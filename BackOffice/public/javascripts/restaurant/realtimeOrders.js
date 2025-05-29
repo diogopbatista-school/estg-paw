@@ -129,9 +129,7 @@ function loadOrders() {
 
   console.log("📋 Loading orders for restaurant:", restaurantId);
 
-  fetch(`/api/orders/restaurant/${restaurantId}`, {
-    credentials: "same-origin", // Include cookies for session authentication
-  })
+  fetch(`/api/orders/restaurant/${restaurantId}`)
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
@@ -292,7 +290,6 @@ function updateOrderStatus(orderId, newStatus) {
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "same-origin", // Include cookies for session authentication
     body: JSON.stringify({ status: newStatus }),
   })
     .then((response) => response.json())
@@ -313,19 +310,35 @@ function updateOrderStatus(orderId, newStatus) {
 
 function cancelOrder(orderId) {
   if (confirm("Tem certeza que deseja cancelar este pedido?")) {
-    console.log(`❌ Redirecting to cancel order view for order: ${orderId}`);
-    
-    // Redirect to the cancel order view instead of making an API call
-    window.location.href = `/order/cancel/${orderId}`;
+    console.log(`❌ Cancelling order ${orderId}`);
+
+    fetch(`/api/orders/${orderId}/cancel`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          console.log("✅ Order cancelled successfully");
+          // The socket listener will handle the UI update
+        } else {
+          console.error("❌ Failed to cancel order:", data.message);
+          showNotification("Erro", "Falha ao cancelar pedido", "danger");
+        }
+      })
+      .catch((error) => {
+        console.error("❌ Error cancelling order:", error);
+        showNotification("Erro", "Erro ao cancelar pedido", "danger");
+      });
   }
 }
 
 function showOrderDetails(orderId) {
   console.log(`👀 Showing details for order: ${orderId}`);
 
-  fetch(`/api/orders/${orderId}`, {
-    credentials: "same-origin", // Include cookies for session authentication
-  })
+  fetch(`/api/orders/${orderId}`)
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
