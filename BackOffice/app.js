@@ -36,7 +36,7 @@ var app = express();
 // Conexão com o banco de dados MongoDB
 mongoose.Promise = global.Promise;
 mongoose
-  .connect("mongodb+srv://PAW_TP_2025:pVHvZ26RXVXUDiwk@paw-tp.bf87xik.mongodb.net/?retryWrites=true&w=majority&appName=PAW-TP")
+  .connect("mongodb+srv://PAW_TP_2025:pVHvongodb.net/?retryWrites=true&w=majority&appName=PAW-TP")
   .then(() => {
     console.log("Connected to the database!");
   })
