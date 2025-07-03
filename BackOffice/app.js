@@ -48,7 +48,7 @@ mongoose
 // Configuração do middleware de sessão
 app.use(
   session({
-    store: MongoStore.create({ mongoUrl: "mongodb+srv://PAW_TP_2025:pVHvZ26RXVXUDiwk@paw-tp.bf87xik.mongodb.net/?retryWrites=true&w=majority&appName=PAW-TP" }),
+    store: MongoStore.create({ mongoUrl: "mongodb+srv://PAW_TP_2025:pVHvZ26RXV87xik.mongodb.net/?retryWrites=true&w=majority&appName=PAW-TP" }),
     resave: false,
     saveUninitialized: false,
     secret: "estg-paw", // Substitua por uma chave secreta segura
