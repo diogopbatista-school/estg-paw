@@ -4,9 +4,9 @@ import {
   HttpInterceptorFn,
   HttpErrorResponse,
 } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, DOCUMENT } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
-import { isPlatformBrowser, DOCUMENT } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { PLATFORM_ID } from '@angular/core';
 
