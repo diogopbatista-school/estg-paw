@@ -36,7 +36,7 @@ var app = express();
 // Conexão com o banco de dados MongoDB
 mongoose.Promise = global.Promise;
 mongoose
-  .connect("mongodb+srv://PAW_TP_2025:pVHvongodb.net/?retryWrites=true&w=majority&appName=PAW-TP")
+  .connect("")
   .then(() => {
     console.log("Connected to the database!");
   })
@@ -48,7 +48,7 @@ mongoose
 // Configuração do middleware de sessão
 app.use(
   session({
-    store: MongoStore.create({ mongoUrl: "mongodb+srv://PAW_TP_2025:pVHvZ26RXV87xik.mongodb.net/?retryWrites=true&w=majority&appName=PAW-TP" }),
+    store: MongoStore.create({ mongoUrl: "" }),
     resave: false,
     saveUninitialized: false,
     secret: "estg-paw", // Substitua por uma chave secreta segura
